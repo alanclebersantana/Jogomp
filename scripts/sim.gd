@@ -11,6 +11,16 @@ var molas: Array = []
 var milhas: Array = []
 var mala: Dictionary = {}
 var eventos: Array = []   # [tipo, valor]
+var projeteis: Array = []  # etiquetas, botes do cão, cones (vêm de trás)
+var ataques: Array = []
+var portas: Array = []
+var pocas: Array = []
+var itens: Array = []
+var cartoes: Array = []
+var n_cartao := 0
+var montado := false       # no carrinho de bagagem
+var guarda_chuva_t := 0.0
+var bonus_raiox := 0
 
 var px := 0.0
 var py := 0.0
@@ -71,12 +81,31 @@ func _init(fase: Dictionary, x_inicio := 0.0, com_intro := true) -> void:
 	if F.get("mala_dourada") != null:
 		var md: Array = F["mala_dourada"]
 		mala = {"x": float(md[0]), "y": float(md[1]), "z": float(md[2]), "pega": false}
+	for a in F.get("ataques", []):
+		ataques.append({"x": float(a["x"]), "tipo": a["tipo"], "feito": false})
+	for d in F.get("portas", []):
+		portas.append({"x": float(d["x"]), "aberta": float(d["aberta"]), "fechada": float(d["fechada"]), "fase": float(d["fase"]), "ate": -1.0})
+	for d in F.get("pocas", []):
+		pocas.append({"x": float(d["x"]), "z": float(d["z"]), "usada": false})
+	for d in F.get("itens", []):
+		itens.append({"tipo": d["tipo"], "x": float(d["x"]), "y": float(d["y"]), "pega": false})
+	for c in F.get("cartao", []):
+		cartoes.append({"x": float(c[0]), "y": float(c[1]), "z": float(c[2]), "pega": false, "anim": 0.0})
 	tempo = float(F["tempo"])
+	if x_inicio <= 0.0:
+		x_inicio = float(F.get("inicio", 0.0))
 	px = x_inicio
 	if x_inicio > 0.0:
 		var s = suporte(px, 0.0, 10.0)
 		py = s["y"] if s != null else 0.0
-	intro = 1.6 if com_intro else 0.0
+	intro = 2.4 if com_intro else 0.0
+
+
+func _zona(tipo: String) -> Dictionary:
+	for z in F["zonas"]:
+		if z["tipo"] == tipo:
+			return z
+	return {"x0": -INF, "x1": -INF}
 
 
 func ev(tipo: String, valor = null) -> void:
@@ -126,6 +155,8 @@ func acao(a: String) -> void:
 		"cima":
 			buffer = Regras.BUFFER
 		"baixo":
+			if montado:
+				return
 			if no_chao:
 				rolar_t = Regras.ROLAR_T
 				ev("som", "rolar")
@@ -154,7 +185,7 @@ func mudar_faixa(d: int) -> void:
 
 
 func dash() -> void:
-	if dash_cd > 0.0:
+	if dash_cd > 0.0 or montado:
 		return
 	dash_t = Regras.DASH_T
 	dash_cd = Regras.DASH_CD
@@ -170,6 +201,9 @@ func tropecar(tipo: String, msg := "") -> bool:
 	tropecos += 1
 	rolar_t = 0.0
 	dash_t = 0.0
+	if montado:
+		montado = false
+		ev("aviso", "Caiu do carrinho!")
 	ev("som", "tropeco")
 	ev("tremer", 0.35)
 	ev("flash")
@@ -178,6 +212,11 @@ func tropecar(tipo: String, msg := "") -> bool:
 	if guarda <= 0.0:
 		acabar("pego")
 	return true
+
+
+func porta_aberta(d: Dictionary, quando: float) -> bool:
+	var ciclo: float = d["aberta"] + d["fechada"]
+	return fmod(quando + d["fase"] + 1000.0 * ciclo, ciclo) < d["aberta"]
 
 
 func acabar(tipo: String) -> void:
@@ -211,6 +250,20 @@ func passo(dt: float) -> void:
 					alvo += 2.5
 		if sobre != null and sobre["esteira"] > 0.0:
 			alvo += sobre["esteira"]
+	var na_zona_carrinho := false
+	for z in F["zonas"]:
+		if z["tipo"] == "carrinho" and px >= z["x0"] and px <= z["x1"]:
+			na_zona_carrinho = true
+	if na_zona_carrinho and not montado and no_chao and tropeco_t <= 0.0 and px < float(_zona("carrinho")["x0"]) + 1.5:
+		montado = true
+		rolar_t = 0.0
+		ev("som", "carrinho")
+		ev("aviso", "Segura!")
+	if montado and not na_zona_carrinho:
+		montado = false
+		ev("aviso", "Desce!")
+	if montado:
+		alvo = Regras.VEL_CARRINHO
 	if dash_t > 0.0:
 		alvo += Regras.DASH
 	if tropeco_t > 0.0:
@@ -229,6 +282,7 @@ func passo(dt: float) -> void:
 	tropeco_t = maxf(0.0, tropeco_t - dt)
 	invuln = maxf(0.0, invuln - dt)
 	buffer = maxf(0.0, buffer - dt)
+	guarda_chuva_t = maxf(0.0, guarda_chuva_t - dt)
 	coyote = Regras.COYOTE if no_chao else maxf(0.0, coyote - dt)
 	if molhado:
 		rolar_t = maxf(rolar_t, 0.12)
@@ -245,11 +299,11 @@ func passo(dt: float) -> void:
 		var g := Regras.G
 		planando = false
 		if hold and vy < 0.0 and not mergulho:
-			g *= Regras.PLANAR_G
+			g *= Regras.PLANAR_G_GC if guarda_chuva_t > 0.0 else Regras.PLANAR_G
 			planando = true
 		vy -= g * dt
 		if planando:
-			vy = maxf(vy, Regras.PLANAR_VY)
+			vy = maxf(vy, Regras.PLANAR_VY_GC if guarda_chuva_t > 0.0 else Regras.PLANAR_VY)
 		py += vy * dt
 	if no_chao:
 		var s = suporte(px, pz, py + Regras.PASSO_RAMPA)
@@ -281,14 +335,24 @@ func passo(dt: float) -> void:
 			mergulho = false
 			m["anim"] = 0.4
 			ev("som", "mola")
+	for al in F.get("alcapoes", []):
+		if px > al["x2"] and px < al["fim"] + 8.0 and py < -0.5 and py > al["y"] - 0.4 and vy <= 0.0:
+			vy = 21.5
+			no_chao = false
+			mergulho = false
+			ev("som", "mola")
+			ev("mola_alcapao", al["x2"])
 	if py < -12.0:
 		py = 0.5
 		vy = 0.0
-		tropecar("solido")
+		ev("queda", px)
+		tropecar("solido", "Ufa!")
 	var alt := Regras.ALT_ROLA if rolar_t > 0.0 else Regras.ALT
 	for s in solidos:
 		if s["fantasma"] or not z_overlap(pz, s["z"], s["d"]):
 			continue
+		if s["tipo"] == "escada":
+			continue   # escada rolante: só serve de chão (dá para passar por baixo)
 		if px + Regras.MEIO < s["x0"] or px - Regras.MEIO > s["x1"]:
 			continue
 		var topo := topo_solido(s, clampf(px + Regras.MEIO, s["x0"], s["x1"]))
@@ -299,7 +363,7 @@ func passo(dt: float) -> void:
 			continue
 		if s["rampa"] > 0.0 and px < s["x0"] + s["rampa"]:
 			continue
-		tropecar("solido", "Opa!")
+		tropecar("solido", "Opa! (%s)" % s["tipo"] if OS.is_debug_build() and bot else "Opa!")
 		s["fantasma"] = true
 	for p in perigos:
 		if p["alarme"] > 0.0:
@@ -346,7 +410,7 @@ func passo(dt: float) -> void:
 					if guarda <= 0.0:
 						acabar("pego")
 			_:
-				if tropecar("trem" if p["tipo"] == "trem" else "placa", "Trem!" if p["tipo"] == "trem" else "Ai!"):
+				if tropecar("trem" if p["tipo"] == "trem" else "placa", {"trem": "Trem!", "mala_rolando": "Mala!"}.get(p["tipo"], "Ai!")):
 					p["usado"] = true
 	var cy := py + 0.75
 	for m in milhas:
@@ -365,6 +429,76 @@ func passo(dt: float) -> void:
 		achou_mala = true
 		ev("aviso", "Mala dourada! ★")
 		ev("som", "mala")
+	for it in itens:
+		if not it["pega"] and absf(it["x"] - px) < 0.9 and absf(it["y"] - cy) < 1.2:
+			it["pega"] = true
+			if it["tipo"] == "guarda_chuva":
+				guarda_chuva_t = Regras.GUARDA_CHUVA_T
+				ev("som", "guarda_chuva")
+				ev("aviso", "Guarda-chuva!")
+	for c in cartoes:
+		if c["pega"]:
+			c["anim"] = minf(1.0, c["anim"] + dt * 3.0)
+			continue
+		if absf(c["x"] - px) < 0.9 and absf(c["y"] - cy) < 1.1 and absf(c["z"] - pz) < 0.8:
+			c["pega"] = true
+			n_cartao += 1
+			ev("som", "cartao")
+			ev("aviso", "Cartão de embarque %d/5" % n_cartao)
+	if no_chao:
+		for pc in pocas:
+			if not pc["usada"] and absf(pc["x"] - px) < 0.8 and z_overlap(pz, pc["z"], 1.6):
+				pc["usada"] = true
+				rolar_t = maxf(rolar_t, Regras.POCA_T)
+				vx += 2.0
+				ev("som", "splash")
+				ev("poca", pc["x"])
+		if sobre != null and sobre["tipo"] == "raiox":
+			if not sobre.get("visto", false):
+				sobre["visto"] = true
+				ev("raiox", sobre["x"])
+			if rolar_t > 0.0 and not sobre.get("bonus", false):
+				sobre["bonus"] = true
+				n_milhas += 10
+				bonus_raiox += 1
+				ev("som", "ok")
+				ev("aviso", "Raio-x aprovado! +10")
+	for d in portas:
+		if t < d["ate"] or porta_aberta(d, t):
+			continue
+		if px + Regras.MEIO > d["x"] - 0.2 and px - Regras.MEIO < d["x"] + 0.2 and py < 3.0:
+			d["ate"] = t + 1.5
+			tropecar("solido", "Porta fechada!")
+	for a in ataques:
+		if not a["feito"] and px >= a["x"]:
+			a["feito"] = true
+			var chao_y := py
+			if not no_chao:
+				var sp = suporte(px, pz, py)
+				chao_y = sp["y"] if sp != null else py
+			var p := {"tipo": a["tipo"], "x": px - Regras.ATAQUE_DIST, "vx": maxf(vx, Regras.VEL) + Regras.ATAQUE_VEL, "usado": false, "t": 0.0}
+			match a["tipo"]:
+				"etiqueta":
+					p["y0"] = chao_y + 0.85; p["y1"] = chao_y + 1.3; p["w"] = 0.5
+				"cao":
+					p["y0"] = chao_y; p["y1"] = chao_y + 0.75; p["w"] = 1.4
+				_:
+					p["y0"] = chao_y; p["y1"] = chao_y + 0.55; p["w"] = 0.55
+			projeteis.append(p)
+			ev("ataque", a["tipo"])
+	for p in projeteis:
+		p["x"] += p["vx"] * dt
+		p["t"] += dt
+		if p["usado"]:
+			continue
+		var hx: float = p["w"] / 2.0
+		if px + Regras.MEIO < p["x"] - hx or px - Regras.MEIO > p["x"] + hx:
+			continue
+		if py + alt <= p["y0"] or py >= p["y1"]:
+			continue
+		p["usado"] = true
+		tropecar("solido", {"etiqueta": "Etiquetado!", "cao": "Au au!", "cone": "Cone!"}.get(p["tipo"], "Ai!"))
+	projeteis = projeteis.filter(func(p): return p["x"] < px + 18.0)
 	if tropeco_t <= 0.0:
 		guarda = minf(Regras.GUARDA_MAX, guarda + Regras.GUARDA_REC * dt)
 	t_alarme = maxf(0.0, t_alarme - dt)
@@ -410,14 +544,28 @@ func _bot() -> void:
 				continue
 			if p["y0"] > 0.5 and py < p["y0"]:
 				rolar = d < 2.2
-			elif p["tipo"] == "pessoa":
+			elif p["tipo"] == "pessoa" or p["tipo"] == "mala_rolando":
 				pular = true
+	for p in projeteis:
+		if p["usado"]:
+			continue
+		var rel: float = p["vx"] - vx
+		var dist: float = px - Regras.MEIO - (p["x"] + p["w"] / 2.0)
+		if rel > 0.0 and dist > 0.0 and dist / rel < 0.3:
+			if p["tipo"] == "etiqueta" and no_chao and not montado:
+				rolar = true
+			else:
+				pular = true
+	for d in portas:
+		var dd: float = d["x"] - px
+		if dd > 0.0 and dd < 7.0 and vx > 0.5 and not porta_aberta(d, t + dd / vx):
+			dash()
 	var sa = suporte(px + look, pz, py + 0.5)
-	if sa == null or sa["y"] < py - 1.0:
+	if (sa == null or sa["y"] < py - 1.0) and py > -1.0:
 		pular = true
 	if no_chao and pular:
 		acao("cima")
-	if no_chao and rolar and rolar_t <= 0.0:
+	if no_chao and rolar and rolar_t <= 0.0 and not pular:
 		acao("baixo")
 	var sb = suporte(px + 2.0, pz, py + 0.1)
 	hold = not no_chao and (sb == null or sb["y"] < py - 2.5)

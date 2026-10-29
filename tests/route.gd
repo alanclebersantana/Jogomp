@@ -15,7 +15,7 @@ func _init() -> void:
 				s.hold = false
 			n += 1
 		var ok: bool = s.fim == "venceu"
-		print("%s %s: fim=%s milhas=%d/%d mala=%s tempo=%.1f tropecos=%d" % ["✓" if ok else "✗", caso[0], s.fim, s.n_milhas, int(F["alvo_milhas"]), s.achou_mala, float(F["tempo"]) - s.tempo, s.tropecos])
+		print("%s %s: fim=%s x=%.1f milhas=%d/%d mala=%s cartao=%d tempo=%.1f tropecos=%d guarda=%.1f" % ["✓" if ok else "✗", caso[0], s.fim, s.px, s.n_milhas, int(F["alvo_milhas"]), s.achou_mala, s.n_cartao, float(F["tempo"]) - s.tempo, s.tropecos, s.guarda])
 		if not ok:
 			falhas += 1
 	print("FALHAS: %d" % falhas)

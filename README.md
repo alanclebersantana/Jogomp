@@ -45,13 +45,13 @@ Para publicar na Play Store, cadastre a chave nos *Secrets*: `KEYSTORE_BASE64`, 
 | `scripts/sim.gd` | física e regras (mascote, guarda, obstáculos, tempo), sem desenho |
 | `scripts/regras.gd` | números do jogo: velocidade, pulo, planar, guarda |
 | `scripts/main.gd` | desenho da visão lateral e da visão de trás, HUD, telas, controles e sons |
-| `tools/make_mascote.py` | desenha o mascote (de lado, de costas, expressões dos olhos de LED) |
-| `tools/make_pessoas.py` | guarda, passageiros, comissária, atendente |
-| `tools/make_objetos.py` | malas, balcões, raio-x, placas, milhas, avião e o que aparece no trem |
-| `tools/make_fundos.py` | céu de São Paulo, paredes do terminal, subsolo, finger e a vista do trem |
+| `tools/make_gemini.py` | recorta as artes do Gemini (`art_src/gemini/*.jpg`, fundo verde) e monta as folhas do mascote, perseguidores, passageiros, objetos e fundos; grava `assets/sprites/arte.json` |
+| `tools/recortar.py` | tira o fundo verde e separa os quadros |
+| `tools/make_objetos.py` | texturas simples feitas em código (piso, calçada, esteira) |
+| `tools/make_audio.py` | música de samba e efeitos sonoros (`assets/audio/*.wav`) |
 | `tests/route.gd` | o robô joga a fase do começo ao fim |
 
-A arte é desenhada em código (`pip install pycairo` e rode os scripts de `tools/`). Para trocar por arte
-feita no Gemini, gere a imagem com o mesmo tamanho e o mesmo nome de arquivo em `assets/`.
+A arte do jogo foi gerada no Gemini (fundo verde puro) e recortada com `python3 tools/make_gemini.py`.
+Para trocar uma arte, salve a nova imagem com o mesmo nome em `art_src/gemini/` e rode o script de novo.
 
-Para tirar prints da fase: `godot --path . -- --fotos=3,100,300 --pasta=/tmp`.
+Para tirar prints da fase: `godot --path . -- --fotos=3,100,300 --pasta=/tmp`. Abertura: `-- --bot --intro --fotos_t=0.3,1.2`. Final: `-- --final --fotos_t=1,3,5`.
