@@ -91,37 +91,17 @@
    "t": "ground",
    "x": 5560,
    "y": 500,
-   "w": 1590,
+   "w": 2040,
    "h": 140
-  },
-  {
-   "t": "ground",
-   "x": 7220,
-   "y": 500,
-   "w": 380,
-   "h": 140
-  },
-  {
-   "t": "ground",
-   "x": 6800,
-   "y": -150,
-   "w": 200,
-   "h": 590
-  },
-  {
-   "t": "dirt",
-   "x": 7150,
-   "y": 520,
-   "w": 70,
-   "h": 120
   },
   {
    "t": "pgate",
    "id": "bag1",
-   "x": 7400,
+   "x": 6990,
    "y": -150,
    "w": 22,
-   "h": 650
+   "h": 650,
+   "dogpass": 1
   },
   {
    "t": "ground",
@@ -601,6 +581,18 @@
    470
   ],
   [
+   6700,
+   470
+  ],
+  [
+   6740,
+   470
+  ],
+  [
+   6780,
+   470
+  ],
+  [
    6820,
    470
   ],
@@ -614,10 +606,6 @@
   ],
   [
    6940,
-   470
-  ],
-  [
-   6980,
    470
   ],
   [
@@ -846,9 +834,9 @@
    "t": "Uma mala de rodinhas presa na esteira... ela está piscando para você! Chegue perto e toque em ✦ USAR."
   },
   {
-   "a": 6600,
-   "b": 6800,
-   "t": "Só a Bag passa por esse vão. Troque para ela (botão da mala), passe e pare em cima da placa."
+   "a": 6650,
+   "b": 6990,
+   "t": "Só a Bag passa pela portinhola. Troque para ela (botão da mala), passe e pare em cima da placa."
   },
   {
    "a": 8100,
@@ -894,7 +882,7 @@
  "plates": [
   {
    "x": 7150,
-   "y": 520,
+   "y": 500,
    "w": 70,
    "gate": "bag1"
   }
@@ -971,12 +959,12 @@
   },
   {
    "k": "path",
-   "x0": 2150,
-   "x1": 2450,
-   "y0": 330,
-   "y1": 430,
+   "x0": 2450,
+   "x1": 2150,
+   "y0": 430,
+   "y1": 330,
    "w": 120,
-   "per": 240
+   "per": 280
   },
   {
    "k": "lift",

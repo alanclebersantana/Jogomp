@@ -197,6 +197,184 @@ func fase_1_1() -> void:
 	var r = until({}, func(): return not g.running, 300)
 	S("saída", r is String and r == "state")
 
+## espera a tábua idx chegar perto de x e pula nela
+func pula_na_tabua(idx: int, x: float, mx: int = 900):
+	var o: Dictionary = g.MV.MV[idx]
+	var s: Dictionary = o.plats[0]
+	var r = until({}, func(): return abs(s.x + s.w / 2 - x) < 14, mx)
+	if not (r is bool and r):
+		return "a tábua não veio: " + str(r)
+	jump_to(s.x + s.w / 2 + s.dx * 20)
+	if not (P.onGround and g.MV.on_plat(o)):
+		return "não pousou na tábua x=%d y=%d" % [int(px()), int(P.y)]
+	return true
+
+## fica no meio da tábua até ela chegar perto de x
+func na_tabua_ate(idx: int, x: float, mx: int = 900):
+	var o: Dictionary = g.MV.MV[idx]
+	var s: Dictionary = o.plats[0]
+	for i in mx:
+		P = g.player
+		if not ok():
+			return "state"
+		if abs(s.x + s.w / 2 - x) < 12:
+			return true
+		var cx: float = s.x + s.w / 2
+		frame({"R": true} if px() < cx - 10 else ({"L": true} if px() > cx + 10 else {}))
+	return "timeout"
+
+## passa pelo vento que empurra para trás: espera desligar e corre
+func passa_rajada(o: Dictionary, x_depois: float):
+	until({}, func(): return g.TR.gust_state(o) == 2, 400)
+	until({}, func(): return g.TR.gust_state(o) == 0, 400)
+	return run_to(x_depois)
+
+func fase_1_2() -> void:
+	walk_to(1440)
+	S("mala", jump_to(1560))
+	S("totem", walk_to(1580))
+	S("esteira 1", pula_na_tabua(1, 1710))
+	S("chega no alto", na_tabua_ate(1, 2110))
+	S("esteira 2", pula_na_tabua(2, 2210))
+	S("desce com ela", na_tabua_ate(2, 2510))
+	S("chão", jump_to(2660))
+	walk_to(3540)
+	S("piso elétrico", cross_spikes(trap_at("spikes", 3600), 3760))
+	walk_to(3830)
+	S("em cima da pilha", jump_to(3915, true))
+	slam_here()
+	S("quebrou a pilha", g.CR.filter(func(c): return c.get("t", "") == "break" and abs(float(c.x) - 3900) < 5 and not c.get("dead", false)).size() == 0)
+	S("pista 4", walk_to(4710) and n_clues() == 1)
+	S("botão gigante", stake_cross(5100))
+	S("totem grande", walk_to(5720))
+	S("descansou 1", rests.has(1))
+	S("a Bag presa", walk_to(6280))
+	use()
+	S("Bag solta", g.X.dog_free())
+	walk_to(6950)
+	hold({}, 20)
+	press("D")
+	frame()
+	S("controla a Bag", g.M.ctrl)
+	S("Bag pela portinhola até a placa", walk_to(7185))
+	S("portão abriu", until({}, func(): return g.M.GATES.filter(func(gt): return gt.get("id", "") == "bag1")[0].open > .85, 200))
+	press("D")
+	frame()
+	S("de volta ao Milis", not g.M.ctrl)
+	S("cartão 1", walk_to(7090) and cartoes() == 1)
+	S("elevador", walk_to(8348))
+	use()
+	var lf: Dictionary = g.MV.MV[3]
+	S("sobe de elevador", until({}, func(): return lf.pos == 0.0 and lf.goal == 0.0, 600))
+	S("fusível", walk_to(9110) and pegou("fusivel"))
+	walk_to(9780)
+	S("desce do alto", until({"R": true}, func(): return P.onGround and P.y > 400, 300))
+	S("manivela", walk_to(10000))
+	for k in 8:
+		use()
+		hold({}, 6)
+	S("porta da manivela abriu", g.CRANKS[0].done)
+	walk_to(10600)
+	S("duto que sopra", passa_rajada(trap_at("gust", 10700), 10900))
+	walk_to(11530)
+	S("caixa da armadura", jump_to(11690))
+	S("fita", walk_to(11910) and pegou("fita"))
+	S("cartão 2", walk_to(12510) and cartoes() == 2)
+	S("emenda o fusível", g.try_combine("fusivel", "fita") != "")
+	walk_to(12880)
+	use()
+	S("gerador ligou", g.LOCKS[0].done)
+	S("portão abriu", until({}, func(): return g.M.GATES.filter(func(gt): return gt.get("id", "") == "ger1")[0].open >= 1.0, 300))
+	S("cartão 3", walk_to(13310) and cartoes() == 3)
+	S("pista 5", walk_to(13410) and n_clues() == 2)
+	walk_to(13480)
+	var r = until({"R": true}, func(): return not g.running, 300)
+	S("saída", r is String and r == "state")
+
+func fase_1_3() -> void:
+	walk_to(930)
+	S("malas empilhadas", jump_to(1090, true))
+	for i in 5:
+		walk_to(1680 + i * 50)
+		jump_to(1725 + i * 50)
+	S("topo da escada do avião", jump_to(2000))
+	S("asa do avião", walk_to(2660))
+	S("cartão 1", cartoes() == 1)
+	walk_to(2690)
+	S("salta da asa", planar_ate(3080))
+	S("totem", walk_to(3110))
+	walk_to(3380)
+	S("turbina", passa_rajada(trap_at("gust", 3500), 3720))
+	S("pneu rolando", dodge_roll(4000, 0))
+	walk_to(5120)
+	S("caixa do coração", jump_to(5280))
+	S("totem", walk_to(5330))
+	walk_to(5395)
+	S("cabo 1", grab_vine(g.VINES[0]))
+	S("cabo 2", vine_hop(g.VINES[1]))
+	S("bloco do meio", vine_hop(null) and P.y < 280)
+	walk_to(6510)
+	S("cabo 3", grab_vine(g.VINES[2]))
+	S("chão", vine_hop(null) and P.y > 400)
+	walk_to(7920)
+	S("gancho 1", cross_swing(trap_at("swing", 8100), 8280))
+	S("gancho 2", cross_swing(trap_at("swing", 8450), 8650))
+	S("pista 6", walk_to(8910) and n_clues() == 1)
+	walk_to(9140)
+	S("contêiner", jump_to(9300, true))
+	S("cartão 2", walk_to(9300) and cartoes() == 2)
+	walk_to(9390)
+	S("desce", jump_to(9500))
+	S("totem grande", walk_to(9920))
+	S("descansou 1", rests.has(1))
+	walk_to(10150)
+	S("empurra o caixote até a parede", until({"R": true}, func(): return g.M.PUSH[0].x + g.M.PUSH[0].w >= 10495, 900))
+	walk_to(10380)
+	S("sobe no caixote", jump_to(10450))
+	S("sobe na prateleira", jump_to(10620, true))
+	walk_to(10890)
+	S("desce", until({"R": true}, func(): return P.onGround and P.y > 400, 200))
+	walk_to(11600)
+	use()
+	walk_to(11700)
+	use()
+	S("portão do hangar", until({}, func(): return g.EV.GATE.lift >= g.EV.GATE.h - 8, 400))
+	S("cartão 3", walk_to(12310) and cartoes() == 3)
+	walk_to(12650)
+	var r = until({"R": true}, func(): return not g.running, 300)
+	S("saída", r is String and r == "state")
+
+func luta_motoboy(x_poleiro: float, x_chao: float):
+	for it in 60:
+		P = g.player
+		var b: Dictionary = g.X.BOSS
+		if b.done or b.st == "down":
+			hold({}, 160)
+			return true
+		if not ok():
+			return "state"
+		if P.onGround and P.y + P.h <= 397:
+			until({}, func(): return g.X.BOSS.st == "idle" or g.X.BOSS.st == "down", 600)
+			if g.X.BOSS.st == "down":
+				continue
+			walk_to(x_chao)
+			until({}, func(): return P.onGround and P.y + P.h >= 494, 60)
+		walk_to(x_chao)
+		until({}, func(): return g.X.BOSS.st == "charge" and abs(g.X.BOSS.x - px()) < 330, 400)
+		jump_to(x_poleiro, true)
+		hold({}, 4)
+	return "hp=%d st=%s" % [g.X.BOSS.hp, g.X.BOSS.st]
+
+func fase_chefe() -> void:
+	S("totem", walk_to(910))
+	S("entra na pista", walk_to(1520))
+	S("motoboy apareceu", until({}, func(): return g.X.boss_active(), 200))
+	S("vence o Motoboy Turbo", luta_motoboy(1405, 1500))
+	S("pega as milhas", walk_to(1800))
+	walk_to(3200)
+	var r = until({"R": true}, func(): return not g.running, 300)
+	S("saída", r is String and r == "state")
+
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	var com := args.has("inimigos")
@@ -205,13 +383,19 @@ func _initialize() -> void:
 		if a.is_valid_int():
 			fases.append(int(a))
 	if fases.is_empty():
-		fases = [1]
+		fases = [1, 2, 3, 4]
 	for f in fases:
 		carregar(f - 1, com)
 		log_lines.append("== " + nome_fase)
 		match f:
 			1:
 				fase_1_1()
+			2:
+				fase_1_2()
+			3:
+				fase_1_3()
+			4:
+				fase_chefe()
 		S("fim: milhas %d/%d pistas %d cartões %d/%d segredos %d" % [g.STATS.pen, g.STATS.penTotal, n_clues(), cartoes(), g.DRWS.size(), g.X.found.size()], true)
 	for l in log_lines:
 		print(l)
