@@ -167,6 +167,28 @@ def fim(x, y=GY - 90, kind="exit"):
     L["door"] = {"x": x, "y": y, "kind": kind}
 
 
+def deposito(xc, sid, aid):
+    """alçapão de 60 px no chão em xc (o chão precisa ter um vão [xc, xc+60]): o mergulho abre, uma escada
+    desce até um depósito (y 760..960) e, atrás de uma parede falsa à esquerda, a sala secreta"""
+    S.append({"t": "crack", "x": xc, "y": GY, "w": 60, "h": 22, "kind": "slam", "id": aid, "ladder": [xc + 15, GY, 460],
+              "msg": "O mergulho abriu o alçapão! Tem uma escada descendo (↓)."})
+    L["caves"].append({"x": xc, "y": GY, "w": 60, "h": 260})
+    L["caves"].append({"x": xc - 110, "y": 760, "w": 520, "h": 200})
+    L["caves"].append({"x": xc - 310, "y": 860, "w": 180, "h": 100})
+    S.append({"t": "dirt", "x": xc - 130, "y": 960, "w": 560, "h": 60})
+    S.append({"t": "dirt", "x": xc - 330, "y": 960, "w": 200, "h": 60})
+    S.append({"t": "dirt", "x": xc - 130, "y": 740, "w": 130, "h": 20})
+    S.append({"t": "dirt", "x": xc + 60, "y": 740, "w": 370, "h": 20})
+    S.append({"t": "dirt", "x": xc + 410, "y": 740, "w": 20, "h": 220})
+    S.append({"t": "dirt", "x": xc - 130, "y": 740, "w": 20, "h": 140})
+    S.append({"t": "fakewall", "x": xc - 130, "y": 880, "w": 20, "h": 80, "deco": 1})
+    S.append({"t": "dirt", "x": xc - 330, "y": 840, "w": 20, "h": 180})
+    S.append({"t": "dirt", "x": xc - 330, "y": 840, "w": 200, "h": 20})
+    L["secrets"].append({"id": sid, "x": xc - 310, "y": 860, "w": 180, "h": 100})
+    milhas(xc + 120, xc + 370, 930, 50)
+    milhas(xc - 280, xc - 160, 930, 40)
+
+
 def _fix_coin(c):
     for _ in range(12):
         moved = False
@@ -342,25 +364,9 @@ plat(13250, 170, 160)
 cartao(13330, 170, "Cartão de embarque dourado 3/3: a hora do voo — 23h59.")
 dica(13200, 13350, "Uma balança de bagagem com mola: pule em cima para ir bem alto!")
 # sala secreta embaixo do piso (mergulho no alçapão)
-S.append({"t": "crack", "x": 13580, "y": GY, "w": 60, "h": 22, "kind": "slam", "id": "alc1", "ladder": [13595, GY, 460],
-          "msg": "O mergulho abriu o alçapão! Tem uma escada descendo (↓)."})
-# o depósito embaixo do piso, com a sala secreta atrás da parede falsa
-L["caves"].append({"x": 13580, "y": GY, "w": 60, "h": 260})
-L["caves"].append({"x": 13470, "y": 760, "w": 520, "h": 200})
-L["caves"].append({"x": 13270, "y": 860, "w": 180, "h": 100})
-S.append({"t": "dirt", "x": 13450, "y": 960, "w": 560, "h": 60})
-S.append({"t": "dirt", "x": 13250, "y": 960, "w": 200, "h": 60})
-S.append({"t": "dirt", "x": 13450, "y": 740, "w": 130, "h": 20})
-S.append({"t": "dirt", "x": 13640, "y": 740, "w": 370, "h": 20})
-S.append({"t": "dirt", "x": 13990, "y": 740, "w": 20, "h": 220})
-S.append({"t": "dirt", "x": 13450, "y": 740, "w": 20, "h": 140})
-S.append({"t": "fakewall", "x": 13450, "y": 880, "w": 20, "h": 80, "deco": 1})
-S.append({"t": "dirt", "x": 13250, "y": 840, "w": 20, "h": 180})
-S.append({"t": "dirt", "x": 13250, "y": 840, "w": 200, "h": 20})
-L["secrets"].append({"id": "s1", "x": 13270, "y": 860, "w": 180, "h": 100})
-milhas(13700, 13950, 930, 50)
-milhas(13300, 13420, 930, 40)
+deposito(13580, "s1", "alc1")
 pista(13330, 960, 2)
+L["gold"] = {"x": 13380, "y": 930}
 dica(13450, 13600, "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele.")
 cambista(13900, [13750, 14050])
 pista(14000, GY, 3)
@@ -399,7 +405,8 @@ L["movers"].append({"k": "path", "x0": 2450, "x1": 2150, "y0": 430, "y1": 330, "
 arco(1650, 2450, 380, 80, 12)
 drone(2050, 220, [1800, 2400])
 dica(1600, 1900, "Esteiras suspensas! Pule de uma para a outra. Não caia no fosso das malas.")
-chao(2600, 5200)
+chao(2600, 4400)
+chao(4460, 5200)
 bateria(2700)
 drone_gancho(3000, 0)
 drone_gancho(3300, -50)
@@ -413,6 +420,9 @@ dica(3800, 3950, "Pilha de malas: pule e mergulhe (↓ no ar) para quebrar tudo 
 cambista(4300, [4100, 4600])
 pista(4700, GY, 4)
 totem(4100)
+deposito(4400, "s1", "alc1")
+L["gold"] = {"x": 4150, "y": 930}
+dica(4250, 4400, "Esse piso de grade parece solto... pule e mergulhe (↓ no ar) em cima dele.")
 # estaca: o mergulho no botão grande abaixa a ponte
 L["slam"] = {"stakes": [{"x": 5100, "y": GY, "bridge": {"x": 5200, "y": GY, "w": 360}}], "seesaw": [], "fruit": []}
 L["pits"].append([5200, 5560])
@@ -555,8 +565,11 @@ bloco(9200, 9400, GY - 200, GY)
 robo_falso(9600, [9450, 9750])
 # --- Hangar 7: dentro, escuro, com o portão das alavancas
 L["sections"].append({"x": 9800, "song": "noite", "bg": "mina", "gt": "mina", "dark": .3, "night": 1, "per": 3})
-chao(9800, 12800)
+chao(9800, 11300)
+chao(11360, 12800)
 teto(9800, 12800, -620, -100)
+deposito(11300, "s1", "alc1")
+L["gold"] = {"x": 11050, "y": 930}
 totem(9900, GY, 1)
 caixote(10200)
 bloco(10500, 10560, 300, 500)
@@ -586,16 +599,32 @@ novo("Guarulhos · Chefe: Motoboy Turbo",
      periods=["A pista"], clueIds=[],
      endStory="As milhas LATAM voltaram para os clientes! Mas o Barão já decolou para Maringá... A próxima parada é o Paraná.")
 L["sections"].append({"x": 0, "song": "chuva", "bg": "noite", "gt": "", "rain": .4, "night": .5, "per": 0})
-chao(-200, 3400)
-milhas(300, 900, 470)
-dica(0, 500, "A pista de Guarulhos. Lá na frente, o Motoboy Turbo acelera a moto...")
-totem(900)
-PZ0, PZ1 = 1300, 2300
+chao(-200, 1200)
+milhas(300, 650, 470)
+dica(0, 500, "A pista de Guarulhos, à noite. Lá na frente, o ronco de uma moto...")
+totem(520)
+caixa(760, item="heart")
+robo_falso(1000, [850, 1150])
+# vala de drenagem com placas soltas
+L["pits"].append([1200, 1500])
+plat(1260, 440, 90, crumble=1)
+plat(1390, 400, 90, crumble=1)
+arco(1210, 1490, 400, 70, 7)
+chao(1500, 4600)
+# turbina de um avião taxiando e pneus soltos
+L["traps"].append({"k": "gust", "x": 1700, "y": 80, "w": 140, "h": 420, "per": 200, "ph": 0, "on": 100})
+dica(1550, 1750, "Turbina ligada! Segure ↓ para aguentar a rajada, ou passe quando ela desligar.")
+pombo(2000, 300, [1800, 2250])
+L["traps"].append({"k": "roll", "x": 2400, "y": GY, "trig": 1950, "dir": -1, "vmax": 4.6, "end": 1500, "r": 34})
+milhas(1880, 2300, 470, 50)
+drone(2350, 330, [2200, 2500])
+totem(2600)
+PZ0, PZ1 = 2900, 3900
 plat(PZ0 + 40, 395, 130)
 plat(PZ1 - 170, 395, 130)
 L["boss"] = {"x0": PZ0, "x1": PZ1, "trig": PZ0 + 180, "spawn": PZ1 - 120, "hp": 4, "item": [(PZ0 + PZ1) // 2, 470]}
 dica(PZ0, PZ1, "Suba nas plataformas quando ele acelerar. Quando ele bater e ficar tonto, ataque!", boss=1)
-milhas(2400, 3100, 470, 50)
-fim(3250)
-L["spanX"] = 3400
+milhas(4000, 4400, 470, 50)
+fim(4500)
+L["spanX"] = 4600
 salvar(4)

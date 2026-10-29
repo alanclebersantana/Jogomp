@@ -63,7 +63,26 @@
    "dark": 0.78
   }
  ],
- "caves": [],
+ "caves": [
+  {
+   "x": 4400,
+   "y": 500,
+   "w": 60,
+   "h": 260
+  },
+  {
+   "x": 4290,
+   "y": 760,
+   "w": 520,
+   "h": 200
+  },
+  {
+   "x": 4090,
+   "y": 860,
+   "w": 180,
+   "h": 100
+  }
+ ],
  "solids": [
   {
    "t": "rockw",
@@ -84,8 +103,94 @@
    "t": "ground",
    "x": 2600,
    "y": 500,
-   "w": 2600,
+   "w": 1800,
    "h": 140
+  },
+  {
+   "t": "ground",
+   "x": 4460,
+   "y": 500,
+   "w": 740,
+   "h": 140
+  },
+  {
+   "t": "crack",
+   "x": 4400,
+   "y": 500,
+   "w": 60,
+   "h": 22,
+   "kind": "slam",
+   "id": "alc1",
+   "ladder": [
+    4415,
+    500,
+    460
+   ],
+   "msg": "O mergulho abriu o alçapão! Tem uma escada descendo (↓)."
+  },
+  {
+   "t": "dirt",
+   "x": 4270,
+   "y": 960,
+   "w": 560,
+   "h": 60
+  },
+  {
+   "t": "dirt",
+   "x": 4070,
+   "y": 960,
+   "w": 200,
+   "h": 60
+  },
+  {
+   "t": "dirt",
+   "x": 4270,
+   "y": 740,
+   "w": 130,
+   "h": 20
+  },
+  {
+   "t": "dirt",
+   "x": 4460,
+   "y": 740,
+   "w": 370,
+   "h": 20
+  },
+  {
+   "t": "dirt",
+   "x": 4810,
+   "y": 740,
+   "w": 20,
+   "h": 220
+  },
+  {
+   "t": "dirt",
+   "x": 4270,
+   "y": 740,
+   "w": 20,
+   "h": 140
+  },
+  {
+   "t": "fakewall",
+   "x": 4270,
+   "y": 880,
+   "w": 20,
+   "h": 80,
+   "deco": 1
+  },
+  {
+   "t": "dirt",
+   "x": 4070,
+   "y": 840,
+   "w": 20,
+   "h": 180
+  },
+  {
+   "t": "dirt",
+   "x": 4070,
+   "y": 840,
+   "w": 200,
+   "h": 20
   },
   {
    "t": "ground",
@@ -529,6 +634,46 @@
    470
   ],
   [
+   4520,
+   930
+  ],
+  [
+   4570,
+   930
+  ],
+  [
+   4620,
+   930
+  ],
+  [
+   4670,
+   930
+  ],
+  [
+   4720,
+   930
+  ],
+  [
+   4770,
+   930
+  ],
+  [
+   4120,
+   930
+  ],
+  [
+   4160,
+   930
+  ],
+  [
+   4200,
+   930
+  ],
+  [
+   4240,
+   930
+  ],
+  [
    5600,
    470
   ],
@@ -824,6 +969,11 @@
    "t": "Pilha de malas: pule e mergulhe (↓ no ar) para quebrar tudo de uma vez."
   },
   {
+   "a": 4250,
+   "b": 4400,
+   "t": "Esse piso de grade parece solto... pule e mergulhe (↓ no ar) em cima dele."
+  },
+  {
    "a": 4950,
    "b": 5150,
    "t": "Um botão gigante no chão: pule e mergulhe em cima dele para baixar a ponte."
@@ -877,7 +1027,15 @@
  "mirrors": [],
  "crystals": [],
  "ghost": [],
- "secrets": [],
+ "secrets": [
+  {
+   "id": "s1",
+   "x": 4090,
+   "y": 860,
+   "w": 180,
+   "h": 100
+  }
+ ],
  "chalk": [],
  "plates": [
   {
@@ -998,6 +1156,10 @@
   ]
  },
  "endStory": "Milis e Bag descobriram o esquema: as milhas viajam escondidas em malas com etiqueta trocada, direto para o Hangar 7.",
+ "gold": {
+  "x": 4150,
+  "y": 930
+ },
  "slam": {
   "stakes": [
    {
