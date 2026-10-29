@@ -293,7 +293,7 @@ func __draw_raw() -> void:
 		return
 	var vs := get_viewport_rect().size
 	var cam: float = g.rcam * PAR
-	var under: bool = _hide
+	var under: bool = _hide or g.L.get("theme", "") == "aeroporto"   # aeroporto: sem capim e sombras de nuvem na frente
 	var nw: Dictionary = FxClock.nw(g)
 	var dark: float = g.AMB.dark
 	var snow: float = g.AMB.get("snow", 0.0)

@@ -1518,6 +1518,7 @@ func step() -> void:
 			d.got = true
 			DRAWN["%d:%d" % [level_idx, d.i]] = 1
 			Save.setv("gallery", "d%d" % int(d.i), true)
+			Save.setv("gallery", "cartao_%d_%d" % [level_idx, int(d.i)], str(d.txt))
 			flash(d.txt, 280)
 			burst(d.x, d.y, 24, Color("#f6efdc"))
 			drawing_found.emit(int(d.i))

@@ -1206,9 +1206,13 @@ func _label(t: String, size: int = 18, c: Color = INK, f: Font = null, maxw: flo
 	l.add_theme_color_override("font_color", c)
 	if f:
 		l.add_theme_font_override("font", f)
+	# celular em pé: nenhum texto passa da largura da tela
+	var vw: float = get_viewport().get_visible_rect().size.x - 44.0
+	if maxw <= 0 and t.length() > 38:
+		maxw = vw
 	if maxw > 0:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		l.custom_minimum_size = Vector2(maxw, 0)
+		l.custom_minimum_size = Vector2(min(maxw, vw), 0)
 	return l
 
 func _button(t: String, cb: Callable) -> Button:
@@ -1248,15 +1252,15 @@ func show_title() -> void:
 	img.set_anchors_preset(Control.PRESET_FULL_RECT)
 	img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	img.modulate = Color(.55, .5, .45)
+	img.modulate = Color(.8, .8, .8)
 	panel.add_child(img)
 	panel.move_child(img, 0)
-	vb.add_child(_label("CADÊ AS MILHAS?!", 52, Color("#f2d28a"), Spr.font_title))
+	vb.add_child(_label("CADÊ AS\nMILHAS?!", 50, Color("#f2d28a"), Spr.font_title))
 	var eps: int = int(Save.getv("prog", "eps", 1))
 	vb.add_child(_label("MILHAS PLUS · EPISÓDIO 1 · BRASIL", 18, Color("#e8c98a"), Spr.font_title))
 	if OS.has_feature("teste"):
 		vb.add_child(_label("VERSÃO DE TESTE · todos os episódios liberados", 13, Color("#ffb070"), Spr.font_b))
-	vb.add_child(_label("O Barão das Milhas Falsas roubou as milhas dos clientes. O Milis vai buscar!", 18, Color("#e8dcc0"), Spr.font_i))
+	vb.add_child(_label("O Barão das Milhas Falsas roubou as milhas dos clientes. O Milis vai buscar!", 17, Color("#e8dcc0"), Spr.font_i, 460))
 	var sp := Control.new()
 	sp.custom_minimum_size = Vector2(0, 8)
 	vb.add_child(sp)
@@ -1277,7 +1281,7 @@ func show_title() -> void:
 	ob.custom_minimum_size = Vector2(150, 46)
 	row.add_child(ob)
 	vb.add_child(row)
-	vb.add_child(_label("Teclado: ← → andar · ↑ ↓ subir/abaixar · Espaço pular · G bastão · F usar · M compartimento · N mapa", 12, Color(.8, .75, .65, .8)))
+	vb.add_child(_label("Teclado: ← → andar · ↑ ↓ subir/abaixar · Espaço pular · G bastão · F usar · M compartimento · N mapa", 12, Color(.8, .75, .65, .8), null, 460))
 	panel.set_meta("ok", func(): start_level(not run.is_empty()))
 	# voltar na tela inicial: pergunta antes de fechar o jogo
 	panel.set_meta("back", func(): _confirm("SAIR DO JOGO?", "O progresso do último totem de check-in continua salvo.", "SAIR", func(): get_tree().quit(), show_title))
@@ -2104,22 +2108,6 @@ func _render_bag(msg: String) -> void:
 		m = m.replace("Toque num objeto e depois em outro", "Escolha um objeto com o direcional e aperte A; depois outro")
 		m = m.replace("Toque em ", "Escolha ").replace("toque em ", "escolha ").replace("toque no botão da manivela", "aperte X para girar a manivela").replace("toque no botão ✔", "aperte X para usar").replace("toque em ✔", "aperte X")
 	vb.add_child(_label(m, 16, Color("#e8d8b0"), Spr.font_i, 680))
-	vb.add_child(_label("MILHAS ESPECIAIS", 13, Color("#b8a888")))
-	var pens := HBoxContainer.new()
-	pens.alignment = BoxContainer.ALIGNMENT_CENTER
-	for c in GameData.PEN_LIST:
-		var ic2 := _atlas_icon("pen_" + c, 40)
-		ic2.modulate = Color(1, 1, 1, 1 if game.SPECGOT.has(c) else .2)
-		pens.add_child(ic2)
-	vb.add_child(pens)
-	if game.level_idx == 0:
-		var crw := HBoxContainer.new()
-		crw.alignment = BoxContainer.ALIGNMENT_CENTER
-		crw.add_theme_constant_override("separation", 6)
-		crw.add_child(_label("COROAS DOS REIS ", 13, Color("#b8a888")))
-		for cid in WorldKings.CROWN_IDS:
-			crw.add_child(_CrownIcon.new(cid, Save.getv("gallery", "crown_" + cid, false), 26.0))
-		vb.add_child(crw)
 	vb.add_child(_label("PISTAS DO BARÃO", 13, Color("#b8a888")))
 	var clues := HBoxContainer.new()
 	clues.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -2356,8 +2344,6 @@ func show_map(from_pause: bool, from_bag: bool = false) -> void:
 ## nomes dos períodos de cada episódio (sem depender da fase carregada agora)
 var _ep_per_cache := {}
 func _ep_periods(ep: int) -> Array:
-	if ep <= 1:
-		return Game.PERIODS1
 	if not _ep_per_cache.has(ep):
 		var p := "res://assets/data/level%d.json" % ep
 		var per: Array = Game.PERIODS1
@@ -2404,7 +2390,7 @@ func show_gallery(ep: int = 1) -> void:
 		tabs.add_theme_constant_override("separation", 8)
 		for e in eps:
 			var en: int = e + 1
-			var tb := _compact_btn("EPISÓDIO %d" % en)
+			var tb := _compact_btn(["1-1", "1-2", "1-3", "CHEFE"][e] if e < 4 else "FASE %d" % en)
 			tb.toggle_mode = true
 			tb.button_pressed = en == ep
 			tb.pressed.connect(func(): show_gallery(en))
@@ -2426,72 +2412,29 @@ func show_gallery(ep: int = 1) -> void:
 		crow.add_child(col)
 	vb.add_child(crow)
 	var bt2: int = int(Save.getv("conq", "time" if ep == 1 else "time%d" % ep, 0))
-	vb.add_child(_label("Reis vencidos %d/%d · Segredos %d · Lápis especiais %d/6 · Lápis dourado %s · Melhor tempo %s" % [
-		int(Save.getv("conq", "kings" if ep == 1 else "kings%d" % ep, 0)), 4 if ep == 1 else 3, int(Save.getv("conq", "secrets", 0)), int(Save.getv("conq", "specs", 0)),
-		"✓" if Save.getv("conq", "gold", false) else "—", ("%d:%02d" % [bt2 / 60, bt2 % 60]) if bt2 > 0 else "—"], 13, Color(.85, .8, .7), Spr.font_i))
-	var row := GridContainer.new()
-	var nd: int = 3 if ep == 1 else 4
-	row.columns = 3
-	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	row.add_theme_constant_override("h_separation", 12)
-	row.add_theme_constant_override("v_separation", 8)
-	vb.add_child(row)
-	var KD := preload("res://scripts/ui/kid_drawing.gd")
-	var dsz := Vector2(176, 112)
+	vb.add_child(_label("Melhor tempo %s" % [("%d:%02d" % [bt2 / 60, bt2 % 60]) if bt2 > 0 else "—"], 13, Color(.85, .8, .7), Spr.font_i))
+	# cartões de embarque dourados desta fase (o texto aparece depois de achar)
+	vb.add_child(_label("CARTÕES DE EMBARQUE DOURADOS", 13, Color("#b8a888")))
+	var L2 = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/level%d.json" % ep))
+	var nd: int = L2.get("drawings", []).size() if L2 else 0
 	for i in nd:
-		var d = KD.new()
-		d.kind = [0, 1, 3][clamp(i, 0, 2)]
-		d.locked = not Save.getv("gallery", "e%d_d%d" % [ep, i], false)
-		d.custom_minimum_size = dsz
-		row.add_child(d)
-	var bon = KD.new()
-	bon.kind = 4
-	bon.locked = not Save.getv("gallery", "bonus" if ep == 1 else "bonus%d" % ep, false)
-	bon.custom_minimum_size = dsz
-	row.add_child(bon)
-	var fin = Save.getv("gallery", "final" if ep == 1 else "final%d" % ep, null)
-	if fin == null:
-		var d3 = KD.new()
-		d3.locked = true
-		d3.custom_minimum_size = dsz
-		row.add_child(d3)
-	else:
-		# o contêiner da grade desfaz a escala do filho: o desenho fica dentro de uma moldura simples
-		var hold := Control.new()
-		hold.custom_minimum_size = Vector2(178, 112)
-		var fd := _FinalDrawing.new()
-		fd.ep = ep
-		for c in fin:
-			fd.specs[c] = 1
-		fd.scale = Vector2(.59, .59)
-		fd.position = Vector2(1, 4)
-		hold.add_child(fd)
-		row.add_child(hold)
-	if ep == 1:
-		# coroas dos reis: cada rei vencido deixa a sua (pegas no chão depois da luta)
-		var crl := HBoxContainer.new()
-		crl.alignment = BoxContainer.ALIGNMENT_CENTER
-		crl.add_theme_constant_override("separation", 14)
-		crl.add_child(_label("COROAS DOS REIS", 13, Color("#b8a888")))
-		for cid in WorldKings.CROWN_IDS:
-			var have: bool = Save.getv("gallery", "crown_" + cid, false)
-			var cc := VBoxContainer.new()
-			cc.add_theme_constant_override("separation", 0)
-			cc.add_child(_CrownIcon.new(cid, have, 38.0))
-			cc.add_child(_label(WorldKings.CROWN_NAME[cid] if have else WorldKings.CROWN_KING[cid], 11, GOLD if have else Color(.6, .55, .45)))
-			crl.add_child(cc)
-		vb.add_child(crl)
-	if Save.getv("gallery", "gold", false) and ep == 1:
+		var tx = Save.getv("gallery", "cartao_%d_%d" % [ep - 1, i], null)
+		var rowc := HBoxContainer.new()
+		rowc.add_theme_constant_override("separation", 8)
+		rowc.add_child(_atlas_icon("drawing", 34))
+		rowc.add_child(_label(str(tx) if tx != null else "??? (ainda escondido nesta fase)", 13, Color("#ffe9b0") if tx != null else Color(.6, .55, .45), Spr.font_i, 420))
+		vb.add_child(rowc)
+	if Save.getv("conq", "gold", false):
 		var gl := HBoxContainer.new()
 		gl.alignment = BoxContainer.ALIGNMENT_CENTER
 		gl.add_child(_atlas_icon("pen_gold", 30))
-		gl.add_child(_label("  A milha dourada — encontrada!", 14, Color("#ffd76a"), Spr.font_i))
+		gl.add_child(_label("  Milha dourada encontrada!", 14, Color("#ffd76a"), Spr.font_i))
 		vb.add_child(gl)
 	var cl := HBoxContainer.new()
 	cl.alignment = BoxContainer.ALIGNMENT_CENTER
 	cl.add_theme_constant_override("separation", 10)
-	cl.add_child(_label("PISTAS", 13, Color("#b8a888")))
-	var c0: int = 1 if ep == 1 else 7
+	cl.add_child(_label("PISTAS DO BARÃO", 13, Color("#b8a888")))
+	var c0: int = 1
 	for i in range(c0, c0 + 6):
 		if Save.getv("gallery", "c%d" % i, false):
 			var ic := _atlas_icon("clb_%d" % i, 50)
@@ -2508,9 +2451,6 @@ func show_gallery(ep: int = 1) -> void:
 	var b := HBoxContainer.new()
 	b.alignment = BoxContainer.ALIGNMENT_CENTER
 	b.add_theme_constant_override("separation", 10)
-	var rb := _button("REVER ABERTURA", func(): play_cut("abertura" if ep == 1 else "ep2", show_title))
-	rb.custom_minimum_size = Vector2(200, 44)
-	b.add_child(rb)
 	var back := func():
 		panel.queue_free()
 		panel = null

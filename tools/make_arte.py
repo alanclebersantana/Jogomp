@@ -349,6 +349,12 @@ def fundos():
             y0 = max(0, (im.height - h) // 2)
             im = im.crop((0, y0, im.width, y0 + h)).resize((1792, 592), Image.LANCZOS)
         im.save(os.path.join(BG, k + ".jpg"), quality=90)
+    # imagens de abertura de cada fase (16:9): o meio do fundo da fase
+    for n, src in [(1, "bg_terminal"), (2, "bg_subsolo"), (3, "bg_patio"), (4, "bg_pista")]:
+        im = Image.open(os.path.join(G, src + ".jpg")).convert("RGB")
+        im = im.resize((int(im.width * 768 / im.height), 768), Image.LANCZOS)
+        x0 = (im.width - 1376) // 2
+        im.crop((x0, 0, x0 + 1376, 768)).save(os.path.join(UI, "intro_%d.jpg" % n), quality=88)
     print("fundos ok")
 
 

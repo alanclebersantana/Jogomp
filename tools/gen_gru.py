@@ -218,7 +218,7 @@ novo("Guarulhos · 1-1 Terminal",
      "O Barão das Milhas Falsas invadiu o Aeroporto de Guarulhos e espalhou as milhas LATAM dos clientes pelo "
      "terminal. Recupere as milhas, ache os cartões de embarque dourados e descubra para onde o Barão foi. "
      "Cuidado com os capangas dele!",
-     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO TERMINAL",
+     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO TERMINAL", introImg="res://assets/ui/intro_1.jpg",
      periods=["Saguão", "Check-in", "Segurança", "Mezanino"], clueIds=[1, 2, 3],
      rests={"1": ["CHECK-IN DO TERMINAL", "No balcão, um bilhete esquecido pelos capangas: \"O Barão manda despachar tudo pelo subsolo das bagagens\".",
                   "Então as milhas estão descendo pelas esteiras. Eu vou atrás!"]},
@@ -382,7 +382,7 @@ salvar(1)
 novo("Guarulhos · 1-2 Bagagens",
      "Uma pista leva ao subsolo das bagagens. Lá embaixo está escuro: o farol dos olhos do Milis gasta bateria, "
      "então pegue as pilhas pelo caminho. Dizem que uma mala muito esperta ficou presa nas esteiras...",
-     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DAS BAGAGENS",
+     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DAS BAGAGENS", introImg="res://assets/ui/intro_2.jpg",
      periods=["Esteiras", "A Bag", "Elevadores", "Túnel de serviço"], clueIds=[4, 5],
      rests={"1": ["CHECK-IN DAS BAGAGENS", "Entre as malas extraviadas, uma está piscando um LED. Malas não piscam... ou piscam?",
                   "Alguém aí? Eu juro que essa mala olhou para mim."]},
@@ -504,7 +504,7 @@ salvar(2)
 novo("Guarulhos · 1-3 Hangar",
      "A pista leva ao pátio, debaixo da garoa paulistana. Turbinas ligadas, guindastes e rebocadores: "
      "atravesse o pátio e entre no Hangar 7, onde os capangas do Barão guardam as milhas roubadas.",
-     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO HANGAR", weather="garoa",
+     introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO HANGAR", introImg="res://assets/ui/intro_3.jpg", weather="garoa",
      periods=["Pátio", "Turbinas", "Guindastes", "Hangar 7"], clueIds=[6],
      rests={"1": ["CHECK-IN DO HANGAR 7", "A Bag buzina baixinho: lá dentro, um motoboy de capacete prende um malote cheio de milhas na moto.",
                   "Se ele chegar na pista, as milhas vão embora com o Barão. Vamos, Bag!"]},
@@ -595,7 +595,7 @@ novo("Guarulhos · Chefe: Motoboy Turbo",
      "Na pista, um capanga do Barão numa moto de entrega carrega o malote com as milhas roubadas. "
      "Ele vem acelerando: desvie subindo nas plataformas, faça ele bater nas barreiras e ataque quando "
      "ele ficar tonto!",
-     introSub="Episódio 1 · Brasil — São Paulo", endTitle="GUARULHOS COMPLETO", weather="garoa",
+     introSub="Episódio 1 · Brasil — São Paulo", endTitle="GUARULHOS COMPLETO", introImg="res://assets/ui/intro_4.jpg", weather="garoa",
      periods=["A pista"], clueIds=[],
      endStory="As milhas LATAM voltaram para os clientes! Mas o Barão já decolou para Maringá... A próxima parada é o Paraná.")
 L["sections"].append({"x": 0, "song": "chuva", "bg": "noite", "gt": "", "rain": .4, "night": .5, "per": 0})

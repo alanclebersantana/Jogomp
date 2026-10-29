@@ -989,6 +989,7 @@
  "fireflies": [],
  "introSub": "Episódio 1 · Brasil — São Paulo",
  "endTitle": "FIM DO HANGAR",
+ "introImg": "res://assets/ui/intro_3.jpg",
  "periods": [
   "Pátio",
   "Turbinas",

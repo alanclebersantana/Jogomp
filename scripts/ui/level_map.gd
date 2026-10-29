@@ -5,10 +5,10 @@ extends Control
 var game: Game
 const BANDS := {"manha": Color(.36, .55, .3), "tarde": Color(.66, .45, .22), "chuva": Color(.22, .38, .36), "neve": Color(.62, .7, .82), "noite": Color(.16, .19, .36), "perseguicao": Color(.34, .14, .14), "ceu": Color(.45, .62, .82), "rio": Color(.2, .42, .55),
 	"mina": Color(.3, .2, .12), "moinho": Color(.72, .55, .25), "vila": Color(.18, .2, .4), "isis": Color(.45, .2, .32)}
-const NAMES := {"manha": "Manhã", "tarde": "Tarde", "chuva": "Pântano", "neve": "Neve", "noite": "Noite", "perseguicao": "Fuga", "ceu": "Céu", "rio": "Corredeira", "mina": "Mina", "moinho": "Moinho", "vila": "Vila", "isis": "Isis"}
+const NAMES := {"manha": "Terminal", "tarde": "Segurança", "chuva": "Pátio", "neve": "Pista", "noite": "Noite", "perseguicao": "Fuga", "ceu": "Céu", "rio": "Rio", "mina": "Subsolo", "tunel": "Subsolo", "moinho": "Hangar", "vila": "Terminal", "isis": "Isis"}
 
 func _init() -> void:
-	custom_minimum_size = Vector2(880, 250)
+	custom_minimum_size = Vector2(500, 250)
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 
 func _draw() -> void:
@@ -98,11 +98,11 @@ func _draw() -> void:
 	for d2 in game.DRWS:
 		if d2.got:
 			nd += 1
-	var txt := "Pistas %d/6  ·  Lápis especiais %d/6  ·  Desenhos %d/%d  ·  Segredos %d/%d  ·  " % [nc, ns, nd, game.DRWS.size(), game.X.found.size(), game.X.SECRETS.size()]
+	var txt := "Pistas %d/%d · Cartões %d/%d · Segredos %d/%d · " % [nc, game.clue_ids().size(), nd, game.DRWS.size(), game.X.found.size(), game.X.SECRETS.size()]
 	draw_string(Spr.font, Vector2(0, h + 50), txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#e8dcc0"))
 	# legenda com as cores de verdade (antes os dois "●" saíam da cor do texto)
 	var lx2: float = Spr.font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x + 6
-	for it in [[Color("#e0463a"), "você"], [Color("#ff9a3a"), "fogueira"]]:
+	for it in [[Color("#e0463a"), "você"], [Color("#ff9a3a"), "totem"]]:
 		draw_circle(Vector2(lx2, h + 45), 5, it[0])
 		draw_string(Spr.font, Vector2(lx2 + 9, h + 50), it[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#e8dcc0"))
 		lx2 += 18 + Spr.font.get_string_size(it[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
