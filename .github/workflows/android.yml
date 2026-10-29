@@ -83,7 +83,7 @@ jobs:
           cp export_presets.cfg /tmp/presets_normal.cfg
           sed -i 's/^custom_features=.*/custom_features="teste"/' export_presets.cfg
           sed -i 's/^package\/unique_name=.*/package\/unique_name="com.milhasplus.cadeasmilhas.teste"/' export_presets.cfg
-          sed -i 's/^package\/name=.*/package\/name="Cadê as milhas? (teste)"/' export_presets.cfg
+          sed -i 's/^package\/name=.*/package\/name="Cadê as Milhas teste"/' export_presets.cfg
           ~/godot/godot --headless --path . $MODE "Android" build/cade-as-milhas-teste.apk
           cp /tmp/presets_normal.cfg export_presets.cfg
           ls -la build
@@ -104,7 +104,7 @@ jobs:
             APKs gerados automaticamente:
             - **cade-as-milhas.apk**: o jogo normal (cada fase abre depois de terminar a anterior).
             - **cade-as-milhas-teste.apk**: versão de teste, com todas as fases liberadas. Instala como
-              outro app ("Cadê as milhas? (teste)"), ao lado do normal, com progresso separado.
+              outro app ("Cadê as Milhas teste"), ao lado do normal, com progresso separado.
             No celular: baixe o arquivo e toque nele para instalar
             (pode ser preciso permitir "instalar apps desconhecidos" para o navegador).
           files: |
