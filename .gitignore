@@ -1,5 +1,8 @@
 .godot/
 build/
 *.tmp
-/android/
-tools/__pycache__/
+.DS_Store
+export_credentials.cfg
+*.keystore
+__pycache__/
+tools/px/

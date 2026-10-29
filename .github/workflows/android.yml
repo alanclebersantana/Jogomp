@@ -61,11 +61,28 @@ jobs:
           fi
           ls ~/.local/share/godot/keystores || true
 
+      - name: Silhuetas das folhas novas (calcular no celular trava o jogo)
+        run: |
+          python3 -c "import PIL" 2>/dev/null || pip3 install --quiet pillow || true
+          python3 tools/make_sil.py || true
+
       - name: Importar recursos
         run: ~/godot/godot --headless --path . --import || true
 
-      - name: Teste automático (Fase 1 · Guarulhos do começo ao fim)
+      - name: Teste automático (Fase 1 do começo ao fim)
         run: ~/godot/godot --headless --path . -s tests/route.gd
+
+      - name: Teste automático (Episódio 2 do começo ao fim)
+        run: ~/godot/godot --headless --path . -s tests/route2.gd
+
+      - name: Teste automático (Epílogo do Episódio 2 — a fuga da Isis)
+        run: ~/godot/godot --headless --path . -s tests/isis_test.gd
+
+      - name: Teste dos controles de toque (diagonal e analógico)
+        run: ~/godot/godot --headless --path . -s tests/touch.gd | tee /tmp/touch.log && grep -q "TOUCH OK" /tmp/touch.log
+
+      - name: Teste de salvar e continuar (segredos, chefe, picareta)
+        run: ~/godot/godot --headless --path . -s tests/save_test.gd | tee /tmp/save.log && grep -q "SAVE OK" /tmp/save.log
 
       - name: Gerar APK
         run: |
@@ -73,36 +90,36 @@ jobs:
           sed -i "s/^version\/code=.*/version\/code=${{ github.run_number }}/" export_presets.cfg
           sed -i "s/^version\/name=.*/version\/name=\"0.1.${{ github.run_number }}\"/" export_presets.cfg
           if [ "$RELEASE_BUILD" = "1" ]; then MODE=--export-release; else MODE=--export-debug; fi
-          ~/godot/godot --headless --path . $MODE "Android" build/ultima-chamada.apk
-          # versão de teste: outro app no celular (instala ao lado do normal) com todas as fases liberadas
+          ~/godot/godot --headless --path . $MODE "Android" build/encontre-a.apk
+          # versão de teste: outro app no celular (instala ao lado do normal) com todos os episódios liberados
           cp export_presets.cfg /tmp/presets_normal.cfg
           sed -i 's/^custom_features=.*/custom_features="teste"/' export_presets.cfg
-          sed -i 's/^package\/unique_name=.*/package\/unique_name="com.milhasplus.ultimachamada.teste"/' export_presets.cfg
-          sed -i 's/^package\/name=.*/package\/name="Última Chamada (teste)"/' export_presets.cfg
-          ~/godot/godot --headless --path . $MODE "Android" build/ultima-chamada-teste.apk
+          sed -i 's/^package\/unique_name=.*/package\/unique_name="com.alanclebersantana.findher.teste"/' export_presets.cfg
+          sed -i 's/^package\/name=.*/package\/name="Encontre-a (teste)"/' export_presets.cfg
+          ~/godot/godot --headless --path . $MODE "Android" build/encontre-a-teste.apk
           cp /tmp/presets_normal.cfg export_presets.cfg
           ls -la build
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ultima-chamada-apk
+          name: encontre-a-apk
           path: |
-            build/ultima-chamada.apk
-            build/ultima-chamada-teste.apk
+            build/encontre-a.apk
+            build/encontre-a-teste.apk
 
       - name: Publicar na página de versões (para baixar no celular)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-${{ github.run_number }}
-          name: Última Chamada 0.1.${{ github.run_number }}
+          name: Encontre-a 0.1.${{ github.run_number }}
           body: |
             APKs gerados automaticamente:
-            - **ultima-chamada.apk**: o jogo normal (cada fase abre depois de terminar a anterior).
-            - **ultima-chamada-teste.apk**: versão de teste, com todas as fases liberadas. Instala como
-              outro app ("Última Chamada (teste)"), ao lado do normal, com progresso separado.
+            - **encontre-a.apk**: o jogo normal (cada episódio abre depois de terminar o anterior).
+            - **encontre-a-teste.apk**: versão de teste, com todos os episódios liberados. Instala como
+              outro app ("Encontre-a (teste)"), ao lado do normal, com progresso separado.
             No celular: baixe o arquivo e toque nele para instalar
             (pode ser preciso permitir "instalar apps desconhecidos" para o navegador).
           files: |
-            build/ultima-chamada.apk
-            build/ultima-chamada-teste.apk
+            build/encontre-a.apk
+            build/encontre-a-teste.apk
           prerelease: true
