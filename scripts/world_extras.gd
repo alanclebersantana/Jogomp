@@ -509,7 +509,7 @@ static func boss(g: Game, T: int) -> void:
 	# a coroa balança a cada golpe recebido (e some na derrota: ela cai e rola pelo chão)
 	if b.st != "down":
 		var wob: float = sin(float(b.red) * .7) * .4 * float(b.red) / 30.0
-		WorldKings.crown_art("javali", cx, cy, .95, wob - .12, T)
+		pass   # (sem coroa: o chefe é o Motoboy Turbo)
 	Spr.restore()
 	if b.st == "stun":
 		for i in 4:

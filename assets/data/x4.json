@@ -1,28 +1,4 @@
 {
- "A:crow": {
-  "ax": 66.5,
-  "ay": 62.5,
-  "ch": 126,
-  "cols": 12,
-  "cw": 134,
-  "cyc": true,
-  "file": "x4/A__crow.png",
-  "kind": "A",
-  "n": 12,
-  "q": 1.0
- },
- "A:dog": {
-  "ax": 76.5,
-  "ay": 126.5,
-  "ch": 130,
-  "cols": 16,
-  "cw": 136,
-  "cyc": true,
-  "file": "x4/A__dog.png",
-  "kind": "A",
-  "n": 16,
-  "q": 1.0
- },
  "A:en_owl": {
   "ax": 60.1,
   "ay": 31.0,
@@ -33,30 +9,6 @@
   "file": "x4/A__en_owl.png",
   "kind": "A",
   "n": 8,
-  "q": 1.0
- },
- "A:pai_crawl": {
-  "ax": 49.0,
-  "ay": 75.1,
-  "ch": 77,
-  "cols": 16,
-  "cw": 98,
-  "cyc": true,
-  "file": "x4/A__pai_crawl.png",
-  "kind": "A",
-  "n": 16,
-  "q": 1.0
- },
- "A:pai_push": {
-  "ax": 62.5,
-  "ay": 117.0,
-  "ch": 120,
-  "cols": 12,
-  "cw": 122,
-  "cyc": true,
-  "file": "x4/A__pai_push.png",
-  "kind": "A",
-  "n": 12,
   "q": 1.0
  },
  "P:goose": {
@@ -79,42 +31,6 @@
   "file": "x4/P__tuc_f.png",
   "kind": "P",
   "n": 16,
-  "px": 2.0,
-  "q": 1.0,
-  "w": 42.0
- },
- "PC:bat": {
-  "ch": 111,
-  "cols": 16,
-  "cw": 102,
-  "cyc": true,
-  "file": "x4/PC__bat.png",
-  "kind": "PC",
-  "n": 16,
-  "px": 2.0,
-  "q": 1.0,
-  "w": 50.0
- },
- "PC:fly": {
-  "ch": 93,
-  "cols": 8,
-  "cw": 82,
-  "cyc": true,
-  "file": "x4/PC__fly.png",
-  "kind": "PC",
-  "n": 8,
-  "px": 2.0,
-  "q": 1.0,
-  "w": 40.0
- },
- "PC:spider": {
-  "ch": 68,
-  "cols": 12,
-  "cw": 86,
-  "cyc": true,
-  "file": "x4/PC__spider.png",
-  "kind": "PC",
-  "n": 12,
   "px": 2.0,
   "q": 1.0,
   "w": 42.0
@@ -148,36 +64,6 @@
   "kind": "sheet",
   "n": 24,
   "q": 0.85
- },
- "en_boar:0-1-2-3-4-5": {
-  "ch": 98,
-  "cols": 24,
-  "cw": 147,
-  "cyc": true,
-  "file": "x4/en_boar__0-1-2-3-4-5.png",
-  "kind": "sheet",
-  "n": 24,
-  "q": 0.7
- },
- "en_crow2:0-1-2-3": {
-  "ch": 130,
-  "cols": 16,
-  "cw": 170,
-  "cyc": true,
-  "file": "x4/en_crow2__0-1-2-3.png",
-  "kind": "sheet",
-  "n": 16,
-  "q": 1.0
- },
- "en_frog2:0-1": {
-  "ch": 70,
-  "cols": 8,
-  "cw": 130,
-  "cyc": true,
-  "file": "x4/en_frog2__0-1.png",
-  "kind": "sheet",
-  "n": 8,
-  "q": 1.0
  },
  "esquilo:0-1-2-3": {
   "ch": 99,
@@ -229,26 +115,6 @@
   "n": 32,
   "q": 0.8
  },
- "javali:0-1-2-3": {
-  "ch": 140,
-  "cols": 16,
-  "cw": 210,
-  "cyc": true,
-  "file": "x4/javali__0-1-2-3.png",
-  "kind": "sheet",
-  "n": 16,
-  "q": 1.0
- },
- "javali:5-3": {
-  "ch": 140,
-  "cols": 8,
-  "cw": 210,
-  "cyc": true,
-  "file": "x4/javali__5-3.png",
-  "kind": "sheet",
-  "n": 8,
-  "q": 1.0
- },
  "morcego_rei:0-1-2-1": {
   "ch": 340,
   "cols": 13,
@@ -258,36 +124,6 @@
   "kind": "sheet",
   "n": 16,
   "q": 1.0
- },
- "pai2:0-1": {
-  "ch": 120,
-  "cols": 8,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/pai2__0-1.png",
-  "kind": "sheet",
-  "n": 8,
-  "q": 0.75
- },
- "pai2:4-7": {
-  "ch": 120,
-  "cols": 8,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/pai2__4-7.png",
-  "kind": "sheet",
-  "n": 8,
-  "q": 0.75
- },
- "pai:1-2-3-2": {
-  "ch": 120,
-  "cols": 16,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/pai__1-2-3-2.png",
-  "kind": "sheet",
-  "n": 16,
-  "q": 0.75
  },
  "ride_gallop:0-1-2-3-4-5-6-7": {
   "ch": 200,
@@ -308,76 +144,6 @@
   "kind": "sheet",
   "n": 8,
   "q": 1.0
- },
- "tome/fall:0-1": {
-  "ch": 128,
-  "cols": 5,
-  "cw": 128,
-  "cyc": false,
-  "file": "x4/tome_fall__0-1.png",
-  "kind": "sheet",
-  "n": 5,
-  "q": 0.5
- },
- "tome/jump:0-1-2": {
-  "ch": 128,
-  "cols": 9,
-  "cw": 128,
-  "cyc": false,
-  "file": "x4/tome_jump__0-1-2.png",
-  "kind": "sheet",
-  "n": 9,
-  "q": 0.5
- },
- "tome/land:0-1-2": {
-  "ch": 128,
-  "cols": 9,
-  "cw": 128,
-  "cyc": false,
-  "file": "x4/tome_land__0-1-2.png",
-  "kind": "sheet",
-  "n": 9,
-  "q": 0.5
- },
- "tome/lantern:0-1": {
-  "ch": 128,
-  "cols": 8,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/tome_lantern__0-1.png",
-  "kind": "sheet",
-  "n": 8,
-  "q": 0.5
- },
- "tome/run:0-1-2-3-4-5-6-7": {
-  "ch": 128,
-  "cols": 32,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/tome_run__0-1-2-3-4-5-6-7.png",
-  "kind": "sheet",
-  "n": 32,
-  "q": 0.5
- },
- "tome/shiver:0-1-2": {
-  "ch": 128,
-  "cols": 12,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/tome_shiver__0-1-2.png",
-  "kind": "sheet",
-  "n": 12,
-  "q": 0.5
- },
- "tome/walk:0-1-2-3-4-5-6-7": {
-  "ch": 128,
-  "cols": 32,
-  "cw": 128,
-  "cyc": true,
-  "file": "x4/tome_walk__0-1-2-3-4-5-6-7.png",
-  "kind": "sheet",
-  "n": 32,
-  "q": 0.5
  },
  "urso:0-1": {
   "ch": 230,

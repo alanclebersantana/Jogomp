@@ -804,7 +804,7 @@ func boss_damage(from_slam: bool = false) -> void:
 		Polish.final_blow()
 		if b.get("skin", "") != "dog" and g.K:
 			# a coroa de folhas salta da cabeça, quica e fica brilhando no chão da clareira
-			g.K.drop_crown("javali", b.x + b.dir * 34, b.y - 122, -b.dir * 2.4, -6.0)
+			pass
 		Polish.loot_arc(b.x, b.y - 80, 12, 500.0)
 		_gate_on(false)
 		if b.skin == "dog":

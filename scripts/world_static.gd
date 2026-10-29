@@ -148,6 +148,11 @@ func _draw_raw() -> void:
 			"house":
 				# casa da vila (Episódio 2): o telhado é o caminho do Tomé
 				Spr.P("casa%d" % int(s.get("v", 0)), s.x + s.w / 2, s.y + 3, s.w, bool(s.get("flip", false)))
+			"peca":
+				# peça pintada (balcão, painel, contêiner...): a arte cobre a caixa, com folga ox/oy
+				var ox: float = float(s.get("ox", 0))
+				var oy: float = float(s.get("oy", 0))
+				Spr.AB(str(s.sprite), s.x - ox, s.y - oy, s.w + 2 * ox, s.h + oy + 4)
 			"cart":
 				if s.get("sprite"):
 					Spr.ABb(s.sprite, s.x + s.w / 2, s.y + s.h + 4, s.w + 20)
@@ -510,6 +515,8 @@ func _pit_wall(e: float, y0: float, dir: float) -> void:
 
 ## terra por dentro: pedrinhas, raízes finas e manchas, escurecendo com a profundidade (nada de chapado)
 func _earth_detail(sa: float, sb: float, ya: float, yb: float, base: Color) -> void:
+	if game.L.get("theme", "") == "aeroporto":
+		return
 	# [sa, sb] = o bloco inteiro; manchas e camadas só na faixa deste pedaço, mas as pedrinhas e raízes
 	# perto da emenda são desenhadas pelos dois pedaços (cada um corta a sua metade)
 	var xa: float = max(sa, x0 - 2)
@@ -702,7 +709,7 @@ static func hh(x: float, k: int = 0) -> float:
 ## enfeites pequenos em cima do chão: flores, pedrinhas, folhas secas, poças, montinhos de neve
 ## e raízes saindo da beira. Tudo fixo (sorteado pela posição), desenhado uma vez só.
 func _ground_deco(s: Dictionary) -> void:
-	if s.w < 120:
+	if s.w < 120 or game.L.get("theme", "") == "aeroporto":
 		return
 	var y: float = s.y
 	var th := _theme_at(s.x + s.w / 2)
@@ -771,6 +778,9 @@ static func flowers_of(g: Game, s: Dictionary) -> Array:
 	if s.has("_fl"):
 		return s._fl
 	var out: Array = []
+	if g.L.get("theme", "") == "aeroporto":
+		s._fl = out
+		return out
 	if s.w >= 120 and not s.get("snow") and s.get("t", "") == "ground":
 		var y: float = s.y
 		var under: bool = g.L.has("under") and y > g.L.under
@@ -1012,7 +1022,7 @@ static func plat(s: Dictionary) -> void:
 	if s.get("crumble"):
 		return
 	if s.get("trestle"):
-		var wood := Color("#4a3220")
+		var wood := Color("#59626c")   # andaime de metal
 		for lx in [s.x + 8, s.x + s.w - 16]:
 			Spr.rect(lx, s.y + 10, 8, leg_floor(s, lx + 4) - s.y - 6, wood)
 		# cruz de travamento: nunca abaixo do chão (cavaletes baixos ficam com a cruz menor)

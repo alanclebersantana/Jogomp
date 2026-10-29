@@ -104,7 +104,7 @@ func _ready() -> void:
 	tex["pad_S"] = load("res://assets/ui/pad_S.png")
 	_warm_start.call_deferred()
 	tex["btn_use"] = load("res://assets/ui/btn_use.png")
-	AR["it_picareta"] = [17, 12, 102, 110, 51, 55, 2]
+	AR["it_picareta"] = [17, 12, 102, 110, 51, 55, 2]   # (o atlas milhas.json troca pelo bastão)
 	# artes novas opcionais (assets/sprites/novos/<nome>.png, quadros quadrados lado a lado)
 	for k in NOVOS:
 		var npth := "res://assets/sprites/novos/%s.png" % k
@@ -136,6 +136,13 @@ func _ready() -> void:
 		# ícones pintados de objetos e pistas novos: valem também pelo nome antigo (it_x, cl_7, clb_7)
 		if (n.begins_with("it_") or n.begins_with("cl_") or n.begins_with("clb_")) and not AR.has(n):
 			AR[n] = AR["p_" + n]
+	# arte do Cadê as milhas?! (tools/make_arte.py): peças novas por cima dos nomes antigos
+	if ResourceLoader.exists("res://assets/sprites/milhas.png"):
+		tex["paint9"] = load("res://assets/sprites/milhas.png")
+		var mj = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/milhas.json"))
+		for n in mj:
+			var r = mj[n]
+			AR[n] = [r[0], r[1], r[2], r[3], r[4], r[5], 11]
 	# brilho radial (substitui os gradientes radiais do canvas)
 	var g := Gradient.new()
 	g.set_color(0, Color(1, 1, 1, 1))

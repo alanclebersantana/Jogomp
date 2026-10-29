@@ -404,8 +404,8 @@ func _process(_d: float) -> void:
 		sh += game.shake_dir * amp * .9
 		game.shake_dir *= .86
 		# câmera chega mais perto nas cenas calmas e abre nas de ação
-		# celular em pé: abre a câmera para mostrar uns 620 px de largura do mundo
-		var retrato: float = clampf(vs.x / 620.0, .72, 1.0) if vs.y > vs.x else 1.0
+		# celular em pé: a câmera mostra uns 520 px de largura do mundo
+		var retrato: float = clampf(vs.x / 520.0, .72, 1.1) if vs.y > vs.x else 1.0
 		var zt: float = _zoom_target() * retrato * (1.12 if game.slowmo > 0 else 1.0)
 		# abrir é mais rápido que fechar (nada fica cortado por muito tempo)
 		cam_zoom = lerpf(cam_zoom, zt, .04 if zt < cam_zoom else .02)

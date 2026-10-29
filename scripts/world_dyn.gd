@@ -792,9 +792,7 @@ const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1
 const EN_NAME := {"crow": "Pombo do Barão", "bat": "Mala-monstro", "fly": "Drone", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
 	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Cambista", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
-const EYES := {"crow": [Vector2(17, -13)], "squirrel": [Vector2(28, -25)], "bat": [Vector2(8, 5), Vector2(13, 5)],
-	"spider": [Vector2(2, 3), Vector2(7, 3)], "fly": [Vector2(13, 2)], "frog": [Vector2(-5, -38), Vector2(6, -38)], "boar": [Vector2(18, -30)],
-	"piranha": [Vector2(13, -8)]}
+const EYES := {}   # a arte nova já tem os olhos acesos dos capangas
 
 func _enemy_eyes(e: Dictionary) -> void:
 	var ey: Array = EYES.get(e.k, [])
@@ -2204,14 +2202,7 @@ const MG_R := 16
 const TURN_N := 10      # passos da meia-volta (rápida: a física vira na hora, só o desenho gira)
 ## pontos de cada quadro (em pixels do quadro pintado): mão que segura a lanterna (x, y), centro da lanterna (x, y)
 ## e o pompom do gorro (x, y) — medidos nas folhas assets/sprites/tome/*.png e pai.png (quadro 0)
-const MG_PTS := {
-	"walk": [[201, 110, 201, 150, 73, 56], [200, 110, 200, 150, 75, 56], [197, 108, 197, 148, 77, 56], [200, 112, 200, 152, 75, 56], [199, 106, 199, 146, 75, 56], [187, 118, 187, 158, 85, 52], [188, 105, 188, 145, 83, 55], [198, 108, 198, 148, 78, 56]],
-	"run": [[200, 114, 200, 154, 75, 62], [200, 114, 200, 154, 76, 62], [200, 120, 200, 160, 76, 62], [198, 116, 198, 156, 75, 62], [197, 109, 197, 149, 76, 62], [183, 113, 183, 153, 90, 57], [188, 110, 188, 150, 84, 61], [196, 110, 196, 150, 80, 61]],
-	"jump": [[204, 92, 204, 132, 68, 52], [194, 114, 194, 154, 64, 49], [197, 84, 197, 124, 68, 42]],
-	"fall": [[197, 84, 197, 124, 68, 42], [185, 86, 185, 126, 85, 14]],
-	"land": [[188, 123, 188, 163, 75, 63], [196, 119, 196, 159, 68, 64], [189, 100, 189, 140, 66, 60]],
-	"pai": [[138, 64, 138, 90, 54, 30]],
-}
+const MG_PTS := {}   # o Milis não tem lanterna na mão nem pompom (a grade só faz o passo e a meia-volta)
 var _mg_idx := PackedInt32Array()
 var _mg_fr := PackedVector2Array()      # posição de cada ponto da grade (0..1 no quadro)
 var _mg_pts := PackedVector2Array()
@@ -2594,6 +2585,7 @@ func _pose(key: String, tex: Texture2D, src: Rect2, dst: Rect2, x: float, y: flo
 
 ## ponta do cachecol esvoaçando para trás quando corre ou pula (atrás do corpo)
 func _scarf(p: Dictionary, force: float = -1.0) -> void:
+	return   # o Milis não usa cachecol
 	var sp: float = clamp(abs(p.vx) / 6.0, .4, 1.0) if force < 0.0 else force
 	var pts_top := PackedVector2Array()
 	var pts_bot := PackedVector2Array()

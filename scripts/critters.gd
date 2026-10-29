@@ -67,6 +67,8 @@ static func _in_tunnel(g: Game, x: float) -> bool:
 	return tn.size() >= 2 and x > float(tn[0]) and x < float(tn[1])
 
 static func draw(g: Game, T: int) -> void:
+	if g.L.get("theme", "") == "aeroporto":
+		return
 	if level_ref != g.L:
 		C = {}
 		TU = {}

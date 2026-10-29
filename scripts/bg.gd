@@ -122,7 +122,7 @@ static func hh(x: float, k: int = 0) -> float:
 
 ## o céu vivo por cima da pintura: nuvens andando, a tarde caindo, estrelas piscando, a lua com halo
 func _sky(k: String, al: float, w: float, oy: float) -> void:
-	if al <= .01:
+	if al <= .01 or game.L.get("theme", "") == "aeroporto":
 		return
 	var H: float = game.H
 	var t := FxClock.ft
@@ -253,6 +253,8 @@ func _draw_add(n: CanvasItem) -> void:
 	var bh: float = game.H + max(0.0, (game.L.bottom - game.L.top) - game.H) * PX
 	var t := FxClock.ft
 	for k in SUN:
+		if game.L.get("theme", "") == "aeroporto":
+			break
 		var al: float = float(_w.get(k, 0.0)) * clamp(1.0 - rain * 2.0, 0, 1)
 		if al < .02 or not Spr.tex.has("bg_" + k):
 			continue
