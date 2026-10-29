@@ -374,7 +374,17 @@ def cabo():
     NOVO["p_vine"] = (im, float(r[4]), float(r[5]))
 
 
+def apaga_natureza():
+    """capim, flores e cogumelos pintados viram peças vazias (no aeroporto não nasce mato)"""
+    for n in ["grass0", "grass1", "grass2", "grass3", "grass4", "fl_blue", "fl_dande", "fl_lilac", "fl_white",
+              "fl_yellow", "mush1", "mush3", "bfly_side", "bfly_open", "apple"]:
+        r = PNT.get(n)
+        if r:
+            NOVO["p_" + n] = (Image.new("RGBA", (int(r[2]), int(r[3])), (0, 0, 0, 0)), float(r[4]), float(r[5]))
+
+
 if __name__ == "__main__":
+    apaga_natureza()
     cabo()
     info = milis()
     bag()
