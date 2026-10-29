@@ -1,0 +1,61 @@
+nome=Raio-X e Portas
+voo=LA 3522
+destino=BRASÍLIA
+portao=27
+tempo=70
+meta=18
+fundo=seguranca
+piso=metal
+parede=metal
+asas=1
+musica=corrida
+cia=latam
+intro=Os capangas do Barão estão escondidos na área de segurança. Passe pelo raio-X, pelas portas automáticas e suba as paredes verdes até o portão 27!
+dica=Laser do raio-X no chão: pule por cima!
+dica=Laser no teto: aqui NÃO pule.
+dica=Porta fechada? O Milis volta e tenta de novo.
+dica=Malas caindo da esteira! Pule por cima ou pise nelas.
+dica=Capangas do Barão! Pule na cabeça deles.
+dica=Parede verde: o Milis sobe correndo!
+dica=Na chaminé, toque para saltar de uma parede para a outra.
+---
+                                                                                                                                                    ##                                                                                                                   #
+                                                                                                                                                    ##                                                                                                                   #
+                                                                                                                                                    ##                       oo                                                                                          #
+                                                                                                                                                    ##                      o  o          v                                                                              #
+                                                                                                                                                    ##  $                  o    o                                                                                        #
+                                                                                                                                                    ##  o o o o o o o o o o      o  o  o  o  o  o  o  o                                                                  #
+                                                                                                                                                    #######################W====#########################                                                                #
+                                                                                                                                                                           W    #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  #                                                                                        #
+                                                                                                                                                                           W o  W                            v                                                           #
+                                                                                                                                                                           W o  W                                                                                        #
+                                                                                                                                                                           W o  W                                                                                        #
+                                                                                                                                                                           W o  W                                                                                        #
+                                                                                                                                                                           W    W                            o                                                           #
+                                                                                                                                                                                W                            o                                                           #
+                                                                                                                                                                                W                            o                                                           #
+                                                                                                                                                    o ?o  o  o  o  o  o  o      W                            o                                                           #
+                                                                                                                                                  W##############################                            o                                                           #
+                                                                                                                                                  W##############################                            o                                                           #
+                                                                                                                                                 oW##############################                            o                                                           #
+                                                                                                                                                 oW##############################                                                                                        #
+                          MMMMMMMMMMMMM                 M                                                                                        oW##############################                                 o o o o o o                                            #
+                          MMMMMMMMMMMMM                 M                                                                                        oW##############################                                                                                        #
+                            j   j                       M     MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM                                            oW##############################                                                                      o                 #
+           ooo     ooo                                  M     MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM                                            oW##############################                                                                      o                 #
+                                                        M               m               m                                                        oW##############################                                                                      o           G     #
+          o   o   o   o                                 M                                                                                        oW##############################                                                                      o  ################
+                                                        M                                                                                        oW##############################                                                      ooo     ooo     o  ################
+   S  ?  o  l  o o  l  o?  ooooooooooo                  M                 o o o o o o                           ooooo     ooooo     ooooo        oW##############################                                                                         ################
+##########################################              D                                                                                        oW##############################                                                     o   o   o   o       ################
+##########################################                                                                                                       oW##############################                                                                         ################
+##########################################  ? oooooooo      T   ? o  o  o  o  o  o  o  o  o  o  o     T  ?        k         k         r     ?     W##############################                                             T      o  l  o o  l  o  ^   ################
+##########################################################################################################################################################################################################################################################################
+##########################################################################################################################################################################################################################################################################
+##########################################################################################################################################################################################################################################################################

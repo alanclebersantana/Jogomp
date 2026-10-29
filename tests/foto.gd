@@ -1,56 +1,55 @@
 extends SceneTree
-## Prints da fase: teleporta o Milis para os pontos e salva PNG em $PASTA (padrão /tmp/cade_fotos).
-## Uso: LVL=0 godot --path . -s tests/foto.gd -- 900,500 3150,180 ...
+## Prints para conferir: FOTO=telas (todas as telas) ou FOTO=fase com FASE=1-1 e PONTOS="x,y;x,y" (em quadrados).
+## Uso: xvfb-run -a godot --path . -s tests/foto.gd --rendering-driver opengl3
+
+var pasta := "/tmp/corrida_fotos"
+var main
+
+
+func _snap(n: String, frames := 6) -> void:
+	for i in frames:
+		await process_frame
+	root.get_texture().get_image().save_png(pasta.path_join(n + ".png"))
+
+
 func _initialize() -> void:
-	var pasta := OS.get_environment("PASTA") if OS.get_environment("PASTA") != "" else "/tmp/cade_fotos"
 	DirAccess.make_dir_recursive_absolute(pasta)
-	root.get_node("Save").setv("opt", "tut_asked", true)
-	var main = load("res://scenes/main.tscn").instantiate()
+	main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
-	await process_frame
-	var args := OS.get_cmdline_user_args()
-	if args.size() > 0 and args[0] == "titulo":
-		for i in 20:
-			await process_frame
-		root.get_texture().get_image().save_png(pasta.path_join("titulo.png"))
-		quit()
-		return
-	var lvl := int(OS.get_environment("LVL")) if OS.get_environment("LVL") != "" else 0
-	main.start_level(false, lvl)
-	await process_frame
-	for i in 6:
-		for c in main.ui_layer.get_children():
-			if c.has_method("_end"):
-				c._end()
-		await process_frame
-		if main.panel and is_instance_valid(main.panel) and main.panel.has_meta("ok"):
-			main.panel.get_meta("ok").call()
-		await process_frame
-	main.state = main.S.PLAY
-	var g = main.game
-	g.running = true
-	g.lives = 99
-	for e in g.EN:
-		e.dead = 99 if OS.get_environment("SEM_INIMIGOS") != "" else e.dead
-	var n := 0
-	for a in args:
-		var p = a.split(",")
-		g.player.x = float(p[0]) - 12
-		g.player.y = float(p[1]) - 34
-		g.player.vx = 0
-		g.player.vy = 0
-		g.player.spawnX = g.player.x
-		g.player.spawnY = g.player.y
-		g.snap_camera()
-		for i in 50:
-			g.player.hp = 5
-			if main.state != main.S.PLAY:
-				for c in main.ui_layer.get_children():
-					if c.has_method("_end"):
-						c._end()
-				main.state = main.S.PLAY
-				g.running = true
-			await process_frame
-		root.get_texture().get_image().save_png(pasta.path_join("f%02d.png" % n))
-		n += 1
+	await _snap("x", 2)
+	var modo := OS.get_environment("FOTO")
+	if modo == "telas":
+		await _snap("t0_titulo", 20)
+		main.mapa()
+		await _snap("t1_mapa", 8)
+		main.abertura("1-1")
+		await _snap("t2_abertura", 8)
+		main.comeca("1-1")
+		await _snap("t3_pronto", 20)
+		main._pausa()
+		await _snap("t4_pausa", 8)
+		main._continua()
+		main._embarcou({"milhas": 120, "total": 148, "sobra": 24.0, "todas": false, "rapido": true, "quedas": 2, "meta": 20})
+		await _snap("t5_resultado", 10)
+		main._perdeu()
+		await _snap("t6_perdeu", 10)
+	else:
+		var fid := OS.get_environment("FASE")
+		main.comeca(fid)
+		var j = main.jogo
+		j.bot = true
+		var pts := OS.get_environment("PONTOS").split(";")
+		var i := 0
+		for p in pts:
+			var xy := p.split(",")
+			j.pos = Vector2(float(xy[0]) * 40 + 20, float(xy[1]) * 40)
+			j.cam = j.pos
+			j.vel = Vector2.ZERO
+			j.estado = "chao"
+			j.invul = 0.0
+			j.fade = 0.0
+			if xy.size() > 2:
+				j.dir = int(xy[2])
+			await _snap("f%s_%02d" % [fid, i], 40)
+			i += 1
 	quit()

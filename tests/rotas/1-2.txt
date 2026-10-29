@@ -1,0 +1,2 @@
+# x dir acao [s] [y]
+175.6 1 salta 0 17.5

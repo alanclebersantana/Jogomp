@@ -1,0 +1,560 @@
+{
+ "asas": {
+  "ax": 75,
+  "ay": 45,
+  "file": "asas.png",
+  "fps": 6,
+  "h": 90,
+  "n": 1,
+  "w": 150
+ },
+ "barao": {
+  "ax": 160,
+  "ay": 452,
+  "file": "barao.png",
+  "fps": 10,
+  "h": 460,
+  "n": 1,
+  "w": 320
+ },
+ "bateria": {
+  "ax": 17.5,
+  "ay": 70,
+  "file": "bateria.png",
+  "fps": 10,
+  "h": 70,
+  "n": 1,
+  "w": 35
+ },
+ "bg_hangar": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_hangar.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_mezanino": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_mezanino.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_patio": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_patio.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_pista": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_pista.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_seguranca": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_seguranca.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_subsolo": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_subsolo.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "bg_terminal": {
+  "ax": 0,
+  "ay": 0,
+  "file": "bg_terminal.jpg",
+  "fps": 1,
+  "h": 1100,
+  "n": 1,
+  "w": 3329
+ },
+ "caixa": {
+  "ax": 42,
+  "ay": 84,
+  "file": "caixa.png",
+  "fps": 10,
+  "h": 80,
+  "n": 1,
+  "w": 84
+ },
+ "caixote": {
+  "ax": 42,
+  "ay": 84,
+  "file": "caixote.png",
+  "fps": 10,
+  "h": 76,
+  "n": 1,
+  "w": 84
+ },
+ "cambista_anda": {
+  "ax": 130,
+  "ay": 244,
+  "file": "cambista_anda.png",
+  "fps": 9,
+  "h": 250,
+  "n": 6,
+  "w": 260
+ },
+ "cambista_corre": {
+  "ax": 150,
+  "ay": 244,
+  "file": "cambista_corre.png",
+  "fps": 10,
+  "h": 250,
+  "n": 1,
+  "w": 300
+ },
+ "cambista_ko": {
+  "ax": 150,
+  "ay": 244,
+  "file": "cambista_ko.png",
+  "fps": 10,
+  "h": 250,
+  "n": 1,
+  "w": 300
+ },
+ "cambista_tonto": {
+  "ax": 130,
+  "ay": 244,
+  "file": "cambista_tonto.png",
+  "fps": 10,
+  "h": 250,
+  "n": 1,
+  "w": 260
+ },
+ "carrinho": {
+  "ax": 110,
+  "ay": 168,
+  "file": "carrinho.png",
+  "fps": 6,
+  "h": 170,
+  "n": 1,
+  "w": 220
+ },
+ "cartao": {
+  "ax": 55,
+  "ay": 36,
+  "file": "cartao.png",
+  "fps": 10,
+  "h": 56,
+  "n": 1,
+  "w": 110
+ },
+ "laser_emissor": {
+  "ax": 48,
+  "ay": 0,
+  "file": "laser_emissor.png",
+  "fps": 6,
+  "h": 56,
+  "n": 1,
+  "w": 96
+ },
+ "laser_receptor": {
+  "ax": 48,
+  "ay": 56,
+  "file": "laser_receptor.png",
+  "fps": 6,
+  "h": 56,
+  "n": 1,
+  "w": 96
+ },
+ "mala_tonta": {
+  "ax": 95,
+  "ay": 75,
+  "file": "mala_tonta.png",
+  "fps": 10,
+  "h": 150,
+  "n": 1,
+  "w": 190
+ },
+ "mala_voa": {
+  "ax": 95,
+  "ay": 75,
+  "file": "mala_voa.png",
+  "fps": 6,
+  "h": 150,
+  "n": 4,
+  "w": 190
+ },
+ "malas": {
+  "ax": 48,
+  "ay": 38,
+  "file": "malas.png",
+  "fps": 6,
+  "h": 76,
+  "n": 4,
+  "w": 96
+ },
+ "milha": {
+  "ax": 32,
+  "ay": 32,
+  "file": "milha.png",
+  "fps": 10,
+  "h": 63,
+  "n": 1,
+  "w": 64
+ },
+ "milha_latam": {
+  "ax": 32,
+  "ay": 32,
+  "file": "milha_latam.png",
+  "fps": 10,
+  "h": 63,
+  "n": 1,
+  "w": 64
+ },
+ "milis_acena": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_acena.png",
+  "fps": 2,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_anda": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_anda.png",
+  "fps": 10,
+  "h": 240,
+  "n": 6,
+  "w": 240
+ },
+ "milis_cai": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_cai.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 240
+ },
+ "milis_cansado": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_cansado.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 240
+ },
+ "milis_corre": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_corre.png",
+  "fps": 14,
+  "h": 240,
+  "n": 6,
+  "w": 240
+ },
+ "milis_duplo": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_duplo.png",
+  "fps": 12,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_escala": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_escala.png",
+  "fps": 8,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_festa": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_festa.png",
+  "fps": 4,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_parado": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_parado.png",
+  "fps": 1.5,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_plana": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_plana.png",
+  "fps": 6,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "milis_sentado": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_sentado.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 240
+ },
+ "milis_sobe": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_sobe.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 240
+ },
+ "milis_tonto": {
+  "ax": 120,
+  "ay": 234,
+  "file": "milis_tonto.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 240
+ },
+ "mola": {
+  "ax": 50.5,
+  "ay": 110,
+  "file": "mola.png",
+  "fps": 10,
+  "h": 110,
+  "n": 1,
+  "w": 101
+ },
+ "motoboy": {
+  "ax": 150,
+  "ay": 252,
+  "file": "motoboy.png",
+  "fps": 8,
+  "h": 260,
+  "n": 3,
+  "w": 300
+ },
+ "parede_aderente": {
+  "ax": 0,
+  "ay": 0,
+  "file": "parede_aderente.png",
+  "fps": 1,
+  "h": 160,
+  "n": 1,
+  "w": 80
+ },
+ "parede_concreto": {
+  "ax": 0,
+  "ay": 0,
+  "file": "parede_concreto.png",
+  "fps": 1,
+  "h": 160,
+  "n": 1,
+  "w": 160
+ },
+ "parede_metal": {
+  "ax": 0,
+  "ay": 0,
+  "file": "parede_metal.png",
+  "fps": 1,
+  "h": 160,
+  "n": 1,
+  "w": 160
+ },
+ "parede_terminal": {
+  "ax": 0,
+  "ay": 0,
+  "file": "parede_terminal.png",
+  "fps": 1,
+  "h": 160,
+  "n": 1,
+  "w": 160
+ },
+ "passageiro0": {
+  "ax": 80,
+  "ay": 186,
+  "file": "passageiro0.png",
+  "fps": 5,
+  "h": 190,
+  "n": 2,
+  "w": 150
+ },
+ "passageiro1": {
+  "ax": 80,
+  "ay": 186,
+  "file": "passageiro1.png",
+  "fps": 5,
+  "h": 190,
+  "n": 2,
+  "w": 150
+ },
+ "passageiro2": {
+  "ax": 80,
+  "ay": 186,
+  "file": "passageiro2.png",
+  "fps": 5,
+  "h": 190,
+  "n": 2,
+  "w": 150
+ },
+ "piso_asfalto": {
+  "ax": 0,
+  "ay": 0,
+  "file": "piso_asfalto.png",
+  "fps": 1,
+  "h": 96,
+  "n": 1,
+  "w": 1409
+ },
+ "piso_metal": {
+  "ax": 0,
+  "ay": 0,
+  "file": "piso_metal.png",
+  "fps": 1,
+  "h": 96,
+  "n": 1,
+  "w": 1383
+ },
+ "piso_terminal": {
+  "ax": 0,
+  "ay": 0,
+  "file": "piso_terminal.png",
+  "fps": 1,
+  "h": 96,
+  "n": 1,
+  "w": 1396
+ },
+ "piso_viga": {
+  "ax": 0,
+  "ay": 0,
+  "file": "piso_viga.png",
+  "fps": 1,
+  "h": 64,
+  "n": 1,
+  "w": 1422
+ },
+ "placa_molhado": {
+  "ax": 32,
+  "ay": 96,
+  "file": "placa_molhado.png",
+  "fps": 6,
+  "h": 96,
+  "n": 1,
+  "w": 64
+ },
+ "porta_saida": {
+  "ax": 165.5,
+  "ay": 250,
+  "file": "porta_saida.png",
+  "fps": 10,
+  "h": 250,
+  "n": 2,
+  "w": 331
+ },
+ "porta_sensor": {
+  "ax": 48,
+  "ay": 40,
+  "file": "porta_sensor.png",
+  "fps": 6,
+  "h": 40,
+  "n": 2,
+  "w": 96
+ },
+ "porta_vidro": {
+  "ax": 0,
+  "ay": 0,
+  "file": "porta_vidro.png",
+  "fps": 6,
+  "h": 240,
+  "n": 1,
+  "w": 44
+ },
+ "ret_milis": {
+  "ax": 100,
+  "ay": 100,
+  "file": "ret_milis.png",
+  "fps": 10,
+  "h": 200,
+  "n": 1,
+  "w": 200
+ },
+ "robo_anda": {
+  "ax": 120,
+  "ay": 234,
+  "file": "robo_anda.png",
+  "fps": 8,
+  "h": 240,
+  "n": 4,
+  "w": 240
+ },
+ "robo_corre": {
+  "ax": 120,
+  "ay": 234,
+  "file": "robo_corre.png",
+  "fps": 8,
+  "h": 240,
+  "n": 2,
+  "w": 240
+ },
+ "robo_ko": {
+  "ax": 150,
+  "ay": 234,
+  "file": "robo_ko.png",
+  "fps": 10,
+  "h": 240,
+  "n": 1,
+  "w": 300
+ },
+ "seta": {
+  "ax": 30,
+  "ay": 30,
+  "file": "seta.png",
+  "fps": 6,
+  "h": 60,
+  "n": 1,
+  "w": 60
+ },
+ "totem": {
+  "ax": 53.0,
+  "ay": 170,
+  "file": "totem.png",
+  "fps": 10,
+  "h": 170,
+  "n": 2,
+  "w": 106
+ },
+ "ventilador": {
+  "ax": 84,
+  "ay": 44,
+  "file": "ventilador.png",
+  "fps": 6,
+  "h": 44,
+  "n": 1,
+  "w": 168
+ }
+}

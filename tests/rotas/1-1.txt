@@ -1,0 +1,10 @@
+# x dir acao [s] [y]
+12.6 1 pula 0.2
+18.8 1 pula 0.3
+26.2 1 pula 0.3
+71 1 pula 0.3 27
+82 1 pula 0.3 24
+133.6 1 pula 0.35
+163 1 duplo 0.34
+187.2 1 duplo 0.3
+210.3 1 plana 2.6

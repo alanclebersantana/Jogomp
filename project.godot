@@ -1,24 +1,23 @@
-; Milhas Plus – Cadê as milhas?! — projeto Godot 4.6 (motor do Encontre-a)
+; Milhas Plus – Cadê as milhas?! — corrida contra o embarque (Godot 4.6)
 config_version=5
 
 [application]
 
-run/max_fps=0
-
 config/name="Milhas Plus – Cadê as milhas?!"
-config/description="O robô Milis e a mala Bag recuperam as milhas roubadas pelo Barão das Milhas Falsas."
+config/description="O robô Milis corre pelos aeroportos para recuperar as milhas roubadas pelo Barão das Milhas Falsas antes do portão fechar."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
-boot_splash/bg_color=Color(0.043, 0.035, 0.024, 1)
+boot_splash/bg_color=Color(0.07, 0.1, 0.16, 1)
 boot_splash/show_image=false
 config/icon="res://icon.png"
 config/quit_on_go_back=false
+run/max_fps=0
 
 [autoload]
 
+Arte="*res://scripts/arte.gd"
 Save="*res://scripts/save.gd"
-Spr="*res://scripts/spr.gd"
-Audio="*res://scripts/audio.gd"
+Som="*res://scripts/som.gd"
 
 [display]
 
@@ -38,12 +37,13 @@ pointing/emulate_touch_from_mouse=true
 
 [physics]
 
-common/physics_ticks_per_second=60
-common/max_physics_steps_per_frame=3
+common/physics_ticks_per_second=120
+common/max_physics_steps_per_frame=4
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+textures/canvas_textures/default_texture_filter=1
 2d/snap/snap_2d_transforms_to_pixel=false

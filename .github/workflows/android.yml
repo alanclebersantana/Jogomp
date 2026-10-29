@@ -49,9 +49,13 @@ jobs:
           ~/godot/godot --headless --editor --path . --quit || true
           F=$(ls ~/.config/godot/editor_settings-*.tres | head -1)
           echo "Configurações: $F"
-          sed -i '/export\/android\/android_sdk_path/d;/export\/android\/java_sdk_path/d' "$F"
+          sed -i '/export\/android\/android_sdk_path/d;/export\/android\/java_sdk_path/d;/export\/android\/debug_keystore/d' "$F"
           echo "export/android/android_sdk_path = \"$ANDROID_SDK_ROOT\"" >> "$F"
           echo "export/android/java_sdk_path = \"$JAVA_HOME\"" >> "$F"
+          # chave fixa (a mesma em toda versão): o celular aceita instalar a versão nova por cima da antiga
+          echo "export/android/debug_keystore = \"$GITHUB_WORKSPACE/tools/chave_debug.jks\"" >> "$F"
+          echo "export/android/debug_keystore_user = \"androiddebugkey\"" >> "$F"
+          echo "export/android/debug_keystore_pass = \"android\"" >> "$F"
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
             echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > $HOME/release.keystore
             echo "GODOT_ANDROID_KEYSTORE_RELEASE_PATH=$HOME/release.keystore" >> $GITHUB_ENV
@@ -59,18 +63,15 @@ jobs:
             echo "GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
             echo "RELEASE_BUILD=1" >> $GITHUB_ENV
           fi
-          ls ~/.local/share/godot/keystores || true
-
-      - name: Silhuetas das folhas novas (calcular no celular trava o jogo)
-        run: |
-          python3 -c "import PIL" 2>/dev/null || pip3 install --quiet pillow || true
-          python3 tools/make_sil.py || true
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$GITHUB_WORKSPACE/tools/chave_debug.jks" >> $GITHUB_ENV
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> $GITHUB_ENV
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> $GITHUB_ENV
 
       - name: Importar recursos
         run: ~/godot/godot --headless --path . --import || true
 
-      - name: Teste automático (as 4 fases de Guarulhos do começo ao fim)
-        run: ~/godot/godot --headless --path . -s tests/route_gru.gd
+      - name: Teste automático (o robô corre as fases de Guarulhos do começo ao fim)
+        run: ~/godot/godot --headless --path . -s tests/rota.gd
 
       - name: Gerar APK
         run: |
@@ -103,6 +104,8 @@ jobs:
           body: |
             APKs gerados automaticamente:
             - **cade-as-milhas.apk**: o jogo normal (cada fase abre depois de terminar a anterior).
+              Se aparecer "pacote inválido" ou "conflito", desinstale o "Cadê as Milhas" antigo e instale de novo
+              (só desta vez: daqui para a frente a assinatura é sempre a mesma).
             - **cade-as-milhas-teste.apk**: versão de teste, com todas as fases liberadas. Instala como
               outro app ("Cadê as Milhas teste"), ao lado do normal, com progresso separado.
             No celular: baixe o arquivo e toque nele para instalar
