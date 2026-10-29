@@ -1,12 +1,12 @@
-; Encontre-a — projeto Godot 4.6
+; Milhas Plus – Cadê as milhas?! — projeto Godot 4.6 (motor do Encontre-a)
 config_version=5
 
 [application]
 
 run/max_fps=0
 
-config/name="Encontre-a"
-config/description="Um pai, uma lanterna e uma trilha de lápis de cor."
+config/name="Milhas Plus – Cadê as milhas?!"
+config/description="O robô Milis e a mala Bag recuperam as milhas roubadas pelo Barão das Milhas Falsas."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 boot_splash/bg_color=Color(0.043, 0.035, 0.024, 1)

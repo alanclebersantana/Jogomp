@@ -741,7 +741,7 @@ static func tocas(g: Game, T: int) -> void:
 			Spr.circle(tc.x - 26 + k * 24, tc.y - 2, 5, Color("#4a3f36"))
 		var near: bool = abs(p.x + p.w / 2 - tc.x) < 80 and abs(p.y + p.h - tc.y) < 50
 		if not tc.done and near:
-			var lbl := "✦ BUSCA, PIPOCA!" if g.X.dog_free() else "?"
+			var lbl := "✦ VAI, BAG!" if g.X.dog_free() else "?"
 			Spr.text(lbl, tc.x, tc.y - 46 + sin(T * .15) * 3, 15, Color("#ffecaa"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
 
 static func dog(g: Game, T: int) -> void:

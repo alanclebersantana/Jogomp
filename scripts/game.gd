@@ -588,7 +588,7 @@ func give_item(id: String) -> void:
 		player.actT = 60
 	Audio.play("item")
 	Audio.vib(40)
-	flash("Achou: " + item_name(id) + " (veja a mochila)")
+	flash("Achou: " + item_name(id) + " (veja o compartimento)")
 
 func try_combine(a: String, b: String) -> String:
 	if not has_item(a) or not has_item(b):
@@ -615,7 +615,7 @@ func lock_msg(l) -> String:
 		if not has_item(p):
 			miss.append(p)
 	if miss.is_empty():
-		return l.pre + " Você já tem " + item_name(l.parts[0]).to_lower() + " e " + item_name(l.parts[1]).to_lower() + ": abra a mochila e junte os dois!"
+		return l.pre + " Você já tem " + item_name(l.parts[0]).to_lower() + " e " + item_name(l.parts[1]).to_lower() + ": abra o compartimento e junte os dois!"
 	var parts: Array = []
 	for p in miss:
 		parts.append(item_name(p).to_lower() + " — " + l.where[p])
@@ -623,7 +623,7 @@ func lock_msg(l) -> String:
 
 func item_msg(id: String) -> String:
 	if id == "picareta":
-		return "A velha picareta de mineiro do Tomé. Perto de uma rocha rachada, toque ✦ USAR para quebrar."
+		return "O bastão de sinalização do Milis: acende, atordoa capangas e defende golpes."
 	if id == "lanterna_acesa" and lantern_lit:
 		return "A lanterna está acesa. Segure ✦ USAR para concentrar o facho de luz."
 	for l in LOCKS:
@@ -888,7 +888,7 @@ func use_available() -> bool:
 	return X.near_use() or X.beam_useful()
 
 ## nome do período do dia em que o Tomé está (a fase é uma só, dividida pelas fogueiras grandes)
-const PERIODS1 := ["Manhã no bosque", "Tarde", "Pântano", "Neve", "Céu", "Noite na mina"]
+const PERIODS1 := ["Saguão", "Check-in", "Segurança", "Mezanino", "Portão", "Pista"]
 var PERIODS: Array = PERIODS1
 ## pistas da fase (Episódio 1: 1..6; Episódio 2: 7..12)
 func clue_ids() -> Array:
@@ -1598,7 +1598,7 @@ func step() -> void:
 			Audio.play("fire")
 			Audio.play("special", -12, .8)
 			Audio.vib(35)
-			flash("Fogueira acesa: progresso salvo.")
+			flash("Check-in feito: progresso salvo.")
 			burst(c.x, c.y - 30, 12, Color("#ffd76a"))
 		else:
 			note("Progresso salvo.")
@@ -3226,7 +3226,7 @@ func _fuel_step() -> void:
 			if not oil_seen:
 				oil_seen = true
 				if lantern_lit:
-					flash("Óleo para a lanterna: a luz vai crescendo. No escuro ela gasta devagar.")
+					flash("Pilha para o farol dos olhos: a luz vai crescendo. No escuro ela gasta devagar.")
 				else:
 					flash("Um pote de vaga-lumes! Eles clareiam um pouco o caminho.")
 	if chase_on() or player.get("isis"):
@@ -3785,7 +3785,7 @@ func gain_coin(x: float, y: float, silent: bool = false) -> void:
 	if coin_life >= 100:
 		coin_life -= 100
 		lives += 1
-		flash("100 lápis: +1 vida!")
+		flash("100 milhas: +1 vida!")
 		burst(player.x, player.y, 24, Color("#ffd76a"))
 
 func break_crate(c: Dictionary) -> void:
@@ -3814,14 +3814,14 @@ func break_crate(c: Dictionary) -> void:
 		else:
 			for i in 5:
 				gain_coin(c.x + c.w / 2, c.y - 10, true)
-			flash("Vida cheia: +5 lápis.")
+			flash("Vida cheia: +5 milhas.")
 	else:
 		var n: int = c.get("n", 0)
 		for i in n:
 			gain_coin(c.x + c.w / 2, c.y - 10)
 		if not shown_crate:
 			shown_crate = true
-			flash("Caixa ★: +%d lápis." % n)
+			flash("Mala ★: +%d milhas." % n)
 
 func hurt(d: int, from_x: float) -> void:
 	if player.iframe > 0 or player.dyingT > 0:
@@ -3921,7 +3921,7 @@ func _back_to_fire() -> void:
 	X.breath = Extras.BREATH
 	snap_camera()
 	_tick_fx()
-	flash("De volta à fogueira.")
+	flash("De volta ao totem de check-in.")
 
 func respawn() -> void:
 	var msg: String = player.dieMsg
@@ -4042,4 +4042,4 @@ func restore_run(d: Dictionary) -> void:
 		_reset_player(CHK[k].x - 12, CHK[k].y - 34)
 	snap_camera()
 	time_left = int(d.get("time", time_left))
-	flash("Você continua da última fogueira.")
+	flash("Você continua do último totem de check-in.")

@@ -115,7 +115,7 @@ func throw_pick() -> void:
 	p.act = "throw1"
 	p.actT = 14
 	Audio.play("slide", -4)
-	g.tip("A picareta crava em troncos e paredes. GOLPE de novo: ela volta.")
+	g.tip("O bastão crava em paredes e colunas. GOLPE de novo: ele volta.")
 
 func pick_out() -> bool:
 	return not PICK.is_empty()
@@ -266,7 +266,7 @@ func post() -> void:
 				if not o.cut and not p.get("dog") and Game.hit(p, g.R(o.x + 6, o.y, o.w - 12, o.h)):
 					if p.get("webT", 0) == 0:
 						Audio.play("climb", -6)
-						g.tip("Teia de aranha! Ela te deixa lento. GOLPE com a picareta corta a teia.")
+						g.tip("Fita adesiva! Ela te deixa lento. GOLPE com o bastão corta a fita.")
 					p.webT = 40
 			"gust":
 				_gust(o, p, pcx)
@@ -554,9 +554,9 @@ func _cage(o: Dictionary, p: Dictionary, pcx: float) -> void:
 				Audio.play("stomp")
 				g.burst(o.x + w / 2, o.y - 4, 16, Color("#b7a77f"))
 				if g.X.dog_free():
-					g.flash_tut("Preso numa jaula de caçador!", "Preso na jaula! Use o PIPOCA: roa a corda do poste (✦).", 300)
+					g.flash_tut("Preso numa jaula de caçador!", "Preso na jaula! Use a BAG: solte a corda do poste (✦).", 300)
 				else:
-					g.flash("Preso! Bata com a picareta nas grades para quebrar.", 300)
+					g.flash("Preso! Bata com o bastão nas grades para quebrar.", 300)
 		"shut":
 			var b = g.M.tome if g.M.ctrl else p
 			b.x = clamp(b.x, o.x + 6, o.x + w - 6 - b.w)
@@ -578,11 +578,11 @@ func dog_bite(d: Dictionary) -> bool:
 			if o.k == "cage":
 				o.st = "open"
 				trapped = null
-				g.flash("A jaula subiu! Volte para o Tomé.", 200)
+				g.flash("A jaula subiu! Volte para o Milis.", 200)
 			else:
 				o.st = "down"
 				g.SOL.erase(o.sol)
-				g.flash("O Pipoca roeu a corda: a rede caiu!", 180)
+				g.flash("A Bag soltou a corda: a rede caiu!", 180)
 			return true
 	return false
 
@@ -601,7 +601,7 @@ func swing_hits(hb: Dictionary) -> void:
 			g.note("As grades cederam!")
 	for o in T:
 		if o.k == "net" and o.st == "idle" and Game.hit(hb, o.sol):
-			g.tip("A rede é grossa demais para a picareta. Um dente afiado roeria a corda...")
+			g.tip("A rede é grossa demais para o bastão. O zíper da Bag soltaria a corda...")
 		if o.k == "web" and not o.cut and Game.hit(hb, g.R(o.x, o.y, o.w, o.h)):
 			o.cut = true
 			o.t = 0

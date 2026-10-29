@@ -320,7 +320,7 @@ func post() -> void:
 		Audio.vib(80)
 		g.shake = 6
 		g.burst(GOLD.x, GOLD.y, 30, Color("#ffd76a"))
-		g.flash("O LÁPIS DOURADO! O lápis mais especial da Isis — ela guardava para desenhar o sol.", 300)
+		g.flash("A MILHA DOURADA! A milha mais valiosa que o Barão roubou.", 300)
 	_boss()
 	_dog()
 	_critters()
@@ -402,12 +402,12 @@ func _use_crack() -> bool:
 			continue
 		if Game.hit(g.R(p.x - 46, p.y - 40, p.w + 92, p.h + 60), c):
 			if c.get("kind") == "slam":
-				g.tip("Rachado demais para a picareta... pule e aperte ↓ no ar: o MERGULHO quebra!", 200)
+				g.tip("Rachado demais para o bastão... pule e aperte ↓ no ar: o MERGULHO quebra!", 200)
 				return true
 			if g.has_item("picareta"):
 				break_crack(c, true)
 			else:
-				g.tip("Uma rocha rachada. Com uma picareta dava para quebrar...", 200)
+				g.tip("Uma parede rachada. Com o bastão dá para quebrar...", 200)
 			return true
 	return false
 
@@ -604,7 +604,7 @@ func cine_end(id: String) -> void:
 				BOSS.y = 500.0
 				BOSS.st = "idle"
 			BOSS.t = 0
-			g.flash_tut("Faça o Javali-Rei bater a cabeça 4 vezes!", "Fique no chão para ele investir. Quando ele correr, pule para um galho: ele bate a cabeça na árvore ou no barranco. 4 batidas!", 260)
+			g.flash_tut("Faça o Motoboy Turbo bater 4 vezes!", "Fique no chão para ele acelerar. Quando ele vier, pule para uma plataforma: ele bate a moto nas barreiras. 4 batidas!", 260)
 		"brutus":
 			# sem o "pouso" do javali (o Brutus não cai do alto: nada de tremor e baque depois da cena)
 			if BOSS.st == "intro":
@@ -617,7 +617,7 @@ func cine_end(id: String) -> void:
 		"vargas":
 			g.tip("Atrás dele! Pule os buracos e abaixe sob as vigas.", 180)
 		"cao":
-			g.flash_tut("O Pipoca agora vai com você!", "O Pipoca agora vai com você! Perto de uma toca, toque ✦ USAR e ele busca o que tiver lá dentro.", 260)
+			g.flash_tut("A Bag agora vai com você!", "A Bag agora vai com você! Troque para ela com o botão da mala para passar pelas portinholas.", 260)
 
 # ======================================================================
 #  CHEFE: O JAVALI-REI
@@ -681,8 +681,8 @@ func _boss() -> void:
 						[75, 160, "BRUTUS", "o cão de guarda do Vargas"])
 				else:
 					g.start_cine("boss", b.spawn - 60, 420, 260,
-						[[165, 250, "TOMÉ", "Um javali desse tamanho... Forte demais para enfrentar de frente. Vou fazer ele bater a cabeça!", "tome"]],
-						[75, 160, "JAVALI-REI", "o terror da clareira"])
+						[[165, 250, "MILIS", "Um motoboy do Barão com o malote das milhas! Rápido demais para enfrentar de frente. Vou fazer ele bater!", "tome"]],
+						[75, 160, "MOTOBOY TURBO", "capanga do Barão das Milhas Falsas"])
 			return
 		"intro":
 			b.vy += .7
@@ -810,7 +810,7 @@ func boss_damage(from_slam: bool = false) -> void:
 		if b.skin == "dog":
 			g.flash("O Brutus desistiu e fugiu com o rabo entre as pernas! O portão do quintal abriu.", 260)
 		else:
-			g.flash("O Javali-Rei caiu! Você ganhou uma armadura de casca de árvore (aguenta 1 golpe).", 260)
+			g.flash("O Motoboy Turbo caiu! O malote abriu e as milhas voltaram. Você ganhou um colete refletivo (aguenta 1 golpe).", 260)
 			g.player.armor = 1
 		# arena com portão do outro lado e escada para voltar aos telhados
 		if str(b.get("open", "")) != "":
@@ -1010,9 +1010,9 @@ func _use_dog() -> bool:
 		g.burst(DOG.x - 30, DOG.y - 20, 10, Color("#c9a26a"))
 		Audio.play("item")
 		g.start_cine("cao", DOG.x - 40, DOG.y - 40, 215,
-			[[24, 110, "TOMÉ", "Calma, amigão... Você é o Pipoca! O vira-lata que a Isis alimentava todo dia!", "tome"],
-			[110, 205, "TOMÉ", "O Vargas te amarrou aqui para você não seguir a Isis, né? Vem comigo, vamos achá-la!", "tome"]],
-			[150, 205, "PIPOCA", "o melhor amigo da Isis"])
+			[[24, 110, "MILIS", "Calma, mala... Você está piscando para mim? Uma mala que pensa!", "tome"],
+			[110, 205, "MILIS", "Os capangas do Barão te prenderam na esteira, né? Vem comigo: vamos recuperar as milhas!", "tome"]],
+			[150, 205, "BAG", "a mala de rodinhas mais esperta do aeroporto"])
 		return true
 	return false
 
@@ -1036,13 +1036,13 @@ func _use_toca() -> bool:
 		if tc.done or abs(p.x + p.w / 2 - tc.x) > 80 or abs(p.y + p.h - tc.y) > 50:
 			continue
 		if not dog_free():
-			g.flash("Uma toca estreita, cheirando a cachorro. O Tomé não cabe aí...", 200)
+			g.flash("Uma portinhola estreita. O Milis não cabe aí...", 200)
 		elif DOG.st in ["follow", "sit", "stay"]:
 			DOG.st = "to_toca"
 			DOG.toca = tc
 			DOG.t = 0
 			Audio.play("bark")
-			g.note("Busca, Pipoca!")
+			g.note("Vai, Bag!")
 		return true
 	return false
 
@@ -1158,7 +1158,7 @@ func _dog() -> void:
 				g.shake = 6
 				Audio.play("stomp", -6)
 				g.burst(e2.x, e2.base - 10, 14, Color("#7a5a3a"))
-				g.note("O Pipoca puxou a toupeira para fora! Pule nela agora!")
+				g.note("A Bag puxou o capanga para fora! Pule nele agora!")
 				DOG.st = "follow"
 				_resync()
 

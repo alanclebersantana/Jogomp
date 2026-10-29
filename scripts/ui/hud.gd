@@ -43,7 +43,7 @@ var msg_bot := 0.0  # base da dica / do aviso no alto neste quadro (o nome do lu
 var place_y := -1.0
 var place_ty := 92.0
 const PLACE_DUR := 2.5
-const PLACE_NAMES := {"manha": "Manhã no bosque", "tarde": "Tarde no bosque", "chuva": "O pântano", "rio": "O rio",
+const PLACE_NAMES := {"manha": "O terminal", "tarde": "A segurança", "chuva": "O pátio", "rio": "O rio",
 	"neve": "A neve", "ceu": "O céu", "noite": "Noite na mina", "perseguicao": "A perseguição", "tunel": "O túnel"}
 
 func _ready() -> void:
@@ -100,8 +100,8 @@ func _icons(t: String) -> String:
 
 func _icons_raw(t: String) -> String:
 	var r := t
-	for pair in [["GOLPE (botão da picareta / tecla G)", "GOLPE [G]"], ["(botão da picareta / tecla G)", "[G]"], ["(botão da picareta)", "[G]"],
-			["(tecla G)", "[G]"], ["PULAR (Z/espaço)", "PULAR [J]"], ["(botão do cachorro / tecla Q)", "[Q]"], ["(botão do cachorro / Q)", "[Q]"],
+	for pair in [["GOLPE (botão do bastão / tecla G)", "GOLPE [G]"], ["(botão do bastão / tecla G)", "[G]"], ["(botão do bastão)", "[G]"], ["(botão da picareta)", "[G]"],
+			["(tecla G)", "[G]"], ["PULAR (Z/espaço)", "PULAR [J]"], ["(botão da mala / tecla Q)", "[Q]"], ["(botão da mala / Q)", "[Q]"], ["(botão da mala)", "[Q]"],
 			["(botão do cachorro)", "[Q]"], ["✦ USAR", "[A]"], ["✦", "[A]"], ["↑ + GOLPE", "[U] + [G]"], ["← →", "[L] [R]"], ["←/→", "[L] [R]"], ["↑/↓", "[U] [S]"],
 			["↑ ↓ ← →", "[U] [S] [L] [R]"], ["↘", "[R]+[S]"], ["↑", "[U]"], ["↓", "[S]"], ["←", "[L]"], ["→", "[R]"]]:
 		r = r.replace(pair[0], pair[1])
@@ -433,7 +433,7 @@ func _draw_stats(ci: Control) -> void:
 	# controlando o Pipoca
 	if game.M and game.M.ctrl:
 		_box(8, 54, 228, 30)
-		Spr.text("Controlando o PIPOCA", 20, 75, 15, Color("#ffe9a0"), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b)
+		Spr.text("Controlando a BAG", 20, 75, 15, Color("#ffe9a0"), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b)
 
 ## fôlego, barra do chefe, dica e avisos (sempre a 100%)
 func _draw_bars_and_hints(W: float, p: Dictionary, X: Extras) -> void:
@@ -618,7 +618,7 @@ func _cine(W: float, H: float) -> void:
 			_:
 				# rosto do Tomé dentro da moldura (antes o corpo vazava para fora da caixa)
 				Spr.ci.draw_texture_rect(tex_face, Rect2(bx + 12, by + 10, 64, 64), false, Color(1, 1, 1, k2))
-		var col: Color = {"VARGAS": Color("#ff9a7a"), "ISIS": Color("#ffb0d0"), "TOMÉ": Color("#ffd27a")}.get(l[2], Color.WHITE)
+		var col: Color = {"BARÃO": Color("#ff9a7a"), "BAG": Color("#ffb0d0"), "MILIS": Color("#ffd27a"), "VARGAS": Color("#ff9a7a"), "TOMÉ": Color("#ffd27a")}.get(l[2], Color.WHITE)
 		Spr.text(l[2], bx + 92, by + 26, 15, Color(col.r, col.g, col.b, k2), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_title)
 		var shown: int = 9999 if c.get("waiting", false) else int((t - l[0]) * 1.6)
 		var txt: String = l[3].substr(0, shown)

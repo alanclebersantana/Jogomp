@@ -1039,7 +1039,7 @@ func _make_top_buttons() -> void:
 	dog_btn.ignore_texture_size = true
 	dog_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	dog_btn.size = Vector2(54, 54)
-	dog_btn.tooltip_text = "Trocar entre o Tomé e o Pipoca (Q)"
+	dog_btn.tooltip_text = "Trocar entre o Milis e a Bag (Q)"
 	dog_btn.pressed.connect(func(): game.keys["Dp"] = true)
 	dog_btn.visible = false
 	hud_layer.add_child(dog_btn)
@@ -1251,12 +1251,12 @@ func show_title() -> void:
 	img.modulate = Color(.55, .5, .45)
 	panel.add_child(img)
 	panel.move_child(img, 0)
-	vb.add_child(_label("ENCONTRE-A", 68, Color("#f2d28a"), Spr.font_title))
+	vb.add_child(_label("CADÊ AS MILHAS?!", 52, Color("#f2d28a"), Spr.font_title))
 	var eps: int = int(Save.getv("prog", "eps", 1))
-	vb.add_child(_label("EPISÓDIO 1 · O BOSQUE" if eps < 2 else "EPISÓDIOS 1 E 2", 22, Color("#e8c98a"), Spr.font_title))
+	vb.add_child(_label("MILHAS PLUS · EPISÓDIO 1 · BRASIL", 18, Color("#e8c98a"), Spr.font_title))
 	if OS.has_feature("teste"):
 		vb.add_child(_label("VERSÃO DE TESTE · todos os episódios liberados", 13, Color("#ffb070"), Spr.font_b))
-	vb.add_child(_label("Levaram a Isis. Siga a trilha dos lápis de cor.", 18, Color("#e8dcc0"), Spr.font_i))
+	vb.add_child(_label("O Barão das Milhas Falsas roubou as milhas dos clientes. O Milis vai buscar!", 18, Color("#e8dcc0"), Spr.font_i))
 	var sp := Control.new()
 	sp.custom_minimum_size = Vector2(0, 8)
 	vb.add_child(sp)
@@ -1277,10 +1277,10 @@ func show_title() -> void:
 	ob.custom_minimum_size = Vector2(150, 46)
 	row.add_child(ob)
 	vb.add_child(row)
-	vb.add_child(_label("Teclado: ← → andar · ↑ ↓ subir/abaixar · Espaço pular · F usar · M mochila · N mapa", 12, Color(.8, .75, .65, .8)))
+	vb.add_child(_label("Teclado: ← → andar · ↑ ↓ subir/abaixar · Espaço pular · G bastão · F usar · M compartimento · N mapa", 12, Color(.8, .75, .65, .8)))
 	panel.set_meta("ok", func(): start_level(not run.is_empty()))
 	# voltar na tela inicial: pergunta antes de fechar o jogo
-	panel.set_meta("back", func(): _confirm("SAIR DO JOGO?", "O progresso da última fogueira continua salvo.", "SAIR", func(): get_tree().quit(), show_title))
+	panel.set_meta("back", func(): _confirm("SAIR DO JOGO?", "O progresso do último totem de check-in continua salvo.", "SAIR", func(): get_tree().quit(), show_title))
 
 ## caixa de confirmação no estilo do jogo. O botão escolhido de início (e o Voltar/B/Enter) é o CANCELAR.
 func _confirm(title: String, msg: String, yes_txt: String, yes: Callable, no: Callable) -> void:
@@ -1318,7 +1318,7 @@ func _confirm_wipe(next: Callable, back: Callable) -> void:
 	if Save.load_run().is_empty():
 		next.call()
 		return
-	_confirm("COMEÇAR DE NOVO?", "O progresso salvo na última fogueira será apagado. Isso não tem volta.", "APAGAR E COMEÇAR", next, back)
+	_confirm("COMEÇAR DE NOVO?", "O progresso salvo no último totem será apagado. Isso não tem volta.", "APAGAR E COMEÇAR", next, back)
 
 ## escolher o episódio (aparece depois de terminar o primeiro)
 const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."], ["GUARULHOS · 1-2 BAGAGENS", "O subsolo escuro das esteiras e a Bag."], ["GUARULHOS · 1-3 HANGAR", "O pátio na garoa, turbinas, guindastes e o Hangar 7."], ["GUARULHOS · CHEFE", "O Motoboy Turbo na pista."]]
@@ -1689,15 +1689,21 @@ func _on_rest(n: int) -> void:
 	var root := Control.new()
 	root.theme = theme_ui
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var sc := RestScene.new()
-	var found := 0
-	for d in game.DRWS:
-		if d.got:
-			found += 1
-	sc.show_dog = game.L.has("dog")
-	sc.setup(n + (10 if game.level_idx == 1 else 0), found)
-	root.add_child(sc)
-	var info: Array = REST_INFO.get(n, REST_INFO[1])
+	# tela do totem grande: uma imagem da fase (se existir) e o texto da parada
+	var bgc := ColorRect.new()
+	bgc.color = Color(0.03, 0.05, 0.09, 0.94)
+	bgc.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(bgc)
+	var img_path := "res://assets/ui/rest_%d_%d.jpg" % [game.level_idx + 1, n]
+	if ResourceLoader.exists(img_path):
+		var tr := TextureRect.new()
+		tr.texture = load(img_path)
+		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		tr.set_anchors_preset(Control.PRESET_FULL_RECT)
+		tr.modulate = Color(1, 1, 1, .85)
+		root.add_child(tr)
+	var info: Array = ["CHECK-IN FEITO", "O Milis respira fundo (ou o que um robô faz no lugar disso).", "Mais um trecho, e as milhas voltam para quem é dono delas."]
 	var lr: Dictionary = game.L.get("rests", {})
 	if lr.has(str(n)):
 		info = lr[str(n)]
@@ -1722,7 +1728,7 @@ func _on_rest(n: int) -> void:
 		_show_hud(true)
 		_clear_keys()
 		game.running = true
-	var b_go := _button("CONTINUAR A JORNADA", go)
+	var b_go := _button("CONTINUAR", go)
 	var b_later := _button("JOGAR MAIS TARDE", func():
 		if panel:
 			panel.queue_free()
@@ -1740,7 +1746,7 @@ func _on_rest(n: int) -> void:
 	panel = root
 	Audio.set_song("tema")
 	var tw := root.create_tween()
-	tw.tween_interval(1.4)
+	tw.tween_interval(.4)
 	tw.tween_property(title, "modulate:a", 1.0, .5)
 	tw.tween_property(mem, "modulate:a", 1.0, .8)
 	tw.tween_interval(1.2)
@@ -1792,7 +1798,7 @@ func show_intro(cont: bool) -> void:
 		game.running = true
 		_show_hud(true)
 		if cont:
-			game.flash("Você continua da última fogueira.")
+			game.flash("Você continua do último totem de check-in.")
 	vb.add_child(_button("ENTRAR", go))
 	panel.set_meta("ok", go)
 
@@ -1820,7 +1826,7 @@ func _pause_menu() -> void:
 		Audio.set_on(not Audio.on)
 		sb.text = "SOM: " + ("LIGADO" if Audio.on else "DESLIGADO"))
 	vb.add_child(sb)
-	vb.add_child(_button("VOLTAR À ÚLTIMA FOGUEIRA", func():
+	vb.add_child(_button("VOLTAR AO ÚLTIMO TOTEM", func():
 		close_panel()
 		if game.RD and game.RD.riding:
 			# na cavalgada o ponto de volta é o começo da trilha (antes o pedido ficava guardado e,
@@ -1834,7 +1840,7 @@ func _pause_menu() -> void:
 	vb.add_child(_button("OPÇÕES", func(): show_options(true)))
 	# sair para o menu perde o que foi feito desde a última fogueira: pergunta antes
 	vb.add_child(_button("MENU INICIAL", func():
-		_confirm("VOLTAR AO MENU INICIAL?", "O que você fez depois da última fogueira acesa não fica salvo.", "IR PARA O MENU", show_title, _pause_menu)))
+		_confirm("VOLTAR AO MENU INICIAL?", "O que você fez depois do último totem não fica salvo.", "IR PARA O MENU", show_title, _pause_menu)))
 	panel.set_meta("ok", close_panel)
 	panel.set_meta("back", close_panel)
 
@@ -1858,11 +1864,8 @@ func _bag_pairs() -> Array:
 
 ## o que cada objeto montado faz (frase do painel de montagem)
 const BUILT_INFO := {
-	"gancho_corda": "Prenda na argola da pedra: vira uma corda para subir o barranco alto.",
-	"manivela": "Encaixe na comporta do canal e gire para a água passar.",
-	"lanterna_acesa": "Acesa de novo! Ilumina os túneis escuros. Segure ✦ para concentrar o facho.",
-	"vela": "Uma vela nova para o moinho: com ela as pás voltam a girar.",
-	"chave": "A chave inteira da porteira da mina.",
+	"cracha": "Crachá da área restrita: encoste na leitora da porta da segurança.",
+	"fusivel_ok": "Fusível emendado: encaixe no gerador de emergência para religar o portão.",
 }
 
 ## juntou: antes de voltar ao jogo, mostra o objeto novo montado (as peças voam e se juntam, o objeto
@@ -2038,7 +2041,7 @@ func _bag_combined_go(res: String, msg: String) -> void:
 
 func _render_bag(msg: String) -> void:
 	var vb := _overlay(.82)
-	vb.add_child(_label("MOCHILA", 32, GOLD, Spr.font_title))
+	vb.add_child(_label("COMPARTIMENTO", 30, GOLD, Spr.font_title))
 	# peças que se encaixam: aviso bem claro e um botão grande para juntar
 	var pairs: Array = _bag_pairs()
 	var glow_ids := {}
@@ -2065,7 +2068,7 @@ func _render_bag(msg: String) -> void:
 	items.add_theme_constant_override("separation", 10)
 	vb.add_child(items)
 	if game.INV.is_empty():
-		items.add_child(_label("A mochila está vazia. Procure objetos pelo caminho.", 16, Color("#d8ccb0"), Spr.font_i))
+		items.add_child(_label("O compartimento está vazio. Procure objetos pelo caminho.", 16, Color("#d8ccb0"), Spr.font_i))
 	for id in game.INV:
 		var b := Button.new()
 		b.focus_mode = Control.FOCUS_NONE
@@ -2101,7 +2104,7 @@ func _render_bag(msg: String) -> void:
 		m = m.replace("Toque num objeto e depois em outro", "Escolha um objeto com o direcional e aperte A; depois outro")
 		m = m.replace("Toque em ", "Escolha ").replace("toque em ", "escolha ").replace("toque no botão da manivela", "aperte X para girar a manivela").replace("toque no botão ✔", "aperte X para usar").replace("toque em ✔", "aperte X")
 	vb.add_child(_label(m, 16, Color("#e8d8b0"), Spr.font_i, 680))
-	vb.add_child(_label("LÁPIS ESPECIAIS", 13, Color("#b8a888")))
+	vb.add_child(_label("MILHAS ESPECIAIS", 13, Color("#b8a888")))
 	var pens := HBoxContainer.new()
 	pens.alignment = BoxContainer.ALIGNMENT_CENTER
 	for c in GameData.PEN_LIST:
@@ -2117,7 +2120,7 @@ func _render_bag(msg: String) -> void:
 		for cid in WorldKings.CROWN_IDS:
 			crw.add_child(_CrownIcon.new(cid, Save.getv("gallery", "crown_" + cid, false), 26.0))
 		vb.add_child(crw)
-	vb.add_child(_label("CADERNO DE PISTAS", 13, Color("#b8a888")))
+	vb.add_child(_label("PISTAS DO BARÃO", 13, Color("#b8a888")))
 	var clues := HBoxContainer.new()
 	clues.alignment = BoxContainer.ALIGNMENT_CENTER
 	clues.add_theme_constant_override("separation", 6)
@@ -2205,7 +2208,7 @@ func _show_clue(id: int, from_bag: bool) -> void:
 	_clear_keys()
 	_show_hud(false)
 	var vb := _overlay(.84)
-	vb.add_child(_label("PISTA %d DE 6" % game.CLUEGOT.size() if not from_bag else "CADERNO DE PISTAS", 14, Color("#cdbfa6")))
+	vb.add_child(_label("PISTA %d DE %d" % [game.CLUEGOT.size(), game.clue_ids().size()] if not from_bag else "PISTAS DO BARÃO", 14, Color("#cdbfa6")))
 	if id == 6 and game.level_idx == 0:
 		vb.add_child(_Badge.new())
 	else:
@@ -2335,7 +2338,7 @@ func show_map(from_pause: bool, from_bag: bool = false) -> void:
 	var vs := get_viewport().get_visible_rect().size
 	m.custom_minimum_size = Vector2(min(vs.x - 60, 1100), 250)
 	vb.add_child(m)
-	vb.add_child(_label("As fogueiras acesas são onde você volta. \"?\" = algo que ficou para trás num trecho já visitado.", 13, Color(.8, .75, .65), Spr.font_i, 700))
+	vb.add_child(_label("Os totens de check-in são onde você volta. \"?\" = algo que ficou para trás num trecho já visitado.", 13, Color(.8, .75, .65), Spr.font_i, 700))
 	var back := func():
 		if from_pause:
 			_pause_menu()
@@ -2393,7 +2396,7 @@ func show_gallery(ep: int = 1) -> void:
 	ep = clampi(ep, 1, eps)
 	var vb := _overlay(.92)
 	vb.add_theme_constant_override("separation", 8)
-	vb.add_child(_label("GALERIA DA ISIS", 28, GOLD, Spr.font_title))
+	vb.add_child(_label("GALERIA DO MILIS", 28, GOLD, Spr.font_title))
 	# um episódio por vez (abas)
 	if eps >= 2:
 		var tabs := HBoxContainer.new()
@@ -2482,7 +2485,7 @@ func show_gallery(ep: int = 1) -> void:
 		var gl := HBoxContainer.new()
 		gl.alignment = BoxContainer.ALIGNMENT_CENTER
 		gl.add_child(_atlas_icon("pen_gold", 30))
-		gl.add_child(_label("  O lápis dourado da Isis — encontrado!", 14, Color("#ffd76a"), Spr.font_i))
+		gl.add_child(_label("  A milha dourada — encontrada!", 14, Color("#ffd76a"), Spr.font_i))
 		vb.add_child(gl)
 	var cl := HBoxContainer.new()
 	cl.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -2501,7 +2504,7 @@ func show_gallery(ep: int = 1) -> void:
 	vb.add_child(cl)
 	var best := Save.best(ep - 1)
 	if not best.is_empty():
-		vb.add_child(_label("Melhor resultado %s: %s   ·   lápis %d   ·   pistas %d/6" % ["no Bosque" if ep == 1 else "na Mina", "★".repeat(int(best.get("stars", 0))), int(best.get("pen", 0)), int(best.get("clues", 0))], 14, Color("#ffd76a")))
+		vb.add_child(_label("Melhor resultado %s: %s   ·   milhas %d   ·   pistas %d" % ["na fase %d" % ep, "★".repeat(int(best.get("stars", 0))), int(best.get("pen", 0)), int(best.get("clues", 0))], 14, Color("#ffd76a")))
 	var b := HBoxContainer.new()
 	b.alignment = BoxContainer.ALIGNMENT_CENTER
 	b.add_theme_constant_override("separation", 10)
@@ -2559,11 +2562,6 @@ func _on_results() -> void:
 	mid.alignment = BoxContainer.ALIGNMENT_CENTER
 	mid.add_theme_constant_override("separation", 26)
 	vb.add_child(mid)
-	var fd := _FinalDrawing.new()
-	fd.specs = game.SPECGOT.duplicate()
-	fd.ep = game.level_idx + 1
-	fd.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	mid.add_child(fd)
 	var right := VBoxContainer.new()
 	right.add_theme_constant_override("separation", 8)
 	right.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -2729,11 +2727,11 @@ func _on_over() -> void:
 	_show_hud(false)
 	Audio.stop_music()
 	var vb := _overlay(.88)
-	vb.add_child(_label("A LANTERNA SE APAGOU", 34, GOLD, Spr.font_title))
+	vb.add_child(_label("O MILIS DESLIGOU", 34, GOLD, Spr.font_title))
 	vb.add_child(_label("As vidas acabaram. Mas um pai não desiste.", 17, Color("#e8dcc0"), Spr.font_i))
 	var run := Save.load_run()
 	if not run.is_empty():
-		vb.add_child(_button("VOLTAR À FOGUEIRA", func():
+		vb.add_child(_button("VOLTAR AO TOTEM", func():
 			start_level(true)
 			game.lives = max(game.lives, 3)))
 	vb.add_child(_button("RECOMEÇAR A FASE", func(): _confirm_wipe(func(): start_level(false, game.level_idx), _on_over)))

@@ -70,13 +70,13 @@ func dog_ok_now() -> String:
 	if not g.CINE.is_empty() or g.X.boss_active() or p.dyingT > 0:
 		return "agora não"
 	if g.ZN and g.ZN.zone != null:
-		return "o Pipoca ficou esperando"
+		return "a Bag ficou esperando"
 	if g.VIL and g.VIL.go and not g.VIL.gone:
-		return "agora não: o Vargas está fugindo!"
+		return "agora não: o Barão está fugindo!"
 	if not ctrl and (p.ladder or p.vine or p.swim or not p.onGround):
 		return "pare em chão firme para trocar"
 	if ctrl and not p.onGround and not p.swim:
-		return "espere o Pipoca pousar"
+		return "espere a Bag pousar"
 	return ""
 
 func toggle_dog() -> void:
@@ -84,7 +84,7 @@ func toggle_dog() -> void:
 	if why == "no":
 		return
 	if why != "":
-		g.note("Trocar para o Pipoca: " + why + ".")
+		g.note("Trocar para a Bag: " + why + ".")
 		return
 	var X = g.X
 	if not ctrl:
@@ -111,7 +111,7 @@ func toggle_dog() -> void:
 		X._bark()
 		if dog_note < 1:
 			dog_note = 1
-			g.tip("Agora você é o Pipoca! Ele passa por buracos pequenos, cava tocas e late (✦). Troque de volta pelo mesmo botão.", 260)
+			g.tip("Agora você é a Bag! Ela passa por portinholas e buracos pequenos e buzina (✦). Troque de volta pelo mesmo botão.", 260)
 	else:
 		_back_to_tome()
 
@@ -130,7 +130,7 @@ func _back_to_tome() -> void:
 	g.prev_py = tome.y
 	X._resync()
 	if X.DOG.st == "stay":
-		g.note("Fica, Pipoca! Ele vai segurar a placa.")
+		g.note("Fica, Bag! Ela vai segurar a placa.")
 
 ## o Pipoca levou uma pancada ou caiu: ganiu e volta correndo para perto do Tomé (sem perder vida)
 func dog_hurt() -> void:
@@ -138,7 +138,7 @@ func dog_hurt() -> void:
 		return
 	Audio.play("bark", -2)
 	g.burst(g.player.x + DOG_W / 2, g.player.y, 12, Color("#d8c8a0"))
-	g.flash("O Pipoca ganiu e voltou correndo para o Tomé.", 160)
+	g.flash("A Bag levou um susto e voltou rolando para o Milis.", 160)
 	_back_to_tome()
 	g.X.DOG.x = tome.x - tome.face * 30
 	g.X.DOG.y = tome.y + tome.h
@@ -208,7 +208,7 @@ func _swing_hits() -> void:
 			if e.k == "mole" and e.get("helm") and not e.get("helm_off") and e.get("st", 0) != 5:
 				Audio.play("unlock", -8)
 				g.burst(e.x, e.base - 26, 8, Color("#e8b030"))
-				g.tip("Clanc! O capacete aguenta a picareta. O Pipoca consegue puxá-la para fora.")
+				g.tip("Clanc! O capacete aguenta o bastão. A Bag consegue puxar ele para fora.")
 				e.stun = 30
 			else:
 				g.kill_enemy(e, "hit")

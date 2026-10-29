@@ -1492,6 +1492,14 @@
   2,
   3
  ],
+ "rests": {
+  "1": [
+   "CHECK-IN DO TERMINAL",
+   "No balcão, um bilhete esquecido pelos capangas: \"O Barão manda despachar tudo pelo subsolo das bagagens\".",
+   "Então as milhas estão descendo pelas esteiras. Eu vou atrás!"
+  ]
+ },
+ "endStory": "O Barão passou pelo terminal disfarçado, de cartola e bigode postiço. As pistas apontam para o subsolo das bagagens.",
  "door": {
   "x": 14120,
   "y": 410,

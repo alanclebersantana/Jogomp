@@ -845,6 +845,14 @@
  "clueIds": [
   6
  ],
+ "rests": {
+  "1": [
+   "CHECK-IN DO HANGAR 7",
+   "A Bag buzina baixinho: lá dentro, um motoboy de capacete prende um malote cheio de milhas na moto.",
+   "Se ele chegar na pista, as milhas vão embora com o Barão. Vamos, Bag!"
+  ]
+ },
+ "endStory": "O plano de voo do Barão: o Motoboy Turbo leva o malote até a pista e o Barão foge para Maringá às 23h59.",
  "levers": {
   "y": 500,
   "list": [

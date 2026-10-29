@@ -789,8 +789,8 @@ const OUT8 := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vec
 ## estados em que o bicho começa um ataque (aparece o "!" vermelho antes)
 const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1], "mole": [2]}
 ## nomes para a dica do primeiro encontro
-const EN_NAME := {"crow": "Corvo", "bat": "Morcego", "fly": "Mosca", "spider": "Aranha", "squirrel": "Esquilo bravo",
-	"frog": "Sapo", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Javali", "owl": "Coruja brava", "mole": "Toupeira"}
+const EN_NAME := {"crow": "Pombo do Barão", "bat": "Mala-monstro", "fly": "Drone", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
+	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Cambista", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
 const EYES := {"crow": [Vector2(17, -13)], "squirrel": [Vector2(28, -25)], "bat": [Vector2(8, 5), Vector2(13, 5)],
 	"spider": [Vector2(2, 3), Vector2(7, 3)], "fly": [Vector2(13, 2)], "frog": [Vector2(-5, -38), Vector2(6, -38)], "boar": [Vector2(18, -30)],
@@ -838,7 +838,7 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	# primeiro encontro com cada tipo de inimigo: dica curta dizendo que ele é perigoso
 	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k):
 		g.en_seen[e.k] = true
-		g.flash("%s: inimigo (olhos e contorno vermelhos). Pule na cabeça ou use a picareta." % EN_NAME[e.k], 170)
+		g.flash("%s: capanga do Barão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
 	var s: int = e.get("st", 0)
 	if s != e.get("pst", 0) and ATK.get(e.k, []).has(s):
 		e.warnT = 34

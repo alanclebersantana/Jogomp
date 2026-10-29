@@ -990,6 +990,14 @@
   4,
   5
  ],
+ "rests": {
+  "1": [
+   "CHECK-IN DAS BAGAGENS",
+   "Entre as malas extraviadas, uma está piscando um LED. Malas não piscam... ou piscam?",
+   "Alguém aí? Eu juro que essa mala olhou para mim."
+  ]
+ },
+ "endStory": "Milis e Bag descobriram o esquema: as milhas viajam escondidas em malas com etiqueta trocada, direto para o Hangar 7.",
  "slam": {
   "stakes": [
    {

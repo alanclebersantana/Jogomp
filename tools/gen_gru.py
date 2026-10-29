@@ -197,7 +197,10 @@ novo("Guarulhos · 1-1 Terminal",
      "terminal. Recupere as milhas, ache os cartões de embarque dourados e descubra para onde o Barão foi. "
      "Cuidado com os capangas dele!",
      introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO TERMINAL",
-     periods=["Saguão", "Check-in", "Segurança", "Mezanino"], clueIds=[1, 2, 3])
+     periods=["Saguão", "Check-in", "Segurança", "Mezanino"], clueIds=[1, 2, 3],
+     rests={"1": ["CHECK-IN DO TERMINAL", "No balcão, um bilhete esquecido pelos capangas: \"O Barão manda despachar tudo pelo subsolo das bagagens\".",
+                  "Então as milhas estão descendo pelas esteiras. Eu vou atrás!"]},
+     endStory="O Barão passou pelo terminal disfarçado, de cartola e bigode postiço. As pistas apontam para o subsolo das bagagens.")
 
 # --- A · Saguão (0 .. 3400): aprender a andar, pular, quebrar malas, pulo duplo
 L["sections"].append({"x": 0, "song": "manha", "bg": "vila", "gt": "vila", "per": 0})
@@ -374,7 +377,10 @@ novo("Guarulhos · 1-2 Bagagens",
      "Uma pista leva ao subsolo das bagagens. Lá embaixo está escuro: o farol dos olhos do Milis gasta bateria, "
      "então pegue as pilhas pelo caminho. Dizem que uma mala muito esperta ficou presa nas esteiras...",
      introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DAS BAGAGENS",
-     periods=["Esteiras", "A Bag", "Elevadores", "Túnel de serviço"], clueIds=[4, 5])
+     periods=["Esteiras", "A Bag", "Elevadores", "Túnel de serviço"], clueIds=[4, 5],
+     rests={"1": ["CHECK-IN DAS BAGAGENS", "Entre as malas extraviadas, uma está piscando um LED. Malas não piscam... ou piscam?",
+                  "Alguém aí? Eu juro que essa mala olhou para mim."]},
+     endStory="Milis e Bag descobriram o esquema: as milhas viajam escondidas em malas com etiqueta trocada, direto para o Hangar 7.")
 
 L["sections"].append({"x": 0, "song": "tunel", "bg": "mina", "gt": "mina", "dark": .5, "night": 1, "per": 0})
 L["darkZones"].append({"x": 0, "w": 13600, "dark": .78})
@@ -489,7 +495,10 @@ novo("Guarulhos · 1-3 Hangar",
      "A pista leva ao pátio, debaixo da garoa paulistana. Turbinas ligadas, guindastes e rebocadores: "
      "atravesse o pátio e entre no Hangar 7, onde os capangas do Barão guardam as milhas roubadas.",
      introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO HANGAR", weather="garoa",
-     periods=["Pátio", "Turbinas", "Guindastes", "Hangar 7"], clueIds=[6])
+     periods=["Pátio", "Turbinas", "Guindastes", "Hangar 7"], clueIds=[6],
+     rests={"1": ["CHECK-IN DO HANGAR 7", "A Bag buzina baixinho: lá dentro, um motoboy de capacete prende um malote cheio de milhas na moto.",
+                  "Se ele chegar na pista, as milhas vão embora com o Barão. Vamos, Bag!"]},
+     endStory="O plano de voo do Barão: o Motoboy Turbo leva o malote até a pista e o Barão foge para Maringá às 23h59.")
 
 L["sections"].append({"x": 0, "song": "chuva", "bg": "pantano", "gt": "", "rain": .6, "per": 0})
 chao(-200, 2200)
@@ -574,7 +583,8 @@ novo("Guarulhos · Chefe: Motoboy Turbo",
      "Ele vem acelerando: desvie subindo nas plataformas, faça ele bater nas barreiras e ataque quando "
      "ele ficar tonto!",
      introSub="Episódio 1 · Brasil — São Paulo", endTitle="GUARULHOS COMPLETO", weather="garoa",
-     periods=["A pista"], clueIds=[])
+     periods=["A pista"], clueIds=[],
+     endStory="As milhas LATAM voltaram para os clientes! Mas o Barão já decolou para Maringá... A próxima parada é o Paraná.")
 L["sections"].append({"x": 0, "song": "chuva", "bg": "noite", "gt": "", "rain": .4, "night": .5, "per": 0})
 chao(-200, 3400)
 milhas(300, 900, 470)
