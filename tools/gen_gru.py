@@ -225,7 +225,7 @@ novo("Guarulhos · 1-1 Terminal",
      endStory="O Barão passou pelo terminal disfarçado, de cartola e bigode postiço. As pistas apontam para o subsolo das bagagens.")
 
 # --- A · Saguão (0 .. 3400): aprender a andar, pular, quebrar malas, pulo duplo
-L["sections"].append({"x": 0, "song": "manha", "bg": "vila", "gt": "vila", "per": 0})
+L["sections"].append({"x": 0, "song": "gru_saguao", "bg": "vila", "gt": "vila", "per": 0})
 chao(-200, 1500)
 dica(0, 520, "Guarulhos! O Barão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
@@ -255,7 +255,7 @@ pombo(2000, 180, [1750, 2300])
 totem(3300)
 
 # --- B · Check-in (3400 .. 7200): fila em zigue-zague, balcões, esteira de despacho, catraca da placa
-L["sections"].append({"x": 3400, "song": "manha", "bg": "vila", "gt": "vila", "per": 1})
+L["sections"].append({"x": 3400, "song": "gru_saguao", "bg": "vila", "gt": "vila", "per": 1})
 chao(3400, 6300)
 chao(6370, 7200)
 # balcões de check-in: blocos de altura média com esteira de despacho atrás
@@ -298,7 +298,7 @@ totem(6600, GY, 1)
 caixa(7050, n=4)
 
 # --- C · Segurança (7200 .. 10600): raio-x com pinos elétricos, ar-condicionado que sopra para cima, crachá
-L["sections"].append({"x": 7200, "song": "tarde", "bg": "tarde", "gt": "vila", "per": 2})
+L["sections"].append({"x": 7200, "song": "gru_seguranca", "bg": "tarde", "gt": "vila", "per": 2})
 chao(7200, 8000)
 dica(7200, 7500, "A segurança! O Barão ligou as esteiras do raio-x na tomada errada: cuidado com os choques.")
 # esteiras do raio-x: piso que dá choque de tempos em tempos (espinhos com ritmo)
@@ -345,7 +345,7 @@ dica(10150, 10400, "A porta só abre com crachá. Junte o cartão de acesso com 
 totem(10200)
 
 # --- D · Mezanino e portão (10600 .. 14200): escada de serviço, corrimãos, escada rolante, sala secreta
-L["sections"].append({"x": 10600, "song": "noite", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
+L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
 chao(10600, 11400)
 escada(10900, 160)
 bloco(10930, 11600, 160, 200)       # passarela de serviço
@@ -379,8 +379,22 @@ dica(13450, 13600, "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima 
 cambista(13900, [13750, 14050])
 pista(14000, GY, 3)
 totem(13450)
-fim(14120)
-L["spanX"] = 14200
+# --- E · Controle de segurança do portão (14200 .. 15900): o mini-chefe FISCAL FALSO
+chao(14200, 16000)
+milhas(14250, 14450, 470, 50)
+totem(14380)
+FZ0, FZ1 = 14600, 15600
+bloco(FZ1 - 190, FZ1 - 50, 330, GY)          # cabine de controle (o Fiscal fica em cima)
+bloco(FZ1 - 50, FZ1 + 30, -620, 210)         # parede do fundo da arena (porta em cima da cabine)
+bloco(FZ1 - 50, FZ1 + 30, 330, GY)
+L["boss"] = {"x0": FZ0, "x1": FZ1, "trig": FZ0 + 160, "spawn": FZ1 - 120, "hp": 3,
+             "item": [(FZ0 + FZ1) // 2, 470], "skin": "fiscal", "open": "fiscal_porta"}
+L["boss_song"] = "fiscal"
+S.append({"t": "pgate", "x": FZ1 - 50, "y": 210, "w": 80, "h": 120, "id": "fiscal_porta"})
+dica(FZ0, FZ1, "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique num vão da grade. Painel piscando? Bastão nele!", boss=1)
+milhas(15700, 15880, 470, 45)
+fim(15900)
+L["spanX"] = 16000
 salvar(1)
 
 

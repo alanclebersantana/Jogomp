@@ -194,7 +194,15 @@ func fase_1_1() -> void:
 	S("volta à escada", walk_to(13610))
 	S("sobe", climb_to("U", func(): return P.ladder == null and P.onGround and P.y < 500, 500))
 	S("pista 3", walk_to(14010) and n_clues() == 3)
-	walk_to(14130)
+	S("totem do portão", walk_to(14390))
+	walk_to(14820)
+	S("Fiscal Falso apareceu", until({}, func(): return g.X.boss_active() and g.X.BOSS.st not in ["wait", "espera"], 400))
+	S("vence o Fiscal Falso", luta_fiscal())
+	S("pega as milhas", walk_to(15100))
+	walk_to(15300)
+	S("sobe na cabine", jump_to(15430, true))
+	S("porta aberta", walk_to(15560))
+	walk_to(15912)
 	var r = until({}, func(): return not g.running, 300)
 	S("saída", r is String and r == "state")
 
@@ -362,6 +370,84 @@ func fase_1_3() -> void:
 	walk_to(12650)
 	var r = until({"R": true}, func(): return not g.running, 300)
 	S("saída", r is String and r == "state")
+
+## o Fiscal Falso: pula os lasers do rodapé, abaixa nos altos, fica num vão da grade,
+## acerta o painel com o bastão e pisa na cabeça dele quando cai tonto
+func luta_fiscal():
+	return luta_fiscal_lim(9000)
+
+func luta_fiscal_lim(lim: int):
+	var golpeou := 0
+	var hp_ant: int = g.player.hp
+	for it in lim:
+		P = g.player
+		if not ok():
+			return "state"
+		var b: Dictionary = g.X.BOSS
+		if b.done or b.st == "down":
+			hold({}, 170)
+			return true
+		var set := {}
+		var cx: float = px()
+		match str(b.st):
+			"lasers":
+				var bt: int = int(b.get("bt", 0))
+				var warn: int = int(b.get("warn", 50))
+				var on: int = int(b.get("on", 34))
+				var k: String = str(b.get("beam_k", ""))
+				var alvo: float = float(b.x0) + 300.0
+				if k == "grade":
+					# o vão mais perto do meio
+					var xs: Array = []
+					for bm in b.beams:
+						xs.append(float(bm.x))
+					xs.sort()
+					var melhor := alvo
+					var dmin := 1e9
+					var cand: Array = [float(b.x0) + 30.0]
+					for i in xs.size() - 1:
+						cand.append((xs[i] + xs[i + 1]) / 2.0)
+					for c in cand:
+						var livre := true
+						for x in xs:
+							if absf(x - c) < 40.0:
+								livre = false
+						if livre and absf(c - cx) < dmin:
+							dmin = absf(c - cx)
+							melhor = c
+					alvo = melhor
+				if absf(cx - alvo) > 8.0 and P.onGround and not (k == "alto" and bt > warn - 10):
+					set = {"R": true} if alvo > cx else {"L": true}
+				if k == "rasteiro" and bt == warn - 6 and P.onGround:
+					press("J")
+					set["J"] = true
+				elif k == "rasteiro" and bt > warn - 6 and bt < warn + 10:
+					set["J"] = true
+				if k == "alto" and bt > warn - 12 and bt < warn + on + 6:
+					set = {"S": true}
+			"painel":
+				var pan: float = float(b.pan_x) + 46.0
+				if absf(cx - pan) > 6.0:
+					set = {"R": true} if pan > cx else {"L": true}
+				elif P.face > 0:
+					set = {"L": true}
+				elif golpeou <= 0:
+					press("G")
+					golpeou = 30
+			"tonto":
+				if P.onGround and absf(cx - float(b.x)) < 70.0:
+					press("J")
+					set = {"J": true, ("R" if b.x > cx else "L"): true}
+				elif P.onGround:
+					set = {"R": true} if b.x > cx else {"L": true}
+				else:
+					set = {"J": true, ("R" if b.x > cx else "L"): true} if absf(cx - float(b.x)) > 6.0 else {"J": true}
+		golpeou -= 1
+		frame(set)
+		if P.hp < hp_ant:
+			print("  machucou: st=%s k=%s bt=%s x=%d y=%d h=%d crouch=%s" % [g.X.BOSS.st, g.X.BOSS.get("beam_k", ""), g.X.BOSS.get("bt", 0), int(px()), int(P.y), int(P.h), P.crouch])
+		hp_ant = P.hp
+	return "hp=%d st=%s" % [g.X.BOSS.hp, g.X.BOSS.st]
 
 func luta_motoboy(x_poleiro: float, x_chao: float):
 	for it in 60:

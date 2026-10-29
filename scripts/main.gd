@@ -425,7 +425,7 @@ func _process(_d: float) -> void:
 		if px > tun[0] and px < tun[1] and game.player.y < 760:
 			song = "tunel"
 		if game.X and game.X.boss_active():
-			song = "perseguicao"
+			song = str(game.L.get("boss_song", "perseguicao"))
 		if game.K and not game.K.HAWK.is_empty() and game.K.HAWK.active and not game.K.HAWK.done:
 			song = "gaviao"
 		if game.K and not game.K.FISH.is_empty() and game.K.FISH.active and not game.K.FISH.done:
@@ -1244,7 +1244,7 @@ func show_title() -> void:
 	state = S.TITLE
 	game.running = false
 	_show_hud(false)
-	Audio.set_song("tema")
+	Audio.set_song("aero_tema")
 	var vb := _overlay(.35)
 	# a ilustração da Isis desenhando, escurecida atrás do título (como era antes)
 	var img := TextureRect.new()
@@ -1748,7 +1748,7 @@ func _on_rest(n: int) -> void:
 		vb.add_child(c)
 	ui_layer.add_child(root)
 	panel = root
-	Audio.set_song("tema")
+	Audio.set_song("aero_tema")
 	var tw := root.create_tween()
 	tw.tween_interval(.4)
 	tw.tween_property(title, "modulate:a", 1.0, .5)
@@ -2286,7 +2286,7 @@ func play_cut(id: String, after: Callable) -> void:
 	_show_hud(false)
 	_clear_keys()
 	if id == "abertura":
-		Audio.set_song("tema")
+		Audio.set_song("aero_tema")
 	elif id == "mina":
 		Audio.set_song("vitoria")
 	elif id == "posfinal":

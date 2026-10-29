@@ -105,6 +105,8 @@ func load_level() -> void:
 		if BOSS.skin == "dog":
 			# Brutus: preso numa corrente comprida (Ep2Bosses)
 			Ep2Bosses.brutus_setup(BOSS, L)
+		elif BOSS.skin == "fiscal":
+			FiscalBoss.setup(BOSS, L)
 	broken = {}
 	opened = {}
 	found = {}
@@ -599,6 +601,10 @@ func cine_step(c: Dictionary) -> void:
 
 func cine_end(id: String) -> void:
 	match id:
+		"fiscal":
+			BOSS.st = "idle"
+			BOSS.t = 0
+			g.flash_tut("Desvie dos lasers: pule os baixos, abaixe (↓) nos altos!", "Lasers no rodapé: pule. Lasers na altura do peito: abaixe com ↓. Grade de lasers: fique num vão. Quando o painel de energia piscar, acerte com o bastão!", 300)
 		"boss":
 			if BOSS.st == "intro":
 				BOSS.y = 500.0
@@ -626,6 +632,8 @@ func boss_active() -> bool:
 	return not BOSS.is_empty() and BOSS.active and not BOSS.done
 
 func boss_box() -> Dictionary:
+	if BOSS.get("skin", "boar") == "fiscal":
+		return FiscalBoss.box(g, BOSS)
 	# do tamanho do desenho (javali-rei ~134 px de altura; Brutus ~135)
 	if BOSS.get("skin", "boar") == "dog":
 		return g.R(BOSS.x - 78, BOSS.y - 132, 156, 132)
@@ -651,6 +659,9 @@ func _boss() -> void:
 	if b.get("skin", "") == "dog" and b.st not in ["wait", "intro"]:
 		Ep2Bosses.brutus_step(g, self)
 		return
+	if b.get("skin", "") == "fiscal" and b.st != "wait":
+		FiscalBoss.step(g, self)
+		return
 	if b.red > 0:
 		b.red -= 1
 	for k in ["hitT", "landT"]:
@@ -669,6 +680,17 @@ func _boss() -> void:
 				_gate_on(true)
 				Audio.play("thunder", -6)
 				g.shake = 6
+				if b.skin == "fiscal":
+					b.st = "idle" if b.get("seen", false) else "espera"
+					b.x = b.cab_x
+					b.y = b.cab_y
+					Audio.play("unlock", -4)
+					if not b.get("seen", false):
+						b.seen = true
+						g.start_cine("fiscal", b.cab_x - 200, 400, 260,
+							[[165, 250, "MILIS", "Um fiscal de segurança? Não... é capanga do Barão disfarçado! Ele controla os lasers do raio-X daquela cabine.", "tome"]],
+							[75, 160, "FISCAL FALSO", "capanga do Barão das Milhas Falsas"])
+					return
 				if b.skin == "dog" and b.get("seen", false):
 					# voltou da fogueira: sem a apresentação de novo, a luta recomeça direto
 					b.st = "idle"
@@ -854,6 +876,8 @@ func boss_reset() -> void:
 			BOSS[k] = 0.0 if typeof(BOSS[k]) == TYPE_FLOAT else 0
 	if BOSS.get("skin", "") == "dog":
 		Ep2Bosses.brutus_setup(BOSS, g.L)
+	elif BOSS.get("skin", "") == "fiscal":
+		FiscalBoss.setup(BOSS, g.L)
 	_gate_on(false)
 
 func boss_finish_silent() -> void:

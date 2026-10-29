@@ -22,13 +22,13 @@ Audio="*res://scripts/audio.gd"
 
 [display]
 
-window/size/viewport_width=540
-window/size/viewport_height=960
-window/size/window_width_override=540
-window/size/window_height_override=960
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=960
+window/size/window_height_override=540
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=4
 window/vsync/vsync_mode=1
 window/energy_saving/keep_screen_on=true
 

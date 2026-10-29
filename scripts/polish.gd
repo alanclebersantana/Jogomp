@@ -526,8 +526,8 @@ static func bosses() -> Array:
 	if g.X and not g.X.BOSS.is_empty():
 		var b: Dictionary = g.X.BOSS
 		if b.get("active", false) and not b.get("done", false) and b.st != "wait":
-			out.append({"name": "BRUTUS" if b.get("skin", "") == "dog" else "JAVALI-REI", "hp": b.hp, "max": b.maxhp, "x": b.x, "y": b.y,
-				"ref": b, "kind": "javali", "weak": b.st == "stun", "fast": b.st == "charge" and b.get("spd", 0.0) > 4.0, "dir": b.dir, "gy": 500.0})
+			out.append({"name": {"dog": "BRUTUS", "fiscal": "FISCAL FALSO"}.get(b.get("skin", ""), "MOTOBOY TURBO"), "hp": b.hp, "max": b.maxhp, "x": b.x, "y": b.y,
+				"ref": b, "kind": "javali", "weak": b.st in ["stun", "tonto", "painel"], "fast": b.st == "charge" and b.get("spd", 0.0) > 4.0, "dir": b.dir, "gy": 500.0})
 	if g.K:
 		var h: Dictionary = g.K.HAWK
 		if not h.is_empty() and h.get("active", false) and not h.get("done", false) and h.st != "wait":

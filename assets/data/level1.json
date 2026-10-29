@@ -21,28 +21,28 @@
  "sections": [
   {
    "x": 0,
-   "song": "manha",
+   "song": "gru_saguao",
    "bg": "vila",
    "gt": "vila",
    "per": 0
   },
   {
    "x": 3400,
-   "song": "manha",
+   "song": "gru_saguao",
    "bg": "vila",
    "gt": "vila",
    "per": 1
   },
   {
    "x": 7200,
-   "song": "tarde",
+   "song": "gru_seguranca",
    "bg": "tarde",
    "gt": "vila",
    "per": 2
   },
   {
    "x": 10600,
-   "song": "noite",
+   "song": "gru_seguranca",
    "bg": "noite",
    "gt": "vila",
    "night": 0.4,
@@ -448,6 +448,42 @@
    "y": 840,
    "w": 200,
    "h": 20
+  },
+  {
+   "t": "ground",
+   "x": 14200,
+   "y": 500,
+   "w": 1800,
+   "h": 140
+  },
+  {
+   "t": "ground",
+   "x": 15410,
+   "y": 330,
+   "w": 140,
+   "h": 170
+  },
+  {
+   "t": "ground",
+   "x": 15550,
+   "y": -620,
+   "w": 80,
+   "h": 830
+  },
+  {
+   "t": "ground",
+   "x": 15550,
+   "y": 330,
+   "w": 80,
+   "h": 170
+  },
+  {
+   "t": "pgate",
+   "x": 15550,
+   "y": 210,
+   "w": 80,
+   "h": 120,
+   "id": "fiscal_porta"
   }
  ],
  "swamp": [],
@@ -1360,6 +1396,46 @@
   [
    13420,
    930
+  ],
+  [
+   14250,
+   470
+  ],
+  [
+   14300,
+   470
+  ],
+  [
+   14350,
+   470
+  ],
+  [
+   14400,
+   470
+  ],
+  [
+   14450,
+   470
+  ],
+  [
+   15700,
+   470
+  ],
+  [
+   15745,
+   470
+  ],
+  [
+   15790,
+   470
+  ],
+  [
+   15835,
+   470
+  ],
+  [
+   15880,
+   470
   ]
  ],
  "clocks": [],
@@ -1392,6 +1468,10 @@
   ],
   [
    13450,
+   500
+  ],
+  [
+   14380,
    500
   ]
  ],
@@ -1472,6 +1552,12 @@
    "a": 13450,
    "b": 13600,
    "t": "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele."
+  },
+  {
+   "a": 14600,
+   "b": 15600,
+   "t": "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique num vão da grade. Painel piscando? Bastão nele!",
+   "boss": 1
   }
  ],
  "pits": [
@@ -1582,10 +1668,24 @@
   "x": 13380,
   "y": 930
  },
+ "boss": {
+  "x0": 14600,
+  "x1": 15600,
+  "trig": 14760,
+  "spawn": 15480,
+  "hp": 3,
+  "item": [
+   15100,
+   470
+  ],
+  "skin": "fiscal",
+  "open": "fiscal_porta"
+ },
+ "boss_song": "fiscal",
  "door": {
-  "x": 14120,
+  "x": 15900,
   "y": 410,
   "kind": "exit"
  },
- "spanX": 14200
+ "spanX": 16000
 }

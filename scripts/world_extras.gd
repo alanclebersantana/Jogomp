@@ -372,6 +372,9 @@ static func _log(x: float, y: float) -> void:
 # ---------------------------------------------------------------- Javali-Rei
 static func boss(g: Game, T: int) -> void:
 	var b: Dictionary = g.X.BOSS
+	if not b.is_empty() and b.get("skin", "") == "fiscal":
+		FiscalBoss.draw(g, b, T)
+		return
 	if not b.is_empty() and b.get("skin", "") == "dog" and b.has("stake"):
 		# Brutus na corrente: estaca, argolas e corrente sempre à vista; o cão de guarda também
 		# (antes da luta, parado; depois, deitado do lado da estaca)

@@ -24,10 +24,10 @@ const AMB_FOR := {"manha": "passaros", "tarde": "passaros", "chuva": "sapos", "n
 ## músicas calmas e longas gravadas em três camadas sincronizadas (mus_X, mus_X_2, mus_X_3):
 ## a 1 é a música calma; a 2 traz o pulso (baixo, violão, percussão leve); a 3 o brilho (contracanto,
 ## xilofone, pandeiro). Conforme o Tomé avança no trecho, as camadas entram aos poucos.
-const LAYERED := ["tema", "tarde", "chuva", "noite", "tunel"]
+const LAYERED := ["tema", "tarde", "chuva", "noite", "tunel", "aero_tema", "gru_saguao", "gru_seguranca"]
 ## músicas em que a música pode dar uma pausa (nunca em chefes, perseguição e trechos especiais)
-const REST_SONGS := ["manha", "tarde", "chuva", "noite", "tunel", "tema"]
-const BATTLE := ["perseguicao", "gaviao", "bagre", "urso", "pedra"]
+const REST_SONGS := ["manha", "tarde", "chuva", "noite", "tunel", "tema", "aero_tema", "gru_saguao", "gru_seguranca"]
+const BATTLE := ["perseguicao", "gaviao", "bagre", "urso", "pedra", "fiscal"]
 var rain_target := 0.0
 ## barramentos: Música (músicas e tambores), Efeitos (sons curtos e ambiente) e Mundo (chuva e sons
 ## presos no cenário: fogueiras, água). O Mundo fica mudo fora do jogo (menus, fogueira grande, placar).

@@ -222,6 +222,7 @@ func _swing_hits() -> void:
 			g.burst(r.x, r.y - 20, 18, Color("#9a8a7a"))
 	g.TR.swing_hits(hb)
 	g.K.swing_hits(hb)
+	FiscalBoss.swing(g, g.X, hb)
 	var X = g.X
 	for c in g.CR:
 		if not c.dead and c.t == "break" and not swing_hit.has(c) and Game.hit(hb, c):
