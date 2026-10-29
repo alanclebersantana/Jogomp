@@ -396,6 +396,7 @@ func _process(_d: float) -> void:
 		var vs := get_viewport().get_visible_rect().size
 		game.W = vs.x
 		game.H = vs.y
+		game.chao_frac = .66 if vs.y > vs.x else .9
 		var amp: float = game.shake * (.55 if Save.getv("opt", "shake", true) else 0.0)
 		var tt := Time.get_ticks_msec() / 1000.0
 		var sh := Vector2(sin(tt * 53.0) + sin(tt * 31.0) * .5, cos(tt * 47.0) + sin(tt * 29.0) * .5) * amp * .5
@@ -1320,7 +1321,7 @@ func _confirm_wipe(next: Callable, back: Callable) -> void:
 	_confirm("COMEÇAR DE NOVO?", "O progresso salvo na última fogueira será apagado. Isso não tem volta.", "APAGAR E COMEÇAR", next, back)
 
 ## escolher o episódio (aparece depois de terminar o primeiro)
-const EPISODES := [["EPISÓDIO 1 · O BOSQUE", "Do bosque até a boca da mina."], ["EPISÓDIO 2 · AS PROFUNDEZAS DA MINA", "Túneis, o moinho, os telhados da vila, o carrinho nos trilhos e a fuga da Isis."]]
+const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."], ["GUARULHOS · 1-2 BAGAGENS", "O subsolo escuro das esteiras e a Bag."], ["GUARULHOS · 1-3 HANGAR", "O pátio na garoa, turbinas, guindastes e o Hangar 7."], ["GUARULHOS · CHEFE", "O Motoboy Turbo na pista."]]
 func _choose_episode() -> void:
 	var vb := _overlay(.9)
 	vb.add_child(_label("ESCOLHA O EPISÓDIO", 30, GOLD, Spr.font_title))
@@ -1611,11 +1612,10 @@ func start_level(cont: bool, lvl: int = 0) -> void:
 	if cont:
 		show_intro(true)
 	else:
-		var cut: String = "abertura" if game.level_idx == 0 else "ep2"
-		if game.level_idx > 0 and Save.getv("opt", "tut_asked", false):
-			play_cut(cut, func(): show_intro(false))
+		if game.level_idx > 0 or Save.getv("opt", "tut_asked", false):
+			show_intro(false)
 		else:
-			_ask_tutorial(func(): play_cut(cut, func(): show_intro(false)))
+			_ask_tutorial(func(): show_intro(false))
 
 ## completa o ponto de retorno antes de gravar (Save.before_save_run):
 ##  - lápis e frutas que a gangorra e os arbustos derrubaram e ainda estão no chão (antes sumiam)
@@ -2314,7 +2314,7 @@ func _on_level_end() -> void:
 		# fim da fuga da Isis (último trecho do Episódio 2): o Vargas a pegou — gancho para o Episódio 3
 		play_cut("isis_fim", _on_results)
 		return
-	play_cut("mina" if game.level_idx == 0 else "ep2fim", _on_results)
+	_on_results()
 
 ## Episódio 2: o Tomé chegou à porta de ferro. Cena da porta, cena da Isis do outro lado,
 ## e o último trecho do episódio é jogado com ela
@@ -2534,10 +2534,11 @@ func _on_results() -> void:
 	for d in game.DRWS:
 		if d.got:
 			dr += 1
+	var ntot: int = game.clue_ids().size()
 	var stars := 1
-	if pen >= pt * .7 and nc >= 4:
+	if pen >= pt * .7 and (nc >= ntot - 1 or dr >= 2):
 		stars = 2
-	if pen >= pt * .9 and nc == 6 and ns == 6:
+	if pen >= pt * .9 and nc >= ntot and dr == game.DRWS.size():
 		stars = 3
 	Save.set_best(game.level_idx, {"stars": stars, "pen": pen, "clues": nc, "specs": ns})
 	var gk: String = "final" if game.level_idx == 0 else "final%d" % (game.level_idx + 1)
@@ -2551,7 +2552,7 @@ func _on_results() -> void:
 	var head := HBoxContainer.new()
 	head.alignment = BoxContainer.ALIGNMENT_CENTER
 	head.add_theme_constant_override("separation", 18)
-	head.add_child(_label(game.L.get("endTitle", "FIM DO BOSQUE"), 16, Color("#cdbfa6"), Spr.font_title))
+	head.add_child(_label(game.L.get("endTitle", "FIM DA FASE"), 16, Color("#cdbfa6"), Spr.font_title))
 	head.add_child(_label("★".repeat(stars) + "☆".repeat(3 - stars), 34, Color("#ffd76a")))
 	vb.add_child(head)
 	var mid := HBoxContainer.new()
@@ -2571,9 +2572,11 @@ func _on_results() -> void:
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 24)
 	grid.add_theme_constant_override("v_separation", 2)
-	var gold_txt := "Lápis dourado  " + ("✓" if game.X.GOLD.get("got", false) else "—")
+	var gold_txt := "Milha dourada  " + ("✓" if game.X.GOLD.get("got", false) else "—")
 	var sec_txt := "Lugares secretos  %d/%d" % [game.X.found.size(), game.X.SECRETS.size()]
-	var rows := ["⏱ Tempo  %d:%02d" % [secs / 60, secs % 60], "✏ Lápis  %d/%d" % [pen, pt], "Lápis especiais  %d/6" % ns, "Desenhos  %d/%d" % [dr, game.DRWS.size()], "Pistas  %d/6" % nc]
+	var rows := ["⏱ Tempo  %d:%02d" % [secs / 60, secs % 60], "✈ Milhas  %d/%d" % [pen, pt], "Cartões dourados  %d/%d" % [dr, game.DRWS.size()], "Pistas  %d/%d" % [nc, ntot]]
+	if game.SPECS.size() > 0:
+		rows.append("Milhas especiais  %d/%d" % [ns, game.SPECS.size()])
 	if game.L.has("gold"):
 		rows.append(gold_txt)
 	if game.X.SECRETS.size() > 0:
@@ -2628,21 +2631,20 @@ func _on_results() -> void:
 		bcol.add_child(bd)
 		mid.add_child(bcol)
 	var lvl: int = game.level_idx
-	var story := "Agora eu sei: foi Ademar Vargas, o gerente que roubava a mina. Ele levou a Isis para se vingar. Vou atrás dele — mina adentro." if nc == 6 else "Ele fugiu para a mina. Ainda faltam pistas para ter certeza de quem é... (%d/6)" % nc
-	if lvl == 1:
-		story = "O ouro roubado, o livro-caixa, a chave do cofre... Vargas está escondendo a Isis no fundo da mina. Eu vou buscá-la." if nc == 6 else "Ele desceu ainda mais fundo. Ainda faltam pistas... (%d/6)" % nc
-	vb.add_child(_label(story, 15, Color("#e8dcc0"), Spr.font_i, 700))
+	var story: String = game.L.get("endStory", "")
+	if story != "":
+		vb.add_child(_label(story, 15, Color("#e8dcc0"), Spr.font_i, 700))
 	var cont: Callable
-	if lvl == 0:
-		# o Episódio 2 fica liberado e começa logo depois da cena
-		Save.setv("prog", "eps", max(2, int(Save.getv("prog", "eps", 1))))
-		cont = func(): play_cut("posfinal", func(): start_level(false, 1))
-		vb.add_child(_button("CONTINUAR", cont))
+	if lvl + 1 < EPISODES.size():
+		# a próxima fase fica liberada e começa logo depois
+		Save.setv("prog", "eps", max(lvl + 2, int(Save.getv("prog", "eps", 1))))
+		cont = func(): start_level(false, lvl + 1)
+		vb.add_child(_button("PRÓXIMA FASE", cont))
 	else:
 		var brow := HBoxContainer.new()
 		brow.alignment = BoxContainer.ALIGNMENT_CENTER
 		brow.add_theme_constant_override("separation", 16)
-		brow.add_child(_label("O Episódio 3 chega em breve.", 13, Color(.75, .7, .6), Spr.font_i))
+		brow.add_child(_label("Próximo aeroporto: Maringá — em breve.", 13, Color(.75, .7, .6), Spr.font_i))
 		cont = show_title
 		brow.add_child(_button("CONTINUAR", cont))
 		vb.add_child(brow)

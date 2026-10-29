@@ -2,33 +2,22 @@ class_name GameData
 ## Textos e regras fixas da Fase 1 (mochila, receitas, pistas, lápis).
 
 const ITEM_INFO := {
-	"corda": ["Corda", "🪢"], "gancho": ["Gancho de ferro", "🪝"], "gancho_corda": ["Gancho com corda", "🪝"],
-	"engrenagem": ["Engrenagem", "⚙️"], "manivela_q": ["Manivela quebrada", "🔩"], "manivela": ["Manivela", "🔧"],
-	"pavio": ["Pavio", "🧵"], "oleo": ["Lata de óleo", "🛢️"], "lanterna_acesa": ["Lanterna acesa", "🏮"],
-	"picareta": ["Picareta", "⛏️"],
-	"lona": ["Lona velha", "🧺"], "vela": ["Vela de moinho", "⛵"],
-	"chave_a": ["Metade de chave", "🗝️"], "chave_b": ["Outra metade", "🗝️"], "chave": ["Chave da porteira", "🗝️"],
+	"cartao_acesso": ["Cartão de acesso", "💳"], "cordao": ["Cordão de crachá", "🎗️"], "cracha": ["Crachá da área restrita", "🪪"],
+	"fusivel": ["Fusível queimado", "🔌"], "fita": ["Fita isolante", "🩹"], "fusivel_ok": ["Fusível emendado", "⚡"],
+	"bastao": ["Bastão de sinalização", "🦯"],
+	"picareta": ["Bastão de sinalização", "🦯"],
 }
 const RECIPES := [
-	["corda", "gancho", "gancho_corda", "Você amarrou a corda no gancho!"],
-	["engrenagem", "manivela_q", "manivela", "A engrenagem encaixou: a manivela está consertada!"],
-	["oleo", "pavio", "lanterna_acesa", "Óleo e pavio novo: a lanterna acendeu de novo!"],
-	["lona", "corda", "vela", "Você amarrou a lona na armação com a corda: uma vela nova para o moinho!"],
-	["chave_a", "chave_b", "chave", "As duas metades se encaixaram: é a chave da porteira da mina!"],
+	["cartao_acesso", "cordao", "cracha", "Você prendeu o cartão no cordão: um crachá da área restrita!"],
+	["fusivel", "fita", "fusivel_ok", "Fita isolante bem apertada: o fusível está emendado!"],
 ]
 const CLUE_INFO := {
-	1: ["Um botão de uniforme", "Caído na varanda, ao lado dos lápis da Isis: um botão com o símbolo da picareta. É do uniforme da mina... mas não é meu."],
-	2: ["Pegada de bota", "Uma pegada funda, com lama vermelha. Só existe lama dessa cor num lugar: lá embaixo, na mina."],
-	3: ["Bilhete rasgado", "\"...ele nunca mais vai me denunciar ao patrão...\" Alguém escreveu isso com raiva. Eu denunciei os roubos da mina mês passado."],
-	4: ["Páginas do livro-caixa", "As contas da mina, com números riscados e refeitos. Os roubos! Só o gerente mexia nesse livro."],
-	5: ["Chaveiro com a letra V", "Um chaveiro de couro gravado com um V. As chaves do depósito da mina."],
-	6: ["O crachá", "\"ADEMAR VARGAS — GERENTE\". Foi ele. Ele levou a Isis para se vingar de mim. E está indo para a mina."],
-	7: ["Mapa rasgado", "Um mapa da mina com um X vermelho num veio de ouro que ninguém conhecia. A letra é do Vargas."],
-	8: ["Saquinho de pepitas", "Pepitas de ouro com o selo da companhia, escondidas no meio da palha. Ouro roubado da mina."],
-	9: ["Bilhete lacrado", "\"Leve a menina pelos trilhos de baixo. Ninguém procura lá.\" — V."],
-	10: ["O livro verdadeiro", "As contas de verdade da mina: tudo o que o Vargas desviou, anotado com a letra dele."],
-	11: ["Relógio de bolso", "Um relógio com um V gravado, parado nas seis horas: a hora em que a Isis sumiu."],
-	12: ["Chave do cofre", "Uma chave grande de latão com o brasão do Vargas. Ela abre alguma porta lá no fundo da mina."],
+	1: ["Recibo de milhas falsas", "Um recibo com o selo \"Barão das Milhas Falsas — compre já, voe nunca\". As milhas dos clientes foram vendidas como se fossem dele."],
+	2: ["Cartola amassada", "Uma cartola preta esquecida na sala secreta, com um bigode postiço dentro. O Barão esteve aqui disfarçado."],
+	3: ["Lista de capangas", "\"Cambistas no saguão, robôs falsos na segurança, pombos no mezanino. Ninguém passa!\" — B."],
+	4: ["Etiqueta de mala adulterada", "Uma etiqueta de bagagem com o código trocado. As milhas estão sendo despachadas escondidas nas malas!"],
+	5: ["Planilha do Barão", "Uma planilha com milhares de milhas LATAM desviadas, anotadas com uma letra cheia de floreios."],
+	6: ["Plano de voo", "\"Motoboy leva o malote até a pista. Eu sigo para Maringá no voo das 23h59.\" — Barão."],
 }
 const PEN_LIST := ["vermelho", "laranja", "amarelo", "verde", "azul", "roxo"]
 const PEN_COL := {

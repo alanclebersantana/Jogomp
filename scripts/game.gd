@@ -37,6 +37,8 @@ const FLY := {"fly": 1, "owl": 1, "bat": 1, "crow": 1, "piranha": 1}
 
 var L: Dictionary
 var level_idx := 0
+## altura do chão na tela (fração da altura): 0,9 deitado; em pé o chão sobe e os controles ficam no subsolo
+var chao_frac := .9
 var SOL: Array = []
 var CR: Array = []
 var SPR: Array = []
@@ -1989,7 +1991,7 @@ func cam_ty(px: float, focus: float) -> float:
 		gy = base
 	var t: float = cam_focus_ty(focus)
 	if gy < 90000.0 and gy - feet < H * .78:
-		t = gy - H * .9
+		t = gy - H * chao_frac
 		# algo interessante mais embaixo que o chão (canal, poço, água funda entre pilares): mostra
 		var low: float = low_interest(px, gy)
 		if low > 0.0:
@@ -3192,6 +3194,7 @@ func use_lock(l: Dictionary) -> void:
 		for s in SOL:
 			if s.get("id") == l.gate:
 				s.unlocking = true
+				s.force_open = true
 		blockers_dirty()
 		Audio.play("door")
 		flash(l.get("msg", "Abriu!"), 180)
