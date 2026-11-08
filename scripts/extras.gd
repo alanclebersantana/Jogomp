@@ -322,7 +322,7 @@ func post() -> void:
 		Audio.vib(80)
 		g.shake = 6
 		g.burst(GOLD.x, GOLD.y, 30, Color("#ffd76a"))
-		g.flash("A MILHA DOURADA! A milha mais valiosa que o Barão roubou.", 300)
+		g.flash("A MILHA DOURADA! A milha mais valiosa que o ladrão roubou.", 300)
 	_boss()
 	_dog()
 	_critters()
@@ -688,8 +688,8 @@ func _boss() -> void:
 					if not b.get("seen", false):
 						b.seen = true
 						g.start_cine("fiscal", b.cab_x - 200, 400, 260,
-							[[165, 250, "MILIS", "Um fiscal de segurança? Não... é capanga do Barão disfarçado! Ele controla os lasers do raio-X daquela cabine.", "tome"]],
-							[75, 160, "FISCAL FALSO", "capanga do Barão das Milhas Falsas"])
+							[[165, 250, "MILIS", "Um fiscal de segurança? Não... é um capanga do ladrão disfarçado! Ele controla os lasers do raio-X daquela cabine.", "tome"]],
+							[75, 160, "FISCAL FALSO", "capanga do ladrão misterioso"])
 					return
 				if b.skin == "dog" and b.get("seen", false):
 					# voltou da fogueira: sem a apresentação de novo, a luta recomeça direto
@@ -703,8 +703,8 @@ func _boss() -> void:
 						[75, 160, "BRUTUS", "o cão de guarda do Vargas"])
 				else:
 					g.start_cine("boss", b.spawn - 60, 420, 260,
-						[[165, 250, "MILIS", "Um motoboy do Barão com o malote das milhas! Rápido demais para enfrentar de frente. Vou fazer ele bater!", "tome"]],
-						[75, 160, "MOTOBOY TURBO", "capanga do Barão das Milhas Falsas"])
+						[[165, 250, "MILIS", "Um motoboy com o malote das milhas! Será ele o ladrão? Rápido demais para enfrentar de frente. Vou fazer ele bater!", "tome"]],
+						[75, 160, "MOTOBOY TURBO", "suspeito número 1"])
 			return
 		"intro":
 			b.vy += .7

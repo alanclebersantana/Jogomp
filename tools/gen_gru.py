@@ -189,6 +189,30 @@ def deposito(xc, sid, aid):
     milhas(xc - 280, xc - 160, 930, 40)
 
 
+def peca(x0, x1, y0, y1, sprite, ox=0, oy=0, ob=4):
+    """bloco maciço desenhado com um móvel pintado (balcão, bancos, cabine...)"""
+    S.append({"t": "peca", "x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "sprite": sprite, "ox": ox, "oy": oy, "ob": ob})
+
+
+def passarela(x0, x1, y0, y1):
+    """passarela suspensa: piso de grade com corrimão (a arte sobe acima do piso)"""
+    w = x1 - x0
+    alt = w * 120.0 / 612.0
+    peca(x0, x1, y0, y1, "p_pc_passarela_topo", 0, int(alt - (y1 - y0) - 4), 4)
+
+
+def movel(x, nome, w, y=GY, **kw):
+    """móvel só de cenário (atrás de tudo), base no chão"""
+    d = {"k": "pc", "x": x, "y": y, "n": "p_pc_" + nome, "w": w}
+    d.update(kw)
+    L["decor"].append(d)
+
+
+def atendente(x, y, fid, falas, pose="parado"):
+    """Seu Barros, o atendente simpático: fica parado e fala com o Milis quando ele chega perto"""
+    L.setdefault("npcs", []).append({"x": x, "y": y, "id": fid, "pose": pose, "lines": falas})
+
+
 def _fix_coin(c):
     for _ in range(12):
         moved = False
@@ -215,31 +239,52 @@ def salvar(n):
 #  1-1 · TERMINAL
 # ======================================================================
 novo("Guarulhos · 1-1 Terminal",
-     "O Barão das Milhas Falsas invadiu o Aeroporto de Guarulhos e espalhou as milhas LATAM dos clientes pelo "
-     "terminal. Recupere as milhas, ache os cartões de embarque dourados e descubra para onde o Barão foi. "
-     "Cuidado com os capangas dele!",
+     "Alguém está roubando as milhas dos clientes da Milhas Plus! Um vulto de capuz fugiu pelo terminal de "
+     "Guarulhos com uma mala brilhando. Recupere as milhas LATAM, ache os cartões de embarque dourados e junte "
+     "as pistas para descobrir quem é o ladrão. Cuidado com os capangas dele!",
      introSub="Episódio 1 · Brasil — São Paulo", endTitle="FIM DO TERMINAL", introImg="res://assets/ui/intro_1.jpg",
      periods=["Saguão", "Check-in", "Segurança", "Mezanino"], clueIds=[1, 2, 3],
-     rests={"1": ["CHECK-IN DO TERMINAL", "No balcão, um bilhete esquecido pelos capangas: \"O Barão manda despachar tudo pelo subsolo das bagagens\".",
-                  "Então as milhas estão descendo pelas esteiras. Eu vou atrás!"]},
-     endStory="O Barão passou pelo terminal disfarçado, de cartola e bigode postiço. As pistas apontam para o subsolo das bagagens.")
+     rests={"1": ["CHECK-IN DO TERMINAL", "No balcão, um bilhete esquecido pelo vulto: \"Despachar tudo pelo subsolo das bagagens\".",
+                  "Então as milhas estão descendo pelas esteiras. Mas quem escreve com uma letra tão caprichada?"]},
+     endStory="O vulto de capuz escapou de novo, mas deixou rastros: um recibo com um cifrão dourado, um fio de bigode "
+              "grisalho e uma lista assinada com um B. Quem está por trás disso? As pistas apontam para o subsolo das bagagens.")
 
 # --- A · Saguão (0 .. 3400): aprender a andar, pular, quebrar malas, pulo duplo
 L["sections"].append({"x": 0, "song": "gru_saguao", "bg": "vila", "gt": "vila", "per": 0})
 chao(-200, 1500)
-dica(0, 520, "Guarulhos! O Barão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
+# cenário: colunas com painel de voos, carrinhos e bancos atrás
+for cx in [640, 2600, 3500, 5600, 6900]:
+    movel(cx, "coluna", 92)
+movel(1240, "carrinhos", 110)
+movel(2250, "bancos", 230)
+movel(3300, "carrinhos", 110)
+movel(4650, "carrinhos", 110)
+movel(7700, "raiox", 230)
+movel(8000, "raiox", 230)
+movel(10200, "carrinhos", 110)
+movel(13900, "bancos", 230)
+# Seu Barros, o atendente simpático (dá dicas... será que é só simpatia?)
+atendente(1040, 410, "barros1", [
+    ["SEU BARROS", "Ei, robozinho da Milhas Plus! Vi um sujeito de capuz correndo com uma mala brilhando, direto para o check-in.", "barros"],
+    ["MILIS", "Era ele! O saldo da família sumiu na hora em que ele passou. Obrigado, senhor!", "tome"],
+    ["SEU BARROS", "Barros, ao seu dispor. Corre que ainda dá tempo... hehe.", "barros"]], "aponta")
+atendente(14280, GY, "barros2", [
+    ["SEU BARROS", "Psiu! Você de novo? A segurança está estranha hoje. Aquele fiscal da cabine não é daqui, não...", "barros"],
+    ["MILIS", "Seu Barros? Como o senhor chegou aqui antes de mim?", "tome"],
+    ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]], "cochicha")
+dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
 caixa(820, n=5)
-dica(700, 950, "Malas abandonadas do Barão: pise em cima ou bata com o bastão para soltar as milhas.")
+dica(700, 950, "Malas abandonadas pelo ladrão: pise em cima ou bata com o bastão para soltar as milhas.")
 plat(980, 410, 140)                 # balcão de informações (dá para subir)
 milhas(1000, 1100, 380, 40)
 cambista(1300, [1150, 1450])
-dica(1120, 1320, "Um cambista do Barão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização.")
+dica(1120, 1320, "Um cambista trabalhando para o ladrão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização.")
 totem(1460)
 # fileira de bancos e a primeira subida dupla
-bloco(1500, 1700, 430, 500)         # bancos do saguão
+peca(1500, 1700, 430, 500, "p_pc_bancos", 8, 10)   # bancos do saguão
 chao(1500, 3400)
-bloco(1880, 2040, 300, 500)         # coluna com painel de voos
+peca(1880, 2040, 300, 500, "p_pc_cabine", 0, 12)   # cabine de informações (de vidro)
 milhas(1890, 2030, 270, 35)
 dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
 arco(2050, 2300, 470, 90, 6)
@@ -260,7 +305,7 @@ chao(3400, 6300)
 chao(6370, 7200)
 # balcões de check-in: blocos de altura média com esteira de despacho atrás
 for i, bx in enumerate([3600, 3900, 4200]):
-    bloco(bx, bx + 140, 410, 500)
+    peca(bx, bx + 140, 410, 500, "p_pc_balcao", 30, 0)
     milhas(bx + 20, bx + 120, 380, 50)
 caixa(3810, n=3)
 cambista(4100, [3760, 4180])
@@ -269,7 +314,7 @@ cambista(4950, [4820, 5080], y=230)
 dica(3420, 3700, "Fila do check-in. Os balcões dão bons degraus.")
 # esteira de despacho que sobe (plataforma que anda)
 L["movers"].append({"k": "path", "x0": 4400, "x1": 4680, "y0": 400, "y1": 230, "w": 110, "per": 260})
-bloco(4800, 5100, 230, 500)         # o alto das balanças
+peca(4800, 5100, 230, 500, "p_pc_porta", 6, 2)   # parede do despacho, com a porta restrita
 milhas(4830, 5080, 200, 50)
 pista(5050, 230, 1)
 dica(4380, 4600, "A esteira de despacho sobe e desce: espere ela chegar e pule em cima.")
@@ -300,7 +345,7 @@ caixa(7050, n=4)
 # --- C · Segurança (7200 .. 10600): raio-x com pinos elétricos, ar-condicionado que sopra para cima, crachá
 L["sections"].append({"x": 7200, "song": "gru_seguranca", "bg": "tarde", "gt": "vila", "per": 2})
 chao(7200, 8000)
-dica(7200, 7500, "A segurança! O Barão ligou as esteiras do raio-x na tomada errada: cuidado com os choques.")
+dica(7200, 7500, "A segurança! Alguém ligou as esteiras do raio-x na tomada errada: cuidado com os choques.")
 # esteiras do raio-x: piso que dá choque de tempos em tempos (espinhos com ritmo)
 L["traps"].append({"k": "spikes", "x": 7600, "y": GY, "w": 96, "per": 150, "ph": 0})
 L["traps"].append({"k": "spikes", "x": 7820, "y": GY, "w": 96, "per": 150, "ph": 75})
@@ -317,11 +362,11 @@ drone(8340, 300, [8220, 8460])
 mala_monstro(9700, -160, [9450, 9880])
 # saída de ar-condicionado: o vento leva o Milis planando até o mezanino de cima
 L["traps"].append({"k": "wind", "x": 9000, "y": -90, "w": 120, "h": 590, "pow": 1.0})
-bloco(9200, 9900, -40, 0)           # mezanino da segurança
+passarela(9200, 9900, -40, 0)       # mezanino da segurança
 milhas(9020, 9100, 300, 40)
 coluna(9060, 260, -60)
 milhas(9220, 9880, -70, 50)
-cartao(9850, -40, "Cartão de embarque dourado 2/3: carimbado \"VOO DO BARÃO — PORTÃO 2??\".")
+cartao(9850, -40, "Cartão de embarque dourado 2/3: carimbado \"VOO ESPECIAL — PORTÃO 2??\". Quem será o passageiro?")
 L["items"].append({"x": 9500, "y": -24, "id": "cartao_acesso"})
 dica(8900, 9150, "Saída de ar-condicionado: abra as asas (planar) em cima dela e o vento leva você lá para cima.")
 mala_monstro(9600, -200, [9300, 9850])
@@ -348,7 +393,7 @@ totem(10200)
 L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
 chao(10600, 11400)
 escada(10900, 160)
-bloco(10930, 11600, 160, 200)       # passarela de serviço
+passarela(10930, 11600, 160, 200)   # passarela de serviço
 milhas(10960, 11560, 130, 50)
 robo_falso(11300, [11000, 11550], y=160)
 pombo(11900, 20, [11650, 12150])
@@ -357,7 +402,7 @@ L["pits"].append([11400, 12200])
 L["bars"].append({"x0": 11640, "x1": 12160, "y": 120})
 milhas(11660, 12140, 210, 52)
 dica(11550, 11700, "Um cabo esticado: pule e segure-se nele para atravessar.", yl=220)
-bloco(12160, 12500, 160, 200)
+passarela(12160, 12500, 160, 200)
 chao(12200, 13580)
 chao(13640, 14200)
 mala_monstro(12900, 260, [12600, 13200])

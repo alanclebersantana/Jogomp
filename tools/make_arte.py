@@ -383,6 +383,67 @@ def apaga_natureza():
             NOVO["p_" + n] = (Image.new("RGBA", (int(r[2]), int(r[3])), (0, 0, 0, 0)), float(r[4]), float(r[5]))
 
 
+# ======================================================================
+#  MÓVEIS DO TERMINAL, FISCAL FALSO E SEU BARROS (o atendente)
+# ======================================================================
+def solta(nome, q, alt):
+    """peça nova no atlas com altura alt (mantém a proporção); âncora no pé, no meio"""
+    k = alt / q.height
+    q2 = q.resize((max(1, round(q.width * k)), max(1, round(q.height * k))), Image.LANCZOS)
+    NOVO[nome] = (q2, q2.width / 2.0, float(q2.height))
+
+
+def moveis():
+    m = comps("props_terminal")
+    # 0 balcão de check-in, 1 bancos, 2 coluna com painel, 3 cabine de vidro, 4 passarela,
+    # 5 raio-X, 6 carrinhos, 7 parede com porta restrita
+    for i, n in enumerate(["pc_balcao", "pc_bancos", "pc_coluna", "pc_cabine", "pc_passarela", "pc_raiox",
+                           "pc_carrinhos", "pc_porta"]):
+        q = m[i]
+        alt = min(300, max(160, q.height))
+        solta("p_" + n, q, alt)
+    # passarela sem as pernas (só o piso e o corrimão): para mezaninos e passarelas suspensas
+    pz = m[4]
+    import numpy as np
+    al = np.asarray(pz)[..., 3] > 40
+    lin = al.mean(axis=1)
+    # o piso é a faixa mais cheia; corta logo abaixo dela
+    yb = int(np.argmax(lin))
+    while yb < len(lin) - 1 and lin[yb + 1] > .5:
+        yb += 1
+    solta("p_pc_passarela_topo", pz.crop((0, 0, pz.width, yb + 4)), 120)
+
+
+def fiscal():
+    f = comps("fiscal")
+    # 0 parado, 1 apertando o botão, 2 rindo e apontando, 3 braços cruzados, 4 levando choque,
+    # 5 tonto sentado, 6 nocauteado, 7 fugindo (desenhados olhando para a direita)
+    for i, n in enumerate(["parado", "botao", "ri", "bracos", "choque", "tonto", "ko", "foge"]):
+        solta("p_fiscal_" + n, f[i], 220 if i != 6 else 130)
+
+
+def barros():
+    import numpy as np
+    src = os.path.join(G, "barros.jpg")
+    im = Image.open(src).convert("RGB")
+    from PIL import ImageDraw
+    sem = im.copy()
+    ImageDraw.Draw(sem).rectangle((140, 275, 370, 572), fill=(0, 255, 0))
+    tmp = "/tmp/_barros_sem_retrato.jpg"
+    sem.save(tmp, quality=95)
+    b = componentes(abrir_sem_verde(tmp), dil=6, area_min=2500)
+    # 0 parado, 1 acenando (cortado pelo retrato), 2 apontando, 3 cochichando, 4 sorriso maroto
+    for n, i in [("parado", 0), ("aponta", 2), ("cochicha", 3), ("maroto", 4)]:
+        solta("p_barros_" + n, b[i], 240)
+    r = im.crop((140, 275, 370, 572))
+    rt = "/tmp/_barros_retrato.jpg"
+    r.save(rt, quality=95)
+    q = abrir_sem_verde(rt)
+    q = q.crop(q.getbbox())
+    q = q.crop((0, 0, q.width, min(q.height, int(q.width * 1.0))))
+    solta("p_barros_rosto", q, 160)
+
+
 if __name__ == "__main__":
     apaga_natureza()
     cabo()
@@ -391,6 +452,9 @@ if __name__ == "__main__":
     inimigos()
     objetos()
     bastao(info)
+    moveis()
+    fiscal()
+    barros()
     pisos()
     fundos()
     grava_atlas()

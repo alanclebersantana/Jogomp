@@ -1031,6 +1031,8 @@ func step() -> void:
 			respawn()
 		return
 	_comic_check()
+	if _npc_check():
+		return
 	if not player.get("warp", {}).is_empty():
 		T += 1
 		_warp_step()
@@ -1818,6 +1820,9 @@ func _camera() -> void:
 		# fase; galhos, tábuas e ilhas não contam. Se o chão estiver longe lá embaixo (penhasco, lago
 		# fundo, plataformas altas) volta a seguir o Tomé, e ele nunca sai por cima da tela
 		ty = cam_ty(px, cam_focus) + look_y
+		# luta com o Fiscal Falso: a câmera enquadra a arena inteira (cabine, painel e lasers)
+		if X and X.BOSS.get("skin", "") == "fiscal" and not X.BOSS.get("done", false) and X.BOSS.get("st", "wait") != "wait":
+			tx = (float(X.BOSS.x0) + float(X.BOSS.x1)) / 2.0 - W / 2.0 + 120.0
 	var cb := cam_bounds()
 	tx = clamp(tx, cb.position.x, max(cb.position.x, cb.end.x - W))
 	ty = clamp(ty, cb.position.y, max(cb.position.y, cb.end.y - H))
@@ -1875,6 +1880,25 @@ func _comic_triggers() -> void:
 	var dz: Array = L.get("darkZones", [])
 	if not dz.is_empty():
 		add.call("mina", float(dz[0].x) + 40)
+
+## Seu Barros (e outros personagens parados): fala com o Milis na primeira vez que ele chega perto
+func _npc_check() -> bool:
+	for n in L.get("npcs", []):
+		if n.get("seen", false):
+			continue
+		var dx: float = abs(player.x + player.w / 2 - float(n.x))
+		var dy: float = abs(player.y + player.h - float(n.y))
+		if dx < 140 and dy < 140 and player.onGround and player.dyingT <= 0:
+			n.seen = true
+			var lines: Array = []
+			var t := 10
+			for f in n.lines:
+				var dur: int = 40 + int(str(f[1]).length() / 1.6)
+				lines.append([t, t + dur, f[0], f[1], f[2]])
+				t += dur + 6
+			start_cine("npc_" + str(n.id), float(n.x), float(n.y) - 80, t + 30, lines)
+			return true
+	return false
 
 func _comic_check() -> void:
 	var px: float = player.x + player.w / 2

@@ -1,6 +1,6 @@
 {
  "name": "Guarulhos · 1-1 Terminal",
- "intro": "O Barão das Milhas Falsas invadiu o Aeroporto de Guarulhos e espalhou as milhas LATAM dos clientes pelo terminal. Recupere as milhas, ache os cartões de embarque dourados e descubra para onde o Barão foi. Cuidado com os capangas dele!",
+ "intro": "Alguém está roubando as milhas dos clientes da Milhas Plus! Um vulto de capuz fugiu pelo terminal de Guarulhos com uma mala brilhando. Recupere as milhas LATAM, ache os cartões de embarque dourados e junte as pistas para descobrir quem é o ladrão. Cuidado com os capangas dele!",
  "theme": "aeroporto",
  "seed": 5,
  "weather": "limpo",
@@ -85,11 +85,15 @@
    "w": 140
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 1500,
    "y": 430,
    "w": 200,
-   "h": 70
+   "h": 70,
+   "sprite": "p_pc_bancos",
+   "ox": 8,
+   "oy": 10,
+   "ob": 4
   },
   {
    "t": "ground",
@@ -99,11 +103,15 @@
    "h": 140
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 1880,
    "y": 300,
    "w": 160,
-   "h": 200
+   "h": 200,
+   "sprite": "p_pc_cabine",
+   "ox": 0,
+   "oy": 12,
+   "ob": 4
   },
   {
    "t": "plat",
@@ -138,32 +146,48 @@
    "h": 140
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 3600,
    "y": 410,
    "w": 140,
-   "h": 90
+   "h": 90,
+   "sprite": "p_pc_balcao",
+   "ox": 30,
+   "oy": 0,
+   "ob": 4
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 3900,
    "y": 410,
    "w": 140,
-   "h": 90
+   "h": 90,
+   "sprite": "p_pc_balcao",
+   "ox": 30,
+   "oy": 0,
+   "ob": 4
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 4200,
    "y": 410,
    "w": 140,
-   "h": 90
+   "h": 90,
+   "sprite": "p_pc_balcao",
+   "ox": 30,
+   "oy": 0,
+   "ob": 4
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 4800,
    "y": 230,
    "w": 300,
-   "h": 270
+   "h": 270,
+   "sprite": "p_pc_porta",
+   "ox": 6,
+   "oy": 2,
+   "ob": 4
   },
   {
    "t": "plat",
@@ -259,11 +283,15 @@
    "h": 140
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 9200,
    "y": -40,
    "w": 700,
-   "h": 40
+   "h": 40,
+   "sprite": "p_pc_passarela_topo",
+   "ox": 0,
+   "oy": 93,
+   "ob": 4
   },
   {
    "t": "pgate",
@@ -288,18 +316,26 @@
    "h": 140
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 10930,
    "y": 160,
    "w": 670,
-   "h": 40
+   "h": 40,
+   "sprite": "p_pc_passarela_topo",
+   "ox": 0,
+   "oy": 87,
+   "ob": 4
   },
   {
-   "t": "ground",
+   "t": "peca",
    "x": 12160,
    "y": 160,
    "w": 340,
-   "h": 40
+   "h": 40,
+   "sprite": "p_pc_passarela_topo",
+   "ox": 0,
+   "oy": 22,
+   "ob": 4
   },
   {
    "t": "ground",
@@ -564,7 +600,7 @@
   {
    "x": 9850,
    "y": -70,
-   "txt": "Cartão de embarque dourado 2/3: carimbado \"VOO DO BARÃO — PORTÃO 2??\"."
+   "txt": "Cartão de embarque dourado 2/3: carimbado \"VOO ESPECIAL — PORTÃO 2??\". Quem será o passageiro?"
   },
   {
    "x": 13330,
@@ -1479,17 +1515,17 @@
   {
    "a": 0,
    "b": 520,
-   "t": "Guarulhos! O Barão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo."
+   "t": "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo."
   },
   {
    "a": 700,
    "b": 950,
-   "t": "Malas abandonadas do Barão: pise em cima ou bata com o bastão para soltar as milhas."
+   "t": "Malas abandonadas pelo ladrão: pise em cima ou bata com o bastão para soltar as milhas."
   },
   {
    "a": 1120,
    "b": 1320,
-   "t": "Um cambista do Barão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização."
+   "t": "Um cambista trabalhando para o ladrão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização."
   },
   {
    "a": 1720,
@@ -1520,7 +1556,7 @@
   {
    "a": 7200,
    "b": 7500,
-   "t": "A segurança! O Barão ligou as esteiras do raio-x na tomada errada: cuidado com os choques."
+   "t": "A segurança! Alguém ligou as esteiras do raio-x na tomada errada: cuidado com os choques."
   },
   {
    "a": 8100,
@@ -1618,7 +1654,99 @@
    "pow": 1.0
   }
  ],
- "decor": [],
+ "decor": [
+  {
+   "k": "pc",
+   "x": 640,
+   "y": 500,
+   "n": "p_pc_coluna",
+   "w": 92
+  },
+  {
+   "k": "pc",
+   "x": 2600,
+   "y": 500,
+   "n": "p_pc_coluna",
+   "w": 92
+  },
+  {
+   "k": "pc",
+   "x": 3500,
+   "y": 500,
+   "n": "p_pc_coluna",
+   "w": 92
+  },
+  {
+   "k": "pc",
+   "x": 5600,
+   "y": 500,
+   "n": "p_pc_coluna",
+   "w": 92
+  },
+  {
+   "k": "pc",
+   "x": 6900,
+   "y": 500,
+   "n": "p_pc_coluna",
+   "w": 92
+  },
+  {
+   "k": "pc",
+   "x": 1240,
+   "y": 500,
+   "n": "p_pc_carrinhos",
+   "w": 110
+  },
+  {
+   "k": "pc",
+   "x": 2250,
+   "y": 500,
+   "n": "p_pc_bancos",
+   "w": 230
+  },
+  {
+   "k": "pc",
+   "x": 3300,
+   "y": 500,
+   "n": "p_pc_carrinhos",
+   "w": 110
+  },
+  {
+   "k": "pc",
+   "x": 4650,
+   "y": 500,
+   "n": "p_pc_carrinhos",
+   "w": 110
+  },
+  {
+   "k": "pc",
+   "x": 7700,
+   "y": 500,
+   "n": "p_pc_raiox",
+   "w": 230
+  },
+  {
+   "k": "pc",
+   "x": 8000,
+   "y": 500,
+   "n": "p_pc_raiox",
+   "w": 230
+  },
+  {
+   "k": "pc",
+   "x": 10200,
+   "y": 500,
+   "n": "p_pc_carrinhos",
+   "w": 110
+  },
+  {
+   "k": "pc",
+   "x": 13900,
+   "y": 500,
+   "n": "p_pc_bancos",
+   "w": 230
+  }
+ ],
  "bars": [
   {
    "x0": 11640,
@@ -1659,11 +1787,59 @@
  "rests": {
   "1": [
    "CHECK-IN DO TERMINAL",
-   "No balcão, um bilhete esquecido pelos capangas: \"O Barão manda despachar tudo pelo subsolo das bagagens\".",
-   "Então as milhas estão descendo pelas esteiras. Eu vou atrás!"
+   "No balcão, um bilhete esquecido pelo vulto: \"Despachar tudo pelo subsolo das bagagens\".",
+   "Então as milhas estão descendo pelas esteiras. Mas quem escreve com uma letra tão caprichada?"
   ]
  },
- "endStory": "O Barão passou pelo terminal disfarçado, de cartola e bigode postiço. As pistas apontam para o subsolo das bagagens.",
+ "endStory": "O vulto de capuz escapou de novo, mas deixou rastros: um recibo com um cifrão dourado, um fio de bigode grisalho e uma lista assinada com um B. Quem está por trás disso? As pistas apontam para o subsolo das bagagens.",
+ "npcs": [
+  {
+   "x": 1040,
+   "y": 410,
+   "id": "barros1",
+   "pose": "aponta",
+   "lines": [
+    [
+     "SEU BARROS",
+     "Ei, robozinho da Milhas Plus! Vi um sujeito de capuz correndo com uma mala brilhando, direto para o check-in.",
+     "barros"
+    ],
+    [
+     "MILIS",
+     "Era ele! O saldo da família sumiu na hora em que ele passou. Obrigado, senhor!",
+     "tome"
+    ],
+    [
+     "SEU BARROS",
+     "Barros, ao seu dispor. Corre que ainda dá tempo... hehe.",
+     "barros"
+    ]
+   ]
+  },
+  {
+   "x": 14280,
+   "y": 500,
+   "id": "barros2",
+   "pose": "cochicha",
+   "lines": [
+    [
+     "SEU BARROS",
+     "Psiu! Você de novo? A segurança está estranha hoje. Aquele fiscal da cabine não é daqui, não...",
+     "barros"
+    ],
+    [
+     "MILIS",
+     "Seu Barros? Como o senhor chegou aqui antes de mim?",
+     "tome"
+    ],
+    [
+     "SEU BARROS",
+     "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!",
+     "barros"
+    ]
+   ]
+  }
+ ],
  "gold": {
   "x": 13380,
   "y": 930

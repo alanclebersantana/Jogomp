@@ -298,7 +298,19 @@ static func solids(g: Game, T: int) -> void:
 				Spr.PR("gate_iron", s.x - 6, s.y - 14, s.w + 12, s.h + 14)
 				Spr.PR("wb3", s.x - 10, s.y + s.h - 8, s.w + 20, 14, Color(.85, .82, .78))
 			"bossgate":
-				WorldKings.gate(s, T)
+				if g.L.get("theme", "") == "aeroporto":
+					# cancela de segurança: poste de metal com faixas amarelas e pretas
+					Spr.rect(s.x - 2, s.y - 6, s.w + 4, s.h + 6, Color("#1d2128"))
+					Spr.rect(s.x, s.y, s.w, s.h, Color("#c9cfd8"))
+					var yy: float = s.y
+					var k := 0
+					while yy < s.y + s.h:
+						Spr.rect(s.x, yy, s.w, min(22.0, s.y + s.h - yy), Color("#f2c230") if k % 2 == 0 else Color("#22252b"))
+						yy += 22
+						k += 1
+					Spr.circle(s.x + s.w / 2, s.y - 10, 7, Color("#e8302a") if int(T / 10) % 2 == 0 else Color("#7a1a14"))
+				else:
+					WorldKings.gate(s, T)
 			"bosslog":
 				_log(s.x, s.y)
 			"dogdoor":

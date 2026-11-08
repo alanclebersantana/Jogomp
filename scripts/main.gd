@@ -1039,7 +1039,7 @@ func _make_top_buttons() -> void:
 	dog_btn.ignore_texture_size = true
 	dog_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	dog_btn.size = Vector2(54, 54)
-	dog_btn.tooltip_text = "Trocar entre o Milis e a Bag (Q)"
+	dog_btn.tooltip_text = ""
 	dog_btn.pressed.connect(func(): game.keys["Dp"] = true)
 	dog_btn.visible = false
 	hud_layer.add_child(dog_btn)
@@ -1260,7 +1260,7 @@ func show_title() -> void:
 	vb.add_child(_label("MILHAS PLUS · EPISÓDIO 1 · BRASIL", 18, Color("#e8c98a"), Spr.font_title))
 	if OS.has_feature("teste"):
 		vb.add_child(_label("VERSÃO DE TESTE · todos os episódios liberados", 13, Color("#ffb070"), Spr.font_b))
-	vb.add_child(_label("O Barão das Milhas Falsas roubou as milhas dos clientes. O Milis vai buscar!", 17, Color("#e8dcc0"), Spr.font_i, 460))
+	vb.add_child(_label("Alguém está roubando as milhas dos clientes. O Milis vai descobrir quem é!", 17, Color("#e8dcc0"), Spr.font_i, 460))
 	var sp := Control.new()
 	sp.custom_minimum_size = Vector2(0, 8)
 	vb.add_child(sp)
@@ -1325,7 +1325,7 @@ func _confirm_wipe(next: Callable, back: Callable) -> void:
 	_confirm("COMEÇAR DE NOVO?", "O progresso salvo no último totem será apagado. Isso não tem volta.", "APAGAR E COMEÇAR", next, back)
 
 ## escolher o episódio (aparece depois de terminar o primeiro)
-const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."], ["GUARULHOS · 1-2 BAGAGENS", "O subsolo escuro das esteiras e a Bag."], ["GUARULHOS · 1-3 HANGAR", "O pátio na garoa, turbinas, guindastes e o Hangar 7."], ["GUARULHOS · CHEFE", "O Motoboy Turbo na pista."]]
+const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."]]
 func _choose_episode() -> void:
 	var vb := _overlay(.9)
 	vb.add_child(_label("ESCOLHA O EPISÓDIO", 30, GOLD, Spr.font_title))
@@ -1616,10 +1616,61 @@ func start_level(cont: bool, lvl: int = 0) -> void:
 	if cont:
 		show_intro(true)
 	else:
-		if game.level_idx > 0 or Save.getv("opt", "tut_asked", false):
-			show_intro(false)
+		var after := func():
+			if game.level_idx > 0 or Save.getv("opt", "tut_asked", false):
+				show_intro(false)
+			else:
+				_ask_tutorial(func(): show_intro(false))
+		if game.level_idx == 0 and ResourceLoader.exists("res://assets/comic/abertura_1.jpg") and DisplayServer.get_name() != "headless" and OS.get_environment("SKIP_PROLOGO") == "":
+			show_prologue(0, after)
 		else:
-			_ask_tutorial(func(): show_intro(false))
+			after.call()
+
+## quadrinhos de abertura (jogo novo): a família perde as milhas e o vulto de capuz foge
+const PROLOGO := [
+	"Aeroporto de Guarulhos. O Milis, o robô da Milhas Plus, ajuda uma família a emitir as passagens das férias...",
+	"...quando, de repente, o saldo de milhas deles some da tela!",
+	"Um vulto de capuz foge pelo saguão com uma mala brilhando, cheia de milhas!",
+	"Quem está roubando as milhas dos clientes? O Milis vai descobrir!",
+]
+func show_prologue(i: int, next: Callable) -> void:
+	state = S.INTRO
+	_show_hud(false)
+	if i == 0:
+		Audio.set_song("aero_tema")
+	var vb := _overlay(.94)
+	var vs := get_viewport().get_visible_rect().size
+	var img := TextureRect.new()
+	img.texture = load("res://assets/comic/abertura_%d.jpg" % (i + 1))
+	img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var ih: float = min(vs.y - 170.0, (vs.x - 120.0) * .56)
+	img.custom_minimum_size = Vector2(ih / .56, ih)
+	img.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vb.add_child(img)
+	vb.add_child(_label(PROLOGO[i], 18, Color("#f2e6c8"), Spr.font_i, min(vs.x - 80.0, 760.0)))
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 14)
+	var go := func():
+		if i + 1 < PROLOGO.size():
+			show_prologue(i + 1, next)
+		else:
+			close_panel()
+			next.call()
+	var skip := func():
+		close_panel()
+		next.call()
+	if i + 1 < PROLOGO.size():
+		var sb := _button("PULAR", skip)
+		sb.custom_minimum_size = Vector2(130, 44)
+		row.add_child(sb)
+	var gb := _button("CONTINUAR ▸" if i + 1 < PROLOGO.size() else "VAMOS LÁ!", go)
+	gb.custom_minimum_size = Vector2(190, 44)
+	row.add_child(gb)
+	vb.add_child(row)
+	panel.set_meta("ok", go)
+	panel.set_meta("back", skip)
 
 ## completa o ponto de retorno antes de gravar (Save.before_save_run):
 ##  - lápis e frutas que a gangorra e os arbustos derrubaram e ainda estão no chão (antes sumiam)
@@ -2108,7 +2159,7 @@ func _render_bag(msg: String) -> void:
 		m = m.replace("Toque num objeto e depois em outro", "Escolha um objeto com o direcional e aperte A; depois outro")
 		m = m.replace("Toque em ", "Escolha ").replace("toque em ", "escolha ").replace("toque no botão da manivela", "aperte X para girar a manivela").replace("toque no botão ✔", "aperte X para usar").replace("toque em ✔", "aperte X")
 	vb.add_child(_label(m, 16, Color("#e8d8b0"), Spr.font_i, 680))
-	vb.add_child(_label("PISTAS DO BARÃO", 13, Color("#b8a888")))
+	vb.add_child(_label("PISTAS DO LADRÃO", 13, Color("#b8a888")))
 	var clues := HBoxContainer.new()
 	clues.alignment = BoxContainer.ALIGNMENT_CENTER
 	clues.add_theme_constant_override("separation", 6)
@@ -2196,7 +2247,7 @@ func _show_clue(id: int, from_bag: bool) -> void:
 	_clear_keys()
 	_show_hud(false)
 	var vb := _overlay(.84)
-	vb.add_child(_label("PISTA %d DE %d" % [game.CLUEGOT.size(), game.clue_ids().size()] if not from_bag else "PISTAS DO BARÃO", 14, Color("#cdbfa6")))
+	vb.add_child(_label("PISTA %d DE %d" % [game.CLUEGOT.size(), game.clue_ids().size()] if not from_bag else "PISTAS DO LADRÃO", 14, Color("#cdbfa6")))
 	if id == 6 and game.level_idx == 0:
 		vb.add_child(_Badge.new())
 	else:
@@ -2433,7 +2484,7 @@ func show_gallery(ep: int = 1) -> void:
 	var cl := HBoxContainer.new()
 	cl.alignment = BoxContainer.ALIGNMENT_CENTER
 	cl.add_theme_constant_override("separation", 10)
-	cl.add_child(_label("PISTAS DO BARÃO", 13, Color("#b8a888")))
+	cl.add_child(_label("PISTAS DO LADRÃO", 13, Color("#b8a888")))
 	var c0: int = 1
 	for i in range(c0, c0 + 6):
 		if Save.getv("gallery", "c%d" % i, false):
@@ -2582,7 +2633,7 @@ func _on_results() -> void:
 		var brow := HBoxContainer.new()
 		brow.alignment = BoxContainer.ALIGNMENT_CENTER
 		brow.add_theme_constant_override("separation", 16)
-		brow.add_child(_label("Próximo aeroporto: Maringá — em breve.", 13, Color(.75, .7, .6), Spr.font_i))
+		brow.add_child(_label("Próxima fase: Guarulhos 1-2 Bagagens — em breve.", 13, Color(.75, .7, .6), Spr.font_i))
 		cont = show_title
 		brow.add_child(_button("CONTINUAR", cont))
 		vb.add_child(brow)

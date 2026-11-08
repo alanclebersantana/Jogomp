@@ -116,6 +116,7 @@ func __draw_raw() -> void:
 	var __d_Props_draw := Time.get_ticks_usec()
 	WorldProps.draw(g, T)
 	Spr.pt("d_Props_draw", __d_Props_draw)
+	_npcs(g)
 	WorldLake.back(g, T)
 	var __d_Traps_draw := Time.get_ticks_usec()
 	WorldTraps.draw(g, T)
@@ -789,7 +790,7 @@ const OUT8 := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vec
 ## estados em que o bicho começa um ataque (aparece o "!" vermelho antes)
 const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1], "mole": [2]}
 ## nomes para a dica do primeiro encontro
-const EN_NAME := {"crow": "Pombo do Barão", "bat": "Mala-monstro", "fly": "Drone", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
+const EN_NAME := {"crow": "Pombo treinado", "bat": "Mala-monstro", "fly": "Drone", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
 	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Cambista", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
 const EYES := {}   # a arte nova já tem os olhos acesos dos capangas
@@ -836,7 +837,7 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	# primeiro encontro com cada tipo de inimigo: dica curta dizendo que ele é perigoso
 	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k):
 		g.en_seen[e.k] = true
-		g.flash("%s: capanga do Barão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
+		g.flash("%s: capanga do ladrão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
 	var s: int = e.get("st", 0)
 	if s != e.get("pst", 0) and ATK.get(e.k, []).has(s):
 		e.warnT = 34
@@ -2706,3 +2707,27 @@ func _vault(cx: float, gy: float) -> void:
 		var a2: float = k * PI / 4 + .3
 		Spr.seg(wx - cos(a2) * 20, cy + 10 - sin(a2) * 20, wx + cos(a2) * 20, cy + 10 + sin(a2) * 20, Color("#2a2c30"), 4)
 	Spr.circle(wx, cy + 10, 5, Color("#8a8e96"))
+
+## Seu Barros, o atendente: parado, vira para o Milis; depois da conversa, quando o Milis já foi
+## embora, dá um sorrisinho maroto (pista para quem presta atenção)
+func _npcs(g) -> void:
+	for n in g.L.get("npcs", []):
+		var x: float = float(n.x)
+		if x < g.cam - 200 or x > g.cam + g.W + 200:
+			continue
+		var pose: String = str(n.get("pose", "parado"))
+		var px: float = g.player.x + g.player.w / 2
+		if n.get("seen", false) and g.CINE.is_empty():
+			pose = "maroto" if abs(px - x) > 170 else "parado"
+		var nm: String = "p_barros_" + pose
+		var r = Spr.AR.get(nm)
+		if r == null:
+			continue
+		var hgt := 128.0
+		var w: float = hgt * r[2] / r[3]
+		var y: float = float(n.y)
+		Spr.ellipse(x, y + 1, 24, 5, Color(0, 0, 0, .25))
+		var br: float = sin(T * .05 + x) * 1.2
+		# a arte olha para a esquerda: vira quando o Milis está à direita
+		Spr.P(nm.substr(2), x, y + 2 + br * .2, w, px > x)
+

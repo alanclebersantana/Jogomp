@@ -152,7 +152,8 @@ func _draw_raw() -> void:
 				# peça pintada (balcão, painel, contêiner...): a arte cobre a caixa, com folga ox/oy
 				var ox: float = float(s.get("ox", 0))
 				var oy: float = float(s.get("oy", 0))
-				Spr.AB(str(s.sprite), s.x - ox, s.y - oy, s.w + 2 * ox, s.h + oy + 4)
+				var ob: float = float(s.get("ob", 4))
+				Spr.AB(str(s.sprite), s.x - ox, s.y - oy, s.w + 2 * ox, s.h + oy + ob)
 			"cart":
 				if s.get("sprite"):
 					Spr.ABb(s.sprite, s.x + s.w / 2, s.y + s.h + 4, s.w + 20)

@@ -13,6 +13,9 @@ static var clip_x1 := 1e9
 static func decor(d: Dictionary) -> void:
 	var s: float = d.get("s", 1.0)
 	match d.k:
+		"pc":
+			# móvel pintado do aeroporto (só cenário): base no chão, largura w
+			Spr.ABb(str(d.n), d.x, d.y + 2, float(d.get("w", 200)) * s, float(d.get("al", 1.0)))
 		"pine":
 			pine(d.x, d.y, s)
 		"house1", "house2":

@@ -6,7 +6,7 @@ config_version=5
 run/max_fps=0
 
 config/name="Milhas Plus – Cadê as milhas?!"
-config/description="O robô Milis e a mala Bag recuperam as milhas roubadas pelo Barão das Milhas Falsas."
+config/description="O robô Milis da Milhas Plus descobre quem está roubando as milhas dos clientes."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 boot_splash/bg_color=Color(0.043, 0.035, 0.024, 1)

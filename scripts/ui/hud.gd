@@ -615,10 +615,12 @@ func _cine(W: float, H: float) -> void:
 				_portrait("vg_face", bx + 44, by + 42, 62, k2)
 			"lia":
 				_portrait("lia_scared", bx + 44, by + 42, 62, k2)
+			"barros":
+				_portrait("p_barros_rosto", bx + 44, by + 42, 62, k2)
 			_:
 				# rosto do Tomé dentro da moldura (antes o corpo vazava para fora da caixa)
 				Spr.ci.draw_texture_rect(tex_face, Rect2(bx + 12, by + 10, 64, 64), false, Color(1, 1, 1, k2))
-		var col: Color = {"BARÃO": Color("#ff9a7a"), "BAG": Color("#ffb0d0"), "MILIS": Color("#ffd27a"), "VARGAS": Color("#ff9a7a"), "TOMÉ": Color("#ffd27a")}.get(l[2], Color.WHITE)
+		var col: Color = {"BARÃO": Color("#ff9a7a"), "SEU BARROS": Color("#9fc4ff"), "BAG": Color("#ffb0d0"), "MILIS": Color("#ffd27a"), "VARGAS": Color("#ff9a7a"), "TOMÉ": Color("#ffd27a")}.get(l[2], Color.WHITE)
 		Spr.text(l[2], bx + 92, by + 26, 15, Color(col.r, col.g, col.b, k2), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_title)
 		var shown: int = 9999 if c.get("waiting", false) else int((t - l[0]) * 1.6)
 		var txt: String = l[3].substr(0, shown)

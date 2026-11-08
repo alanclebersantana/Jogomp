@@ -1,6 +1,6 @@
 class_name FiscalBoss
 extends RefCounted
-## Mini-chefe da 1-1: o FISCAL FALSO, capanga do Barão disfarçado de agente de segurança.
+## Mini-chefe da 1-1: o FISCAL FALSO, capanga do ladrão disfarçado de agente de segurança.
 ## Fica na cabine de controle (alto, à direita da arena) e liga os lasers do raio-X em padrões:
 ##   rasteiro  laser no rodapé (pule)          alto   laser na altura do peito (abaixe ↓)
 ##   grade     feixes verticais com vãos (fique num vão)
@@ -26,7 +26,10 @@ static func setup(b: Dictionary, _L: Dictionary) -> void:
 
 
 static func box(g, b: Dictionary) -> Dictionary:
-	return g.R(b.x - 22, b.y - 76, 44, 76)
+	# do tamanho da arte: sentado tonto é mais baixo
+	if str(b.get("st", "")) == "tonto":
+		return g.R(b.x - 32, b.y - 92, 64, 92)
+	return g.R(b.x - 26, b.y - 122, 52, 122)
 
 
 static func _pattern_list(hp: int) -> Array:
@@ -237,12 +240,16 @@ static func draw(g, b: Dictionary, T: int) -> void:
 	# cabine de controle (vidro, painel, escadinha)
 	var cx: float = b.get("cab_x", float(b.x1) - 120.0)
 	var cy: float = b.get("cab_y", 330.0)
-	Spr.rect(cx - 70, cy, 140, GY - cy, Color("#3a4150"))
-	Spr.rect(cx - 70, cy, 140, 8, Color("#f2c230"))
+	# a cabine de vidro pintada (o Fiscal fica em cima, no posto de controle)
+	if Spr.AR.has("p_pc_cabine"):
+		Spr.AB("p_pc_cabine", cx - 76, cy - 6, 152, GY - cy + 10)
+	else:
+		Spr.rect(cx - 70, cy, 140, GY - cy, Color("#3a4150"))
+	Spr.rect(cx - 72, cy - 2, 144, 8, Color("#f2c230"))
 	for i in 6:
-		Spr.rect(cx + 52, cy + 18 + i * 26, 22, 4, Color("#8b95a3"))
-	Spr.rect(cx - 74, cy - 96, 148, 96, Color("#2a313d"))
-	Spr.rect(cx - 66, cy - 88, 132, 58, Color(.55, .8, .95, .35))
+		Spr.rect(cx + 70, cy + 18 + i * 26, 18, 4, Color("#8b95a3"))
+	Spr.rect(cx - 74, cy - 96, 148, 96, Color(.16, .19, .24, .55))
+	Spr.rect(cx - 66, cy - 88, 132, 58, Color(.55, .8, .95, .25))
 	var luz: Color = Color("#e8302a") if b.get("st", "") == "lasers" and int(T / 8) % 2 == 0 else Color("#36c26a")
 	Spr.circle(cx + 58, cy - 108, 9, luz)
 	Spr.text("SEGURANÇA", cx - 66, cy - 102, 14, Color("#f2c230"))
@@ -296,16 +303,36 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		return
 	var face_left: bool = g.player.x < b.x
 	var c: Color = Polish.fury(int(b.hp)) if int(b.get("red", 0)) == 0 else Color(1, .5, .5)
-	if st in ["tonto", "down"]:
-		Spr.P("boar_ko" if st == "down" else "boar_wind", b.x, b.y + 2, 110, not face_left, 0.0, c)
+	var pose := "parado"
+	match st:
+		"lasers":
+			pose = "botao"
+		"painel":
+			pose = "ri"
+		"curto", "cai":
+			pose = "choque"
+		"tonto":
+			pose = "tonto"
+		"down":
+			pose = "ko"
+		"volta":
+			pose = "bracos"
+		_:
+			pose = "parado" if int(T / 90) % 3 != 2 else "bracos"
+	var r = Spr.AR.get("p_fiscal_" + pose)
+	if r != null:
+		var hgt: float = 132.0 if pose != "ko" else 64.0
+		if pose == "tonto":
+			hgt = 104.0
+		var w: float = hgt * r[2] / r[3]
+		# a arte olha para a direita
+		Spr.P("fiscal_" + pose, b.x, b.y + 2, w, face_left, 0.0, c)
 		if st == "tonto":
 			for i in 3:
-				var a: float = T * .12 + i * TAU / 3.0
-				Spr.text("★", b.x + cos(a) * 26 - 6, b.y - 82 + sin(a) * 6, 16, Color("#ffd23a"))
+				var a2: float = T * .12 + i * TAU / 3.0
+				Spr.text("★", b.x + cos(a2) * 26 - 6, b.y - 100 + sin(a2) * 6, 16, Color("#ffd23a"))
+		return
+	if st in ["tonto", "down"]:
+		Spr.P("boar_ko" if st == "down" else "boar_wind", b.x, b.y + 2, 110, not face_left, 0.0, c)
 	else:
 		Spr.P("boar_wind", b.x, b.y + 2, 100, not face_left, 0.0, c)
-	# quepe de fiscal
-	if st not in ["tonto", "down"]:
-		Spr.rect(b.x - 18, b.y - 84, 36, 9, Color("#1d2a4a"))
-		Spr.rect(b.x - 22 if face_left else b.x, b.y - 77, 22, 4, Color("#11182c"))
-		Spr.rect(b.x - 4, b.y - 83, 8, 6, Color("#f2c230"))

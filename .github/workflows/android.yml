@@ -69,8 +69,8 @@ jobs:
       - name: Importar recursos
         run: ~/godot/godot --headless --path . --import || true
 
-      - name: Teste automático (as 4 fases de Guarulhos do começo ao fim)
-        run: ~/godot/godot --headless --path . -s tests/route_gru.gd
+      - name: Teste automático (a fase 1-1 Terminal do começo ao fim, com o Fiscal Falso)
+        run: ~/godot/godot --headless --path . -s tests/route_gru.gd -- 1
 
       - name: Gerar APK
         run: |
@@ -102,8 +102,8 @@ jobs:
           name: Cadê as milhas?! 0.1.${{ github.run_number }}
           body: |
             APKs gerados automaticamente:
-            - **cade-as-milhas.apk**: o jogo normal (cada fase abre depois de terminar a anterior).
-            - **cade-as-milhas-teste.apk**: versão de teste, com todas as fases liberadas. Instala como
+            - **cade-as-milhas.apk**: o jogo normal (por enquanto, a fase 1-1 Terminal de Guarulhos).
+            - **cade-as-milhas-teste.apk**: versão de teste, com tudo liberado. Instala como
               outro app ("Cadê as Milhas teste"), ao lado do normal, com progresso separado.
             No celular: baixe o arquivo e toque nele para instalar
             (pode ser preciso permitir "instalar apps desconhecidos" para o navegador).
