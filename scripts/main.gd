@@ -44,7 +44,7 @@ const KEYMAP := {
 	KEY_SPACE: "J", KEY_Z: "J", KEY_K: "J", KEY_C: "P", KEY_F: "A", KEY_E: "A", KEY_X: "A", KEY_V: "A", KEY_R: "B",
 	KEY_G: "G", KEY_J: "G", KEY_Q: "D",
 }
-const GOLD := Color("#e8d39a")
+const GOLD := Color("#ffd84a")
 const INK := Color("#f0e4c8")
 ## faixas de cinema (cenas, apresentação dos chefes e câmera lenta)
 var cine_bars: Control
@@ -1078,8 +1078,8 @@ func _make_theme() -> void:
 	theme_ui.default_font = Spr.font
 	theme_ui.default_font_size = 18
 	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(.08, .06, .04, .85)
-	sb.border_color = Color(.61, .51, .32, .8)
+	sb.bg_color = Color("#13244a")
+	sb.border_color = Color("#f2c230")
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(8)
 	sb.content_margin_left = 22
@@ -1087,10 +1087,10 @@ func _make_theme() -> void:
 	sb.content_margin_top = 10
 	sb.content_margin_bottom = 10
 	var sbh := sb.duplicate()
-	sbh.bg_color = Color(.2, .15, .08, .95)
-	sbh.border_color = GOLD
+	sbh.bg_color = Color("#1f3a72")
+	sbh.border_color = Color("#ffd84a")
 	var sbp := sbh.duplicate()
-	sbp.bg_color = Color(.3, .22, .1, 1)
+	sbp.bg_color = Color("#2b4f96")
 	for st in ["normal", "focus"]:
 		theme_ui.set_stylebox(st, "Button", sb)
 	theme_ui.set_stylebox("hover", "Button", sbh)
@@ -1102,14 +1102,14 @@ func _make_theme() -> void:
 	theme_ui.set_font_size("font_size", "Button", 18)
 	# barras de volume: trilho de madeira escura, parte cheia dourada e um botão redondo de latão
 	var trk := StyleBoxFlat.new()
-	trk.bg_color = Color(.12, .09, .05, .95)
-	trk.border_color = Color(.61, .51, .32, .8)
+	trk.bg_color = Color("#0d1a36")
+	trk.border_color = Color("#f2c230")
 	trk.set_border_width_all(1)
 	trk.set_corner_radius_all(5)
 	trk.content_margin_top = 4
 	trk.content_margin_bottom = 4
 	var fil := trk.duplicate()
-	fil.bg_color = Color("#c9a24a")
+	fil.bg_color = Color("#f2c230")
 	theme_ui.set_stylebox("slider", "HSlider", trk)
 	theme_ui.set_stylebox("grabber_area", "HSlider", fil)
 	theme_ui.set_stylebox("grabber_area_highlight", "HSlider", fil)

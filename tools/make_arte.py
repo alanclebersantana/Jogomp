@@ -444,6 +444,59 @@ def barros():
     solta("p_barros_rosto", q, 160)
 
 
+# ======================================================================
+#  BOTÕES E ANALÓGICO (sinalização de aeroporto)
+# ======================================================================
+def ui_aero():
+    from PIL import ImageDraw, ImageFilter
+    u = comps("ui_aero")
+    def botao(q, n, size=256):
+        im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        im.alpha_composite(cel(q, size, size, (size - 6) / max(q.size), size / 2, size / 2, False))
+        salva(im, UI, n + ".png")
+        return im
+    jump, baton, mala, pausa, mao, ajuda, base, knob = u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7]
+    botao(jump, "btn_jump")
+    botao(baton, "btn_golpe")
+    botao(baton, "btn_harpoon")
+    botao(mala, "btn_bag")
+    botao(pausa, "btn_pause")
+    botao(mao, "btn_use")
+    botao(mao, "btn_check")
+    botao(mao, "btn_crank")
+    botao(ajuda, "btn_hint")
+    botao(base, "stick_base")
+    # o centro verde do botão do analógico sumiu com o fundo verde: pinta a luz de volta
+    k = botao(knob, "stick_knob")
+    glow = Image.new("RGBA", k.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(glow)
+    c = k.width / 2
+    d.ellipse((c - 46, c - 46, c + 46, c + 46), fill=(40, 255, 110, 140))
+    glow = glow.filter(ImageFilter.GaussianBlur(10))
+    d2 = ImageDraw.Draw(glow)
+    d2.ellipse((c - 34, c - 34, c + 34, c + 34), fill=(30, 200, 80, 255))
+    d2.ellipse((c - 26, c - 26, c + 26, c + 26), fill=(70, 240, 120, 255))
+    d2.ellipse((c - 16, c - 22, c + 4, c - 8), fill=(220, 255, 230, 220))
+    out = Image.alpha_composite(glow, k)
+    # a luz fica por baixo do aro: põe por baixo e repinta o miolo
+    out2 = k.copy()
+    out2 = Image.alpha_composite(glow, out2)
+    salva(out2, UI, "stick_knob.png")
+    # setas (controle em cruz): botão azul vazio com seta branca
+    vazio = botao(ajuda, "_tmp_vazio")
+    os.remove(os.path.join(UI, "_tmp_vazio.png"))
+    for n, ang in [("pad_L", 180), ("pad_R", 0), ("pad_U", 90), ("pad_S", 270)]:
+        im = vazio.resize((128, 128), Image.LANCZOS)
+        d = ImageDraw.Draw(im)
+        d.ellipse((24, 24, 104, 104), fill=(25, 45, 92, 255))
+        import math
+        pts = [(34, 0), (4, -26), (4, -12), (-30, -12), (-30, 12), (4, 12), (4, 26)]
+        a = math.radians(-ang)
+        P = [(64 + x * math.cos(a) - y * math.sin(a), 64 + x * math.sin(a) + y * math.cos(a)) for x, y in pts]
+        d.polygon(P, fill=(255, 255, 255, 255), outline=(10, 18, 40, 255))
+        im.save(os.path.join(UI, n + ".png"))
+
+
 if __name__ == "__main__":
     apaga_natureza()
     cabo()
@@ -453,6 +506,7 @@ if __name__ == "__main__":
     objetos()
     bastao(info)
     moveis()
+    ui_aero()
     fiscal()
     barros()
     pisos()
