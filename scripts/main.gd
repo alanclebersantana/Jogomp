@@ -95,6 +95,8 @@ func _ready() -> void:
 	game.drawing_found.connect(func(i: int):
 		# a galeria guarda os desenhos separados por episódio (o 1º desenho do Ep. 2 não abre o do Ep. 1)
 		Save.setv("gallery", "e%d_d%d" % [game.level_idx + 1, i], true)
+		if game.L.get("theme", "") == "aeroporto":
+			return   # cartão de embarque dourado: o aviso já aparece no topo (sem os desenhos da Isis)
 		var dr := preload("res://scripts/ui/drawing_reveal.gd").new()
 		dr.kind = [0, 1, 3][clamp(i, 0, 2)]
 		hud_layer.add_child(dr))

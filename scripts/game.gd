@@ -43,6 +43,8 @@ var SOL: Array = []
 var CR: Array = []
 var SPR: Array = []
 var EN: Array = []
+## piso molhado (aeroporto): poças deixadas pelo faxineiro e as fixas da fase, com placa amarela
+var WET: Array = []
 var COINS: Array = []
 var COIN_GRID := {}      # lápis por faixa de 512 px (para não testar os 660 a cada passo)
 var CHK: Array = []
@@ -200,6 +202,9 @@ func load_level(i: int) -> void:
 		o.t = 0
 		SPR.append(o)
 	EN = []
+	WET = []
+	for wz in L.get("wet", []):
+		WET.append({"x": float(wz.x), "w": float(wz.w), "y": float(wz.get("y", 500)), "t": -1})
 	for e in L.get("enemies", []):
 		var o: Dictionary = e.duplicate()
 		o.dir = -1
@@ -1031,6 +1036,8 @@ func step() -> void:
 			respawn()
 		return
 	_comic_check()
+	_tick_wet()
+	_wire_shock()
 	if _npc_check():
 		return
 	if not player.get("warp", {}).is_empty():
@@ -1310,6 +1317,7 @@ func step() -> void:
 			elif want == 0 or (not player.onGround and not player.run):
 				player.holdT = 0
 			var wet: bool = player._g != null and player._g.get("wet") and player.onGround
+			var slick: bool = player.onGround and on_wet_floor()
 			var top2 := top
 			if player.mud and player.onGround:
 				top2 = min(top, 1.9)
@@ -1324,6 +1332,14 @@ func step() -> void:
 			if wet and want == 0:
 				# escorrega um pouco e para: gelo desliza mais que o tronco molhado
 				player.vx *= (.955 if player._g.t == "ice" else .88) / FRIC
+			elif slick:
+				# piso molhado do aeroporto: escorrega bastante e custa a parar (e a virar)
+				if want == 0:
+					player.vx *= .962 / FRIC
+				elif player.vx * want < 0:
+					acc *= .35
+				if abs(player.vx) > 1.5 and T % 4 == 0:
+					Polish.drops(player.x + player.w / 2, player.y + player.h - 2, 2, 1.4)
 			if player.onGround and abs(player.vx) < 1.4 and not player.run and not player.puff:
 				acc *= .78
 			# M4 no ar, virar para o outro lado responde mais rápido (correção de pulo)
@@ -1654,6 +1670,12 @@ func step() -> void:
 					note("O capacete protege! Sozinho não dá...")
 				continue
 			if e.k == "mole" and e.get("st", 0) == 5 and not stomp:
+				continue
+			if stomp and e.k == "janitor" and sign(player.x + player.w / 2 - e.x) == float(e.dir):
+				# de frente, a enceradeira atrapalha: quica e machuca
+				player.vy = STOMP * .7
+				player.cutOk = false
+				hurt(1, e.x)
 				continue
 			if stomp:
 				kill_enemy(e, "stomp")
@@ -3296,6 +3318,10 @@ func ebox(e: Dictionary) -> Dictionary:
 		return R(e.x - 16, e.y - 40 * lu, 32, 40 * lu)
 	if e.k == "crow":
 		return R(e.x - 30, e.y - 18, 60, 30)
+	if e.k == "fly" and L.get("theme", "") == "aeroporto":
+		return R(e.x - 22, e.y - 26, 44, 50)
+	if e.k == "janitor":
+		return R(e.x - 30, e.y - 96, 60, 96)
 	if FLY.has(e.k):
 		return R(e.x - 22, e.y - 8, 44, 22)
 	return R(e.x - 20, e.y - 34, 40, 34)
@@ -3332,6 +3358,43 @@ func _dust_col() -> Color:
 	if gk == "grass":
 		return Color(.5, .6, .36, .45)
 	return Color(.62, .55, .42, .5)
+
+## fio de manutenção: faísca de tempos em tempos na ponta
+static func wire_spark(v: Dictionary, t: int) -> bool:
+	return (t + int(v.x)) % 160 < 26
+
+## choque leve: encostar na ponta do fio quando ela está soltando faíscas (sem estar segurando o fio)
+func _wire_shock() -> void:
+	if L.get("theme", "") != "aeroporto" or player.iframe > 0 or player.dyingT > 0:
+		return
+	for v in VINES:
+		if not wire_spark(v, T) or player.get("vine") == v:
+			continue
+		var th: float = float(v.get("th", 0.0))
+		var tip := Vector2(v.x + sin(th) * float(v.len), v.y + cos(th) * float(v.len))
+		var c := Vector2(clamp(tip.x, player.x, player.x + player.w), clamp(tip.y, player.y, player.y + player.h))
+		if c.distance_to(tip) < 12:
+			hurt(1, tip.x)
+			burst(tip.x, tip.y, 10, Color(.7, .9, 1))
+			return
+
+func on_wet_floor() -> bool:
+	var cx: float = player.x + player.w / 2
+	var fy: float = player.y + player.h
+	for wz in WET:
+		if cx > wz.x and cx < wz.x + wz.w and abs(fy - wz.y) < 6:
+			return true
+	return false
+
+func _tick_wet() -> void:
+	var i := WET.size() - 1
+	while i >= 0:
+		var wz: Dictionary = WET[i]
+		if wz.t > 0:
+			wz.t -= 1
+			if wz.t == 0:
+				WET.remove_at(i)
+		i -= 1
 
 func update_enemy(e: Dictionary) -> void:
 	_update_enemy_core(e)
@@ -3473,6 +3536,25 @@ func _update_enemy_core(e: Dictionary) -> void:
 		return
 	# javali (anda e investe)
 	var spd := 1.1
+	if e.k == "janitor":
+		# faxineiro: empurra a enceradeira devagar e vai deixando o piso molhado para trás
+		spd = .75
+		e.wt = int(e.get("wt", 0)) + 1
+		if e.wt % 16 == 0:
+			var px: float = e.x + e.dir * 26 - 30
+			var merged := false
+			for wz in WET:
+				if wz.t > 0 and abs(wz.y - e.base) < 2 and px < wz.x + wz.w + 8 and px + 60 > wz.x - 8:
+					var nx0: float = min(wz.x, px)
+					wz.w = max(wz.x + wz.w, px + 60) - nx0
+					wz.x = nx0
+					wz.t = 520
+					merged = true
+					break
+			if not merged:
+				WET.append({"x": px, "w": 60.0, "y": float(e.base), "t": 520})
+		if T % 5 == 0:
+			PARTS.append({"x": e.x + e.dir * 26, "y": e.base - 3, "vx": randf_range(-1.2, 1.2), "vy": -randf_range(.6, 1.6), "life": 18, "col": Color(.7, .85, 1, .8)})
 	if e.k == "boar":
 		var dx2: float = player.x + player.w / 2 - e.x
 		var dy2: float = player.y + player.h - e.base
@@ -3525,7 +3607,10 @@ func _crow(e: Dictionary) -> void:
 	e.t = e.get("t", 0) + 1
 	# penas: uma de vez em quando batendo as asas, várias no mergulho
 	if (st == 0 and rng.randf() < .006) or (st == 1 and rng.randf() < .12):
-		Polish.part("feather", e.x - e.dir * 10, e.y - 4, -e.dir * randf_range(.3, 1.2), -randf_range(.2, .8), 140, Color(.13, .13, .17))
+		if L.get("theme", "") == "aeroporto":
+			PARTS.append({"x": e.x - e.dir * 10, "y": e.y + 6, "vx": randf_range(-1, 1), "vy": randf_range(.5, 2), "life": 14, "col": Color(1, .75, .3)})
+		else:
+			Polish.part("feather", e.x - e.dir * 10, e.y - 4, -e.dir * randf_range(.3, 1.2), -randf_range(.2, .8), 140, Color(.13, .13, .17))
 	if st == 0:
 		_glide(e, 2.2)
 		e.y = e.cy + sin(T * .06 + e.x * .01) * 16

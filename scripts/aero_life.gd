@@ -1,0 +1,251 @@
+class_name AeroLife
+extends RefCounted
+## Vida do aeroporto (só cenário, não machuca): passageiros andando e reagindo ao Milis, papéis
+## voando, sombra de avião passando pelas vidraças, lâmpada fluorescente piscando na segurança,
+## neon do duty free à noite, painéis de voo trocando e o alto-falante do aeroporto.
+
+static var PAPERS: Array = []
+static var _lvl: int = -1
+
+const PAX_H := 118.0     # altura de um adulto (o Milis é baixinho)
+
+static func _reset(g) -> void:
+	if _lvl == g.level_idx and g.T > 2:
+		return
+	_lvl = g.level_idx
+	PAPERS = []
+	for p in g.L.get("pax", []):
+		p.px = float(p.x)
+		p.dir = float(p.get("dir", 1))
+		p.rt = 0
+
+static func aero(g) -> bool:
+	return g.L.get("theme", "") == "aeroporto"
+
+# ---------------------------------------------------------------- atrás do Milis
+static func back(g, T: int) -> void:
+	if not aero(g):
+		return
+	_reset(g)
+	_neon_floor(g, T)
+	_boards(g, T)
+	_carts(g, T)
+	_pax(g, T)
+
+static func _pax(g, T: int) -> void:
+	var pl: Dictionary = g.player
+	var pcx: float = pl.x + pl.w / 2
+	for p in g.L.get("pax", []):
+		var n: String = str(p.n)
+		var k: String = str(p.get("k", "walk"))
+		var fresh: bool = Polish.FRESH
+		# anda de um lado para o outro dentro do trecho dele
+		if k == "walk" and fresh and int(p.rt) <= 0:
+			var spd: float = float(p.get("spd", .9))
+			p.px += p.dir * spd
+			var r: Array = p.r
+			if p.px > float(r[1]):
+				p.px = float(r[1])
+				p.dir = -1.0
+			elif p.px < float(r[0]):
+				p.px = float(r[0])
+				p.dir = 1.0
+		var x: float = p.px
+		if x < g.cam - 200 or x > g.cam + g.W + 200:
+			continue
+		var y: float = float(p.get("y", 500))
+		var near: bool = abs(pcx - x) < 95 and abs(pl.y + pl.h - y) < 120
+		# reação: assusta (troca de pose e para um pouco), acena ou aponta para o Milis
+		if near and p.has("re") and int(p.rt) <= 0 and fresh:
+			p.rt = 70
+		if int(p.rt) > 0 and fresh:
+			p.rt -= 1
+		var nm: String = n
+		var hop := 0.0
+		if int(p.rt) > 0 and p.has("re"):
+			nm = str(p.re)
+			hop = -abs(sin(float(p.rt) * .2)) * 6.0
+		var r2 = Spr.AR.get("p_" + nm)
+		if r2 == null:
+			continue
+		var hgt: float = PAX_H * float(p.get("sc", 1.0))
+		var w: float = hgt * r2[2] / r2[3]
+		var face_left: bool = p.dir < 0
+		if k != "walk":
+			face_left = pcx < x if p.get("look", true) else bool(p.get("flip", false))
+		var bob := 0.0
+		if k == "walk" and int(p.rt) <= 0:
+			bob = -abs(sin(p.px * .09)) * 2.5
+		elif k == "sit":
+			bob = sin(T * .03 + x) * .8
+		Spr.ellipse(x, y + 1, w * .32, 5, Color(0, 0, 0, .22))
+		Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(.93, .93, .97))
+		if k == "sit" and str(p.get("z", "")) != "":
+			var zt: int = (T + int(x)) % 120
+			Spr.text("z", x + 18 + zt * .15, y - hgt * .78 - zt * .3, 12 + zt / 30, Color(1, 1, 1, 1.0 - zt / 120.0), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b, 3)
+
+## carrinho elétrico da limpeza passando devagar no fundo (vai e volta)
+static func _carts(g, T: int) -> void:
+	for c in g.L.get("carts", []):
+		var x0: float = float(c.x0)
+		var x1: float = float(c.x1)
+		var span: float = x1 - x0
+		var ph: float = fposmod(T * .6 + x0, span * 2)
+		var x: float = x0 + (ph if ph < span else span * 2 - ph)
+		var left: bool = ph >= span
+		if x < g.cam - 200 or x > g.cam + g.W + 200:
+			continue
+		var y: float = float(c.get("y", 500))
+		Spr.ellipse(x, y + 1, 52, 6, Color(0, 0, 0, .22))
+		Spr.P("ob_limpeza", x, y + 3 + sin(T * .3) * .5, 120, left, 0.0, Color(.88, .9, .95))
+		if Polish.FRESH and T % 6 == 0:
+			g.PARTS.append({"x": x + (-50.0 if not left else 50.0), "y": y - 2, "vx": randf_range(-.5, .5), "vy": -randf_range(.2, .6), "life": 18, "col": Color(.8, .9, 1, .7)})
+
+## neon do duty free refletindo no piso (trechos de noite)
+static func _neon_floor(g, T: int) -> void:
+	for nz in g.L.get("neon", []):
+		var x: float = float(nz.x)
+		if x < g.cam - 300 or x > g.cam + g.W + 300:
+			continue
+		var c: Color = Color(str(nz.get("c", "#ff4fb4")))
+		var pu: float = .55 + .25 * sin(T * .07 + x) + (.2 if (T + int(x)) % 170 < 6 else 0.0)
+		Spr.glow(x, float(nz.y) - 140, 90, Color(c.r, c.g, c.b, .18 * pu))
+		Spr.ellipse(x, float(nz.y) + 2, 70, 7, Color(c.r, c.g, c.b, .22 * pu))
+		Spr.ellipse(x, float(nz.y) + 2, 34, 3, Color(1, 1, 1, .15 * pu))
+
+# ---------------------------------------------------------------- na frente do Milis
+static func front(g, T: int) -> void:
+	if not aero(g):
+		return
+	_reset(g)
+	_papers(g, T)
+	_plane_shadow(g, T)
+	_fluor(g, T)
+
+static func _section(g) -> Dictionary:
+	var px: float = g.player.x
+	var cur: Dictionary = {}
+	for sc in g.L.get("sections", []):
+		if float(sc.x) <= px:
+			cur = sc
+	return cur
+
+## papéis e folhetos voando: o ar-condicionado sopra alguns, e o Milis correndo levanta outros
+static func _papers(g, T: int) -> void:
+	var pl: Dictionary = g.player
+	if Polish.FRESH:
+		if PAPERS.size() < 10 and T % 50 == 0:
+			PAPERS.append({"x": g.cam + randf() * g.W, "y": g.cam_y + 40 + randf() * 120, "vx": randf_range(.6, 1.6), "vy": randf_range(.2, .6), "r": randf() * TAU, "life": 520, "c": _paper_col()})
+		if pl.onGround and abs(pl.vx) > 3.2 and T % 7 == 0 and PAPERS.size() < 18:
+			PAPERS.append({"x": pl.x + pl.w / 2 - sign(pl.vx) * 10, "y": pl.y + pl.h - 6, "vx": -sign(pl.vx) * randf_range(.5, 1.5) + pl.vx * .3, "vy": -randf_range(1.5, 3.0), "r": randf() * TAU, "life": 220, "c": _paper_col()})
+		var i := PAPERS.size() - 1
+		while i >= 0:
+			var p: Dictionary = PAPERS[i]
+			p.life -= 1
+			p.vy = min(p.vy + .035, .9)
+			p.vx += sin(T * .05 + p.r) * .03
+			p.x += p.vx
+			p.y += p.vy + sin(T * .09 + p.r * 3) * .5
+			p.r += .07
+			if p.life <= 0 or p.y > 520 or p.x < g.cam - 300 or p.x > g.cam + g.W + 300:
+				PAPERS.remove_at(i)
+			i -= 1
+	for p in PAPERS:
+		var a: float = clamp(float(p.life) / 40.0, 0, 1)
+		Spr.save()
+		Spr.translate(p.x, p.y)
+		Spr.rotate(sin(p.r) * .8)
+		Spr.scale(cos(p.r * 1.3), 1)
+		var c: Color = p.c
+		Spr.rect(-6, -4, 12, 8, Color(c.r, c.g, c.b, .95 * a))
+		Spr.rect(-4, -2, 8, 1, Color(0, 0, 0, .25 * a))
+		Spr.rect(-4, 1, 6, 1, Color(0, 0, 0, .2 * a))
+		Spr.restore()
+
+static func _paper_col() -> Color:
+	var cs := [Color(1, 1, 1), Color(.98, .96, .88), Color(1, .9, .55), Color(.75, .88, 1)]
+	return cs[randi() % cs.size()]
+
+## de tempos em tempos a sombra de um avião passa pelas vidraças (só de dia, no saguão e check-in)
+static func _plane_shadow(g, T: int) -> void:
+	var sc := _section(g)
+	if not str(sc.get("bg", "")) in ["vila", "tarde"]:
+		return
+	var per := 1500
+	var u: int = (T + 400) % per
+	var dur := 260
+	if u > dur:
+		return
+	var k: float = u / float(dur)
+	var cx: float = g.cam - 500 + (g.W + 1000) * k
+	var cy: float = g.cam_y + g.H * .35 + k * 40
+	var a: float = .12 * sin(k * PI)
+	var col := Color(0, 0, .05, a)
+	# fuselagem, asas e cauda (silhueta grande e borrada)
+	Spr.ellipse(cx, cy, 300, 36, col)
+	Spr.poly(PackedVector2Array([Vector2(cx - 40, cy), Vector2(cx + 60, cy), Vector2(cx - 80, cy + 190), Vector2(cx - 150, cy + 190)]), col)
+	Spr.poly(PackedVector2Array([Vector2(cx - 40, cy), Vector2(cx + 60, cy), Vector2(cx - 80, cy - 170), Vector2(cx - 150, cy - 170)]), col)
+	Spr.poly(PackedVector2Array([Vector2(cx - 260, cy), Vector2(cx - 220, cy), Vector2(cx - 300, cy - 90), Vector2(cx - 330, cy - 90)]), col)
+
+## segurança: luz fria fluorescente com uma lâmpada falhando
+static func _fluor(g, T: int) -> void:
+	var sc := _section(g)
+	if not str(sc.get("song", "")).contains("seguranca"):
+		return
+	Spr.rect(g.cam - 10, g.cam_y - 10, g.W + 20, g.H + 20, Color(.75, .9, 1, .05))
+	var f: int = T % 300
+	if f < 4 or (f > 9 and f < 12) or (f > 200 and f < 203):
+		Spr.rect(g.cam - 10, g.cam_y - 10, g.W + 20, g.H + 20, Color(0, .02, .06, .22))
+
+## painéis de voos pendurados no teto (com cabos), as linhas trocando
+static func _boards(g, T: int) -> void:
+	var i := 0
+	for b in g.L.get("boards", []):
+		i += 1
+		var x: float = float(b.x)
+		if x < g.cam - 300 or x > g.cam + g.W + 300:
+			continue
+		var y: float = float(b.y)
+		var w: float = float(b.get("w", 150))
+		var h: float = float(b.get("h", 64))
+		Spr.seg(x + 16, y, x + 16, y - 260, Color("#3a414c"), 2)
+		Spr.seg(x + w - 16, y, x + w - 16, y - 260, Color("#3a414c"), 2)
+		Spr.rr(x - 5, y - 5, w + 10, h + 10, 4, Color("#1b1e24"))
+		Spr.rr(x - 3, y - 3, w + 6, 12, 3, Color("#2b4f96"))
+		Spr.text("PARTIDAS" if i % 2 == 1 else "CHEGADAS", x + 6, y + 6, 8, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b)
+		board(x, y + 10, w, h - 10, T, i)
+		Spr.glow(x + w / 2, y + h / 2, w * .6, Color(1, .85, .4, .06))
+
+# ---------------------------------------------------------------- painel de voos girando
+## em cima da arte do painel (colunas do cenário): as linhas de voos trocam de vez em quando
+static func board(x: float, y: float, w: float, h: float, T: int, seed_v: int) -> void:
+	Spr.rect(x, y, w, h, Color("#0d1420"))
+	var rows: int = max(3, int(h / 7))
+	for i in rows:
+		var ry: float = y + 2 + i * (h - 3) / rows
+		var flip: bool = ((T / 6 + seed_v * 13 + i * 7) % 180) < 10
+		var c: Color = Color("#ffcf3a") if (i + seed_v) % 3 != 0 else Color("#7fd0ff")
+		if flip:
+			Spr.rect(x + 3, ry, w - 6, 3, Color(1, 1, 1, .6))
+			continue
+		var ww: float = (w - 10) * (.35 + .5 * fposmod(sin(float(i * 31 + seed_v * 7 + (T / 400))) * 43758.5, 1.0))
+		Spr.rect(x + 3, ry, ww, 2.5, c)
+		Spr.rect(x + w - 14, ry, 10, 2.5, Color("#5cff8a") if (i + seed_v) % 4 == 0 else c)
+
+# ---------------------------------------------------------------- alto-falante (texto no rodapé)
+const AVISOS := [
+	"Última chamada para o voo LA 3410 com destino a Curitiba, portão 12.",
+	"Atenção, senhores passageiros: não deixem bagagens desacompanhadas.",
+	"Passageiro Seu Barros, favor comparecer ao balcão de informações.",
+	"O voo LA 8072 para Salvador está atrasado. Previsão: 18h40.",
+	"Lembramos que é proibido fumar em todas as áreas do aeroporto.",
+	"Atenção: piso molhado próximo ao check-in. Cuidado ao caminhar.",
+	"Embarque imediato do voo LA 3302 para Brasília, portão 8.",
+]
+
+static func aviso(T: int) -> String:
+	var per := 2400
+	var u: int = T % per
+	if u > 520 or T < 600:
+		return ""
+	return AVISOS[(T / per) % AVISOS.size()]

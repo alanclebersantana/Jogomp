@@ -425,7 +425,10 @@ func _roll(o: Dictionary, p: Dictionary, pcx: float) -> void:
 				o.vx = 0.0
 				Audio.play("stomp", -2)
 				g.shake = max(g.shake, 8)
-				g.flash_tut("CORRA!", "CORRA! (toque duas vezes → para correr)", 140)
+				if o.get("aero"):
+					g.flash_tut("CUIDADO!", "Um carrinho de bagagem desgovernado! Pule por cima dele!", 140)
+				else:
+					g.flash_tut("CORRA!", "CORRA! (toque duas vezes → para correr)", 140)
 		"go":
 			o.vx = move_toward(o.vx, o.vmax * o.dir, .09)
 			o.bx += o.vx

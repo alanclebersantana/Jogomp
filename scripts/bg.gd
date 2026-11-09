@@ -115,6 +115,29 @@ func __draw_raw() -> void:
 	for k in keys:
 		_sky(k, nw.get(k, 0.0), w, oy)
 	_atmos(nw, w, oy, bh)
+	_aero_planes(ws, w)
+
+## aeroporto: aviões decolando e pousando lá fora, atrás das vidraças (trechos de dia)
+func _aero_planes(ws: Dictionary, w: float) -> void:
+	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
+		return
+	var day: float = float(ws.get("vila", 0.0)) + float(ws.get("tarde", 0.0)) * .8
+	if day <= .05:
+		return
+	var H: float = game.H
+	for k in 2:
+		var per: int = 1300 + k * 500
+		var u: int = (game.T + k * 700) % per
+		var dur := 900
+		if u > dur:
+			continue
+		var f: float = u / float(dur)
+		var dir: float = -1.0 if k == 0 else 1.0
+		var x: float = (w + 200) * (1.0 - f) - 100 if dir < 0 else -100 + (w + 200) * f
+		# decolando (k=0) sobe; pousando (k=1) desce
+		var y: float = H * (.72 - f * .35) if k == 0 else H * (.38 + f * .3)
+		var pw: float = 150.0 - k * 40.0
+		Spr.P("ob_aviao", x, y, pw, dir > 0, (-.18 if k == 0 else .1) * -dir, Color(1, 1, 1, .9 * day))
 
 static func hh(x: float, k: int = 0) -> float:
 	var v := sin(x * 12.9898 + k * 78.233) * 43758.5453

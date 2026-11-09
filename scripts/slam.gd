@@ -129,7 +129,10 @@ func step() -> void:
 		for m in marks():
 			if abs(px - m.x) < 240 and abs(p.y + p.h - m.y) < 90:
 				taught = true
-				g.flash_tut("Mergulho!", "MERGULHO: pule e, no ar, aperte ↓. Onde aparece esta rachadura dourada, o mergulho faz alguma coisa: quebra o chão, crava estacas, lança a gangorra, derruba frutas e deixa os bichos tontos.", 320)
+				if g.L.get("theme", "") == "aeroporto":
+					g.flash_tut("Mergulho!", "MERGULHO: pule e, no ar, aperte ↓. Onde aparece esta rachadura dourada, o mergulho quebra o piso, abre alçapões e deixa os capangas tontos.", 320)
+				else:
+					g.flash_tut("Mergulho!", "MERGULHO: pule e, no ar, aperte ↓. Onde aparece esta rachadura dourada, o mergulho faz alguma coisa: quebra o chão, crava estacas, lança a gangorra, derruba frutas e deixa os bichos tontos.", 320)
 				break
 
 func _drop_items(x: float, y: float, n: int, hearts: int) -> void:

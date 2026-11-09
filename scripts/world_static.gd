@@ -115,7 +115,11 @@ func _draw_raw() -> void:
 		# na sua faixa (clip em _ready), a ordem é sempre a mesma e o morro não cobre o carrinho
 		_contact_shadow(s)
 		match s.t:
-			"ground": ground(s)
+			"ground":
+				if s.get("esc"):
+					_escalator(s)
+				else:
+					ground(s)
 			"plat", "branch":
 				pass   # desenhados na camada que se mexe (afundam quando o Tomé pisa)
 			"trunk": trunk(s)
@@ -142,8 +146,11 @@ func _draw_raw() -> void:
 			"rockw": rockw(s)
 			"portal": portal(s)
 			"brickw":
-				# parede de pedra do quarto da Isis (com a fresta embaixo)
-				_masonry(s, Color(.62, .58, .54), Color(.3, .25, .2), Color(.1, .08, .06, .97), s.y)
+				if game.L.get("theme", "") == "aeroporto":
+					_aero_wall(s)
+				else:
+					# parede de pedra do quarto da Isis (com a fresta embaixo)
+					_masonry(s, Color(.62, .58, .54), Color(.3, .25, .2), Color(.1, .08, .06, .97), s.y)
 				Spr.rect(s.x, s.y + s.h - 4, s.w, 4, Color(0, 0, 0, .5))
 			"house":
 				# casa da vila (Episódio 2): o telhado é o caminho do Tomé
@@ -942,8 +949,20 @@ func _ground_end(s: Dictionary, t: Texture2D, tw: float, right: bool, lo: float 
 	var y_tex: float = min(fy, bot)
 	var gt := _ground_tint(e)
 	_end_band(top, y_tex, 8.0, inner, e, right, inset, t2, tile_x, s.y - 32, gt, Color(.86, .83, .8) * gt)
+	var aero: bool = game.L.get("theme", "") == "aeroporto"
 	if bot > y_tex + 1:
-		_end_band(y_tex, bot, 30.0, inner, e, right, inset, null, 0, 0, Color("#34200f"), Color("#2a190b"))
+		if aero:
+			_end_band(y_tex, bot, 30.0, inner, e, right, inset, null, 0, 0, Color("#4a5260"), Color("#3a414c"))
+		else:
+			_end_band(y_tex, bot, 30.0, inner, e, right, inset, null, 0, 0, Color("#34200f"), Color("#2a190b"))
+	if aero:
+		# aeroporto: quina de metal com faixa de segurança amarela e preta (nada de grama ou pedras)
+		var ex: float = e - 10.0 if right else e
+		Spr.rect(ex, s.y - 2, 10, 6, Color("#22252b"))
+		for k in 3:
+			Spr.rect(ex, s.y + 6 + k * 14, 10, 7, Color("#f2c230"))
+			Spr.rect(ex, s.y + 13 + k * 14, 10, 7, Color("#22252b"))
+		return
 	# tufo de grama arredondando a quina de cima
 	var gx: float = e - 6.0 if right else e + 6.0
 	var gc := Color(.36, .58, .2)
@@ -2111,3 +2130,54 @@ static func puddles_of(g: Game, s: Dictionary) -> Array:
 				gx += 58
 	s._pd = out
 	return out
+
+## parede da área restrita do aeroporto: placas de concreto pintadas, juntas, faixa zebrada embaixo
+## e placa de "área restrita" de tempos em tempos
+func _aero_wall(s: Dictionary) -> void:
+	var ya: float = s.y
+	var yb: float = s.y + s.h
+	Spr.rect(s.x - 3, ya, s.w + 6, yb - ya, Color("#2b3038"))
+	Spr.hgrad(s.x, ya, s.w, yb - ya, Color("#c9ced6"), Color("#9aa2ad"))
+	var y: float = s.y
+	while y < yb:
+		Spr.rect(s.x, y, s.w, 2, Color(0, 0, 0, .18))
+		Spr.rect(s.x, y + 2, s.w, 1, Color(1, 1, 1, .25))
+		for k in 2:
+			Spr.circle(s.x + 8 + k * (s.w - 16), y + 10, 2, Color(0, 0, 0, .25))
+		y += 90
+	Spr.rect(s.x + s.w * .5 - 1, ya, 2, yb - ya, Color(0, 0, 0, .1))
+	# faixa zebrada embaixo
+	var bot: float = s.y + s.h
+	if bot > ya and bot - 40 < yb:
+		var xx: float = s.x
+		var k := 0
+		while xx < s.x + s.w:
+			var ww: float = min(14.0, s.x + s.w - xx)
+			Spr.rect(xx, bot - 30, ww, 26, Color("#f2c230") if k % 2 == 0 else Color("#22252b"))
+			xx += 14
+			k += 1
+	# placa de área restrita (um pouco acima da porta)
+	var sy: float = bot - 150
+	if sy > ya - 40 and sy < yb and s.w >= 50:
+		Spr.rr(s.x + s.w / 2 - 22, sy, 44, 34, 4, Color("#c8302a"))
+		Spr.rr(s.x + s.w / 2 - 19, sy + 3, 38, 28, 3, Color("#e8463a"))
+		Spr.text("ÁREA", s.x + s.w / 2, sy + 15, 9, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		Spr.text("RESTRITA", s.x + s.w / 2, sy + 27, 7, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+
+## degrau da escada rolante (aeroporto): lateral de metal escovado, degrau com frisos e corrimão preto
+func _escalator(s: Dictionary) -> void:
+	Spr.rect(s.x, s.y, s.w, s.h, Color("#2b3038"))
+	Spr.hgrad(s.x + 2, s.y + 10, s.w - 4, s.h - 10, Color("#aab3bf"), Color("#7d8794"))
+	Spr.rect(s.x, s.y, s.w, 10, Color("#c9ced6"))
+	var xx: float = s.x + 3
+	while xx < s.x + s.w - 2:
+		Spr.rect(xx, s.y + 1, 2, 8, Color(0, 0, 0, .3))
+		xx += 6
+	Spr.rect(s.x, s.y + 9, s.w, 2, Color("#f2c230"))
+	# corrimão de borracha preta seguindo os degraus
+	Spr.rect(s.x, s.y - 34, s.w, 6, Color("#15171b"))
+	Spr.rect(s.x, s.y - 34, s.w, 2, Color(1, 1, 1, .2))
+	Spr.rect(s.x + s.w / 2 - 2, s.y - 28, 4, 28, Color(.6, .85, 1, .35))
+	for k in 3:
+		Spr.circle(s.x + 10 + k * (s.w - 20) / 2.0, s.y + s.h * .55, 3, Color(0, 0, 0, .2))
+

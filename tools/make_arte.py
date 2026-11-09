@@ -497,6 +497,43 @@ def ui_aero():
         im.save(os.path.join(UI, n + ".png"))
 
 
+def voadores():
+    v = componentes(abrir_sem_verde(os.path.join(G, "voadores.jpg")), dil=10, area_min=2500)
+    # 0 drone voando, 1 drone mergulhando, 2 drone quebrado, 3-4 mala voadora (hélice), 5 mala fechada, 6 mala quebrada
+    for i, n in enumerate(["drone_voa", "drone_mergulho", "drone_ko", "malav_0", "malav_1", "malav_fecha", "malav_ko"]):
+        solta("p_" + n, v[i], 150)
+
+
+def faxineiro():
+    f = componentes(abrir_sem_verde(os.path.join(G, "faxineiro.jpg")), dil=8, area_min=2500)
+    # 0-4 andando com a enceradeira, 5 surpreso, 6 nocauteado (com a máquina tombada)
+    import numpy as np
+    for i, n in [(0, "fax_0"), (1, "fax_1"), (2, "fax_2"), (3, "fax_3"), (5, "fax_vira"), (6, "fax_ko")]:
+        # a água da enceradeira sai meio transparente: limpa o que é quase invisível (o contorno
+        # vermelho dos capangas pintava um bloco em volta)
+        a2 = np.asarray(f[i]).copy()
+        al = a2[..., 3]
+        al[al < 150] = 0
+        al[al >= 150] = 255
+        q = Image.fromarray(a2)
+        q = q.crop(q.getbbox())
+        solta("p_" + n, q, 200 if i != 6 else 140)
+
+
+def passageiros():
+    p = componentes(abrir_sem_verde(os.path.join(G, "passageiros.jpg")), dil=1, area_min=2500)
+    nomes = ["exec", "cel", "turista", "pai", "mae", "idosa", "dorme", "menino", "teen", "susto", "comissaria", "piloto"]
+    for i, n in enumerate(nomes):
+        solta("p_pax_" + n, p[i], 200)
+
+
+def objetos_aero():
+    o = componentes(abrir_sem_verde(os.path.join(G, "objetos.jpg")), dil=5, area_min=1500)
+    for i, n in [(0, "aviao"), (1, "limpeza"), (2, "folhetos"), (3, "lixeiras"), (4, "fila"), (5, "placa"),
+                 (6, "etiqueta"), (7, "ursinho"), (8, "papeis"), (11, "cafe"), (12, "passaportes"), (13, "malas")]:
+        solta("p_ob_" + n, o[i], min(180, max(90, o[i].height)))
+
+
 if __name__ == "__main__":
     apaga_natureza()
     cabo()
@@ -506,6 +543,10 @@ if __name__ == "__main__":
     objetos()
     bastao(info)
     moveis()
+    voadores()
+    faxineiro()
+    passageiros()
+    objetos_aero()
     ui_aero()
     fiscal()
     barros()

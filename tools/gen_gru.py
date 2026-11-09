@@ -213,6 +213,53 @@ def atendente(x, y, fid, falas, pose="parado"):
     L.setdefault("npcs", []).append({"x": x, "y": y, "id": fid, "pose": pose, "lines": falas})
 
 
+def obj(x, nome, w, y=GY, **kw):
+    """objeto pequeno do chão (passaporte, copo, papéis, placa, lixeiras...): só cenário"""
+    d = {"k": "pc", "x": x, "y": y, "n": "p_ob_" + nome, "w": w}
+    d.update(kw)
+    L["decor"].append(d)
+
+
+def pax(x, n, k="walk", r=None, y=GY, **kw):
+    """passageiro de cenário: anda (walk) entre r, fica sentado (sit) ou parado (stand)"""
+    d = {"x": x, "n": "pax_" + n, "k": k, "y": y}
+    if r:
+        d["r"] = list(r)
+    d.update(kw)
+    L.setdefault("pax", []).append(d)
+
+
+def painel(x, y=230, w=150, h=64):
+    L.setdefault("boards", []).append({"x": x, "y": y, "w": w, "h": h})
+
+
+def neon(x, c, y=GY):
+    L.setdefault("neon", []).append({"x": x, "y": y, "c": c})
+
+
+def molhado(x, w, y=GY):
+    """piso molhado fixo (escorrega), com a placa amarela"""
+    L.setdefault("wet", []).append({"x": x, "w": w, "y": y})
+
+
+def faxineiro(x, r, y=GY):
+    """faxineiro capanga: anda com a enceradeira e deixa o piso molhado (só dá para pisar por trás)"""
+    inimigo("janitor", x, r, y)
+
+
+def andaime(x, w, niveis):
+    """andaime de manutenção com lona: tábuas para subir e uma escada"""
+    for ny in niveis:
+        plat(x, ny, w)
+    escada(x + w - 34, min(niveis), GY)
+    L["decor"].append({"k": "scaf", "x": x, "y": GY, "w": w, "top": min(niveis), "lv": list(niveis)})
+
+
+def porta_auto(gid, x, per=220, ph=0):
+    """porta automática de vidro: abre e fecha no ritmo"""
+    S.append({"t": "pgate", "id": gid, "x": x, "y": GY - 230, "w": 18, "h": 230, "auto": True, "per": per, "ph": ph})
+
+
 def _fix_coin(c):
     for _ in range(12):
         moved = False
@@ -272,6 +319,88 @@ atendente(14280, GY, "barros2", [
     ["SEU BARROS", "Psiu! Você de novo? A segurança está estranha hoje. Aquele fiscal da cabine não é daqui, não...", "barros"],
     ["MILIS", "Seu Barros? Como o senhor chegou aqui antes de mim?", "tome"],
     ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]], "cochicha")
+
+# ---------- vida do aeroporto na 1-1 (só cenário) ----------
+# saguão
+pax(300, "exec", r=[150, 1350], spd=.9)
+pax(800, "cel", r=[500, 1400], spd=.6, re="pax_susto")
+pax(1900, "turista", r=[1750, 3200], spd=.7)
+pax(2600, "idosa", r=[2000, 3300], spd=.45)
+pax(2250, "dorme", k="sit", y=GY - 26, sc=.8, z=1, look=False, flip=True)
+pax(2780, "menino", k="stand", sc=.62)
+pax(3150, "teen", k="stand", re="pax_teen")
+painel(220)
+painel(1240, 210, 170)
+painel(2480)
+obj(420, "papeis", 60)
+obj(980, "cafe", 46)
+obj(1180, "passaportes", 44)
+obj(1440, "lixeiras", 96)
+obj(2100, "ursinho", 30)
+obj(2420, "malas", 74)
+obj(2960, "folhetos", 40)
+obj(3240, "etiqueta", 26)
+molhado(2050, 150)
+obj(2030, "placa", 34)
+L.setdefault("carts", []).append({"x0": 2300, "x1": 3300})
+L["carts"].append({"x0": 5300, "x1": 6200})
+L["carts"].append({"x0": 12300, "x1": 13500})
+andaime(2860, 220, [380, 260])
+milhas(2880, 3060, 230, 44)
+# check-in
+pax(3500, "pai", r=[3450, 5200], spd=2.2)
+pax(3420, "mae", r=[3400, 5150], spd=2.1)
+pax(5300, "comissaria", r=[5150, 6200], spd=.8)
+pax(6000, "piloto", r=[5600, 7000], spd=.85)
+pax(6800, "exec", r=[6450, 7150], spd=.8, re="pax_susto")
+painel(3700, 200, 170)
+painel(5150, 180)
+painel(6180, 210)
+for fx in [3560, 3860, 4160]:
+    obj(fx, "fila", 70)
+obj(4380, "malas", 70)
+obj(5200, "passaportes", 40)
+obj(5480, "papeis", 60)
+obj(5960, "cafe", 44)
+obj(6250, "lixeiras", 96)
+obj(6720, "ursinho", 28)
+molhado(5980, 140)
+obj(5960, "placa", 34)
+faxineiro(6900, [6650, 7150])
+# segurança: luz fluorescente, porta automática, fios e malas caindo
+pax(7400, "piloto", r=[7250, 7550], spd=.6)
+pax(9000, "comissaria", r=[8600, 9150], spd=.7, re="pax_susto")
+painel(8700, 200)
+obj(7300, "fila", 70)
+obj(7480, "fila", 70)
+obj(8560, "etiqueta", 26)
+obj(9300, "malas", 72)
+obj(10300, "lixeiras", 96)
+porta_auto("auto1", 8900, 240)
+L["traps"].append({"k": "icicle", "x": 9900, "y": 40, "len": 30, "floor": GY, "reach": 60})
+L["traps"].append({"k": "icicle", "x": 10180, "y": 40, "len": 30, "floor": GY, "reach": 60})
+# grade do ar-condicionado até o mezanino (o cartão de acesso fica fácil de pegar)
+escada(9140, -40, GY, kind="net")
+dica(9050, 9250, "Grade do ar-condicionado: dá para escalar até o mezanino (cima/baixo e para os lados).")
+# fio de manutenção solto, para balançar (cuidado com a ponta soltando faísca)
+L["vines"].append({"x": 11880, "y": -260, "len": 250, "aim": [12260, 120]})
+# mezanino à noite: neon do duty free
+neon(12400, "#ff4fb4")
+neon(12950, "#4fd8ff")
+neon(13500, "#ffd84a")
+neon(13950, "#9b6bff")
+pax(12600, "turista", r=[12300, 13500], spd=.6)
+pax(13700, "teen", k="stand", re="pax_teen")
+pax(13300, "idosa", r=[12900, 13560], spd=.4)
+painel(12700, 190)
+obj(12520, "folhetos", 40)
+obj(13100, "papeis", 60)
+obj(13820, "cafe", 44)
+obj(14050, "malas", 70)
+molhado(13650, 130)
+obj(13630, "placa", 34)
+faxineiro(12800, [12600, 13400])
+L["traps"].append({"k": "roll", "x": 13550, "y": GY, "trig": 13200, "dir": -1, "vmax": 3.6, "end": 12250, "r": 30, "aero": True})
 dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
 caixa(820, n=5)
@@ -410,7 +539,9 @@ cambista(13080, [12980, 13190], y=GY - 180)
 # escada rolante (degraus que sobem) e mola
 for i in range(6):
     bloco(12600 + i * 60, 12660 + i * 60, GY - 30 * (i + 1), GY)
+    S[-1]["esc"] = 1
 bloco(12960, 13200, GY - 180, GY)
+S[-1]["esc"] = 2
 milhas(12620, 12940, 440, 64)
 mola(13280, pow=-23)
 plat(13250, 170, 160)

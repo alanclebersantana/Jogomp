@@ -30,7 +30,8 @@ func _initialize() -> void:
 		root.get_texture().get_image().save_png("/tmp/fh_shots/intro.png")
 		quit()
 		return
-	main.panel.get_meta("ok").call()
+	if main.panel and main.panel.has_meta("ok"):
+		main.panel.get_meta("ok").call()
 	var g = main.game
 	if args.size() > 0 and args[0] == "rest":
 		for k in range(1, args.size()):
@@ -45,7 +46,7 @@ func _initialize() -> void:
 	for cid in ["cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho"]:
 		root.get_node("Save").setv("comic", cid, true)
 	for e in g.EN:
-		if e.k != "owl" and e.k != "frog" and e.k != "leech":
+		if OS.get_environment("KEEP_EN") == "" and e.k != "owl" and e.k != "frog" and e.k != "leech":
 			e.dead = 99
 	var n := 0
 	for a in args:

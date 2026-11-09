@@ -28,8 +28,8 @@ static func setup(b: Dictionary, _L: Dictionary) -> void:
 static func box(g, b: Dictionary) -> Dictionary:
 	# do tamanho da arte: sentado tonto é mais baixo
 	if str(b.get("st", "")) == "tonto":
-		return g.R(b.x - 32, b.y - 92, 64, 92)
-	return g.R(b.x - 26, b.y - 122, 52, 122)
+		return g.R(b.x - 44, b.y - 128, 88, 128)
+	return g.R(b.x - 34, b.y - 168, 68, 168)
 
 
 static func _pattern_list(hp: int) -> Array:
@@ -321,16 +321,16 @@ static func draw(g, b: Dictionary, T: int) -> void:
 			pose = "parado" if int(T / 90) % 3 != 2 else "bracos"
 	var r = Spr.AR.get("p_fiscal_" + pose)
 	if r != null:
-		var hgt: float = 132.0 if pose != "ko" else 64.0
+		var hgt: float = 186.0 if pose != "ko" else 90.0
 		if pose == "tonto":
-			hgt = 104.0
+			hgt = 146.0
 		var w: float = hgt * r[2] / r[3]
 		# a arte olha para a direita
 		Spr.P("fiscal_" + pose, b.x, b.y + 2, w, face_left, 0.0, c)
 		if st == "tonto":
 			for i in 3:
 				var a2: float = T * .12 + i * TAU / 3.0
-				Spr.text("★", b.x + cos(a2) * 26 - 6, b.y - 100 + sin(a2) * 6, 16, Color("#ffd23a"))
+				Spr.text("★", b.x + cos(a2) * 34 - 6, b.y - 140 + sin(a2) * 7, 16, Color("#ffd23a"))
 		return
 	if st in ["tonto", "down"]:
 		Spr.P("boar_ko" if st == "down" else "boar_wind", b.x, b.y + 2, 110, not face_left, 0.0, c)

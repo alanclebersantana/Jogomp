@@ -994,6 +994,22 @@ static func mech(g: Game, T: int) -> void:
 		if pl.x + pl.w < c0 or pl.x > c1:
 			continue
 		var dd: float = pl.d * 4
+		if g.L.get("theme", "") == "aeroporto":
+			# placa de pressão de metal com borda zebrada e luz (verde quando tem peso)
+			Spr.rr(pl.x - 6, pl.y - 4, pl.w + 12, 12, 3, Color("#22252b"))
+			var xx: float = pl.x - 4
+			var kk := 0
+			while xx < pl.x + pl.w + 4:
+				Spr.rect(xx, pl.y - 3, min(8.0, pl.x + pl.w + 4 - xx), 3, Color("#f2c230") if kk % 2 == 0 else Color("#22252b"))
+				xx += 8
+				kk += 1
+			Spr.rr(pl.x, pl.y - 10 + dd, pl.w, 10, 2, Color("#8d97a5") if not pl.on else Color("#a9b7c8"))
+			for k in 4:
+				Spr.rect(pl.x + 6 + k * (pl.w - 12) / 3.0 - 4, pl.y - 7 + dd, 8, 2, Color(0, 0, 0, .25))
+			Spr.circle(pl.x + pl.w / 2, pl.y - 16 + dd, 4, Color("#3cff7a") if pl.on else Color("#ff4a3a"))
+			if pl.on:
+				Spr.glow(pl.x + pl.w / 2, pl.y - 6, 30, Color(.4, 1, .6, .3))
+			continue
 		# placa de pedra entalhada, afundando quando tem peso; a moldura de pedra fica fixa
 		Spr.rr(pl.x - 6, pl.y - 3, pl.w + 12, 11, 5, Color(.16, .13, .1))
 		Spr.PR("plate", pl.x - 2, pl.y - 11 + dd, pl.w + 4, 15, Color(1, 1, 1) if not pl.on else Color(1.25, 1.1, .7))
@@ -1001,6 +1017,9 @@ static func mech(g: Game, T: int) -> void:
 			Spr.glow(pl.x + pl.w / 2, pl.y - 4, 30, Color(1, .85, .4, .35))
 	for gt in M.GATES:
 		if gt.x + gt.w < c0 or gt.x > c1:
+			continue
+		if g.L.get("theme", "") == "aeroporto":
+			_aero_gate(g, gt, T)
 			continue
 		if not gt.get("crank") and float(gt.h) > 200.0:
 			_palisade_gate(g, gt)
@@ -1194,6 +1213,8 @@ static func palisade_front(g: Game) -> void:
 		return
 	var c0: float = g.cam - 150
 	var c1: float = g.cam + g.W + 150
+	if g.L.get("theme", "") == "aeroporto":
+		return
 	for gt in M.GATES:
 		if gt.get("crank") or float(gt.h) <= 200.0 or gt.x + 200 < c0 or gt.x - 100 > c1:
 			continue
@@ -1263,3 +1284,63 @@ static func _palisade_log(lx: float, ty: float, by: float, w: float, tint: Color
 		if ry > ty + tip + 10.0 and ry < by - 10.0:
 			Spr.rect(lx + 1, ry, w - 2, 7, Color(Color("#5a3a1c"), fa))
 			Spr.rect(lx + 1, ry + 1, w - 2, 2, Color(1, .85, .6, .3 * fa))
+
+## porta de segurança do aeroporto: batentes de aço e uma porta de metal que sobe (com faixa zebrada,
+## visor de vidro e luz vermelha/verde)
+static func _aero_gate(g: Game, gt: Dictionary, T: int) -> void:
+	if gt.get("auto"):
+		# porta automática de vidro: sobe e desce no ritmo, com faixa de aviso e sensor piscando
+		var lf: float = float(gt.open) * (float(gt.h) - 18)
+		var b0: float = float(gt.y) + float(gt.h)
+		Spr.rect(gt.x - 14, gt.y - 30, gt.w + 28, 22, Color("#2b3038"))
+		Spr.rect(gt.x - 12, gt.y - 28, gt.w + 24, 4, Color("#f2c230"))
+		var sc: Color = Color("#3cff7a") if float(gt.open) > .5 else Color("#ff3a2a")
+		Spr.circle(gt.x + gt.w / 2, gt.y - 17, 4, sc)
+		Spr.rect(gt.x - 14, gt.y - 8, 8, b0 - gt.y + 8, Color("#3a414c"))
+		Spr.rect(gt.x + gt.w + 6, gt.y - 8, 8, b0 - gt.y + 8, Color("#3a414c"))
+		var ya2: float = float(gt.y) - lf
+		Spr.rect(gt.x - 4, ya2, gt.w + 8, gt.h, Color(.6, .85, 1, .28))
+		Spr.rect(gt.x - 4, ya2, gt.w + 8, gt.h, Color(0, 0, 0, 0))
+		Spr.rect(gt.x - 4, ya2, 3, gt.h, Color("#c9ced6"))
+		Spr.rect(gt.x + gt.w + 1, ya2, 3, gt.h, Color("#c9ced6"))
+		Spr.rect(gt.x - 4, ya2 + gt.h - 4, gt.w + 8, 4, Color("#c9ced6"))
+		Spr.seg(gt.x + 2, ya2 + 20, gt.x + gt.w - 4, ya2 + 80, Color(1, 1, 1, .35), 2)
+		Spr.rect(gt.x - 4, ya2 + gt.h * .55, gt.w + 8, 6, Color(1, 1, 1, .4))
+		return
+	var lift: float = float(gt.open) * (float(gt.h) - 18)
+	var hh: float = float(gt.h)
+	var bot: float = float(gt.y) + hh
+	var top_v: float = max(float(gt.y) - 40, g.cam_y - 80)
+	# batentes
+	Spr.rect(gt.x - 12, top_v, 10, bot - top_v, Color("#3a414c"))
+	Spr.rect(gt.x + gt.w + 2, top_v, 10, bot - top_v, Color("#3a414c"))
+	Spr.rect(gt.x - 10, top_v, 3, bot - top_v, Color(1, 1, 1, .18))
+	Spr.rect(gt.x + gt.w + 4, top_v, 3, bot - top_v, Color(1, 1, 1, .18))
+	# porta (só o pedaço que aparece na tela)
+	var y0: float = float(gt.y) - lift
+	var ya: float = max(y0, g.cam_y - 80)
+	var yb: float = min(y0 + hh, g.cam_y + g.H + 80)
+	if yb > ya:
+		Spr.rect(gt.x - 4, ya, gt.w + 8, yb - ya, Color("#1d2128"))
+		Spr.hgrad(gt.x - 2, ya, gt.w + 4, yb - ya, Color("#b9c1cc"), Color("#7d8794"))
+		var yy: float = y0 + fposmod(ya - y0, 26.0) - 26.0
+		yy = y0 + floor((ya - y0) / 26.0) * 26.0
+		while yy < yb:
+			Spr.rect(gt.x - 2, yy, gt.w + 4, 1.5, Color(0, 0, 0, .25))
+			yy += 26
+		var db: float = y0 + hh
+		if db - 34 < yb and db > ya:
+			var xx: float = gt.x - 2
+			var k := 0
+			while xx < gt.x + gt.w + 2:
+				Spr.rect(xx, db - 30, min(10.0, gt.x + gt.w + 2 - xx), 28, Color("#f2c230") if k % 2 == 0 else Color("#22252b"))
+				xx += 10
+				k += 1
+		var vy: float = db - 110
+		if vy > ya and vy < yb and gt.w >= 20:
+			Spr.rr(gt.x + 2, vy, gt.w - 4, 30, 3, Color(.55, .8, .95, .6))
+	var lc: Color = Color("#3cff7a") if float(gt.open) > .5 else Color("#ff3a2a")
+	Spr.circle(gt.x + gt.w / 2, float(gt.y) - 52, 6, Color("#22252b"))
+	Spr.circle(gt.x + gt.w / 2, float(gt.y) - 52, 4, lc)
+	Spr.glow(gt.x + gt.w / 2, float(gt.y) - 52, 16, Color(lc.r, lc.g, lc.b, .35))
+

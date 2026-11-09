@@ -117,6 +117,8 @@ func __draw_raw() -> void:
 	WorldProps.draw(g, T)
 	Spr.pt("d_Props_draw", __d_Props_draw)
 	_npcs(g)
+	_wet(g)
+	AeroLife.back(g, T)
 	WorldLake.back(g, T)
 	var __d_Traps_draw := Time.get_ticks_usec()
 	WorldTraps.draw(g, T)
@@ -329,6 +331,7 @@ func _draw_front_node(n: CanvasItem) -> void:
 	Spr.pt("d_Extras_grass", __d_Extras_grass)
 	WorldTraps.draw_shadows(g, T)
 	Polish.draw_front(g, T)
+	AeroLife.front(g, T)
 	for f in g.FXS:
 		Spr.A(f.n, f.x, f.y, f.sc, false, 1.0 - float(f.t) / f.life)
 	for p in g.PARTS:
@@ -532,7 +535,33 @@ func _climb(g: Game) -> void:
 	for z in g.CLIMB:
 		if z.x + z.w < g.cam - 200 or z.x > g.cam + g.W + 200:
 			continue
-		if z.kind == "ladder":
+		var aero: bool = g.L.get("theme", "") == "aeroporto"
+		if z.kind == "ladder" and aero:
+			# escada de manutenção de metal (amarela)
+			var lx: float = z.x + z.w / 2
+			Spr.rect(lx - 17, z.y - 4, 5, z.h + 4, Color("#e0b020"))
+			Spr.rect(lx + 12, z.y - 4, 5, z.h + 4, Color("#e0b020"))
+			Spr.rect(lx - 17, z.y - 4, 2, z.h + 4, Color(1, 1, 1, .3))
+			var yy: float = z.y + 8
+			while yy < z.y + z.h:
+				Spr.rect(lx - 13, yy, 26, 4, Color("#8d97a5"))
+				Spr.rect(lx - 13, yy + 3, 26, 1, Color(0, 0, 0, .3))
+				yy += 22
+		elif z.kind == "net" and aero:
+			# grade do ar-condicionado / rede de cabos presa na parede: dá para escalar
+			Spr.rr(z.x - 6, z.y - 4, z.w + 12, z.h + 8, 4, Color("#2b3038"))
+			Spr.rr(z.x - 3, z.y - 1, z.w + 6, z.h + 2, 3, Color("#7d8794"))
+			var yy2: float = z.y + 6
+			while yy2 < z.y + z.h - 2:
+				Spr.rect(z.x, yy2, z.w, 3, Color("#3a414c"))
+				Spr.rect(z.x, yy2 + 3, z.w, 1, Color(1, 1, 1, .25))
+				yy2 += 12
+			var xx: float = z.x + 4
+			while xx < z.x + z.w:
+				Spr.rect(xx, z.y, 2, z.h, Color(0, 0, 0, .25))
+				xx += 12
+			Spr.rr(z.x + z.w / 2 - 14, z.y + 10, 28, 10, 3, Color("#f2c230"))
+		elif z.kind == "ladder":
 			Spr.PV("ladder", z.x + z.w / 2 - 20, z.y - 4, 40, z.h + 4)
 		elif z.kind == "net":
 			Spr.strip_v("o_net", z.x - 3, z.y, z.w + 6, z.h)
@@ -691,6 +720,15 @@ func _vine(v: Dictionary) -> void:
 			acc += L2
 	# o cipó continua subindo até as copas (não fica pendurado no nada)
 	Spr.PV("vine", v.x - 8, v.y - 520, 16, 522)
+	if game.L.get("theme", "") == "aeroporto" and pts.size() > 1:
+		# fio de manutenção: ponta desencapada soltando faíscas de tempos em tempos (dá choque)
+		var tip: Vector2 = pts[pts.size() - 1]
+		Spr.circle(tip.x, tip.y, 4, Color("#c87a2a"))
+		if Game.wire_spark(v, T):
+			Spr.glow(tip.x, tip.y, 26, Color(.5, .8, 1, .45))
+			for k in 4:
+				var a2: float = randf() * TAU
+				Spr.seg(tip.x, tip.y, tip.x + cos(a2) * 12, tip.y + sin(a2) * 12, Color(.8, .95, 1, .95), 1.5)
 
 func _glow_mush(x: float, y: float, t: int) -> void:
 	Spr.glow(x, y - 34, 70, Color(.47, .78, 1, .35))
@@ -700,7 +738,7 @@ func _campfire(c: Dictionary) -> void:
 	if c.has("rest"):
 		# fogueira grande: troncos de assento dos dois lados e fogo alto, sempre acesa (chama o Tomé)
 		Spr.glow(c.x, c.y - 30, 110 + sin(T * .2) * 6, Color(1, .7, .3, .4))
-		for lx in c.get("seats", []):
+		for lx in ([] if game.L.get("theme", "") == "aeroporto" else c.get("seats", [])):
 			var sx: float = sign(lx - c.x)
 			Spr.ellipse(lx, c.y + 1, 40, 5, Color(0, 0, 0, .3))
 			Spr.rr(lx - 36, c.y - 15, 72, 16, 8, Color("#3a2414"))
@@ -790,7 +828,7 @@ const OUT8 := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vec
 ## estados em que o bicho começa um ataque (aparece o "!" vermelho antes)
 const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1], "mole": [2]}
 ## nomes para a dica do primeiro encontro
-const EN_NAME := {"crow": "Pombo treinado", "bat": "Mala-monstro", "fly": "Drone", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
+const EN_NAME := {"crow": "Drone espião", "janitor": "Faxineiro (só dá para pisar por trás)", "bat": "Mala-monstro", "fly": "Mala voadora", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
 	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Cambista", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
 const EYES := {}   # a arte nova já tem os olhos acesos dos capangas
@@ -996,8 +1034,28 @@ func _enemy(e: Dictionary) -> void:
 					Spr.frame(Spr.tex.en_frog2, ff, 130, 70, 65, 68, 0, 3, .82)
 			else:
 				Spr.A("en_frog_jump" if e.leap else "en_frog", 0, 3, .9 if e.leap else .82 + sin(T * .12) * .02)
+		"janitor":
+			# faxineiro com a enceradeira (arte olhando para a direita)
+			var jn := "fax_ko" if e.dead else "fax_%d" % (int(dist / 9.0) % 4)
+			if not e.dead and int(e.get("cs", 1.0) * 10) == 0:
+				jn = "fax_vira"
+			var jr = Spr.AR.get("p_" + jn)
+			if jr != null:
+				var jh: float = 104.0 if not e.dead else 60.0
+				Spr.P(jn, 0, 3, jh * jr[2] / jr[3])
+			else:
+				Spr.rr(-16, -90, 32, 90, 6, Color("#5a6f8a"))
 		"fly":
-			Spr.P_cycle("fly", ["fly0", "fly1"], T / 2.0, 0, 0, 40, false, Color.WHITE, true)
+			if Spr.AR.has("p_malav_0"):
+				# aeroporto: mala voadora com hélice de brinquedo; fecha o zíper quando o Milis chega perto
+				var pm: Dictionary = game.player
+				var near: bool = abs(pm.x - e.x) < 130 and abs(pm.y - e.y) < 130
+				var nm := "malav_ko" if e.dead else ("malav_fecha" if near else ("malav_0" if (T / 3) % 2 == 0 else "malav_1"))
+				var mw := 50.0
+				var r = Spr.AR.get("p_" + nm)
+				Spr.P(nm, 0, mw * r[3] / r[2] * .5, mw)
+			else:
+				Spr.P_cycle("fly", ["fly0", "fly1"], T / 2.0, 0, 0, 40, false, Color.WHITE, true)
 		"owl":
 			if e.dead:
 				Spr.A("en_owl_dead", 0, 22, .9)
@@ -2730,4 +2788,25 @@ func _npcs(g) -> void:
 		var br: float = sin(T * .05 + x) * 1.2
 		# a arte olha para a esquerda: vira quando o Milis está à direita
 		Spr.P(nm.substr(2), x, y + 2 + br * .2, w, px > x)
+
+## piso molhado: brilho azulado no chão (some aos poucos) e placa amarela nas poças fixas
+func _wet(g) -> void:
+	for wz in g.WET:
+		if wz.x + wz.w < g.cam - 40 or wz.x > g.cam + g.W + 40:
+			continue
+		var a: float = 1.0 if wz.t < 0 else clamp(float(wz.t) / 120.0, 0.0, 1.0)
+		var cx: float = wz.x + wz.w / 2
+		Spr.ellipse(cx, wz.y + 1, wz.w / 2 + 6, 5, Color(.55, .75, 1, .32 * a))
+		Spr.ellipse(cx - wz.w * .15, wz.y, wz.w * .25, 2, Color(1, 1, 1, .45 * a))
+		Spr.ellipse(cx + wz.w * .22, wz.y + 1, wz.w * .12, 1.5, Color(1, 1, 1, .35 * a))
+		if wz.t < 0 and not g.L.get("_wet_sign_art", false):
+			_wet_sign(wz.x - 18, wz.y)
+
+static func _wet_sign(x: float, y: float) -> void:
+	if Spr.AR.has("p_ob_placa"):
+		Spr.P("ob_placa", x, y + 2, 30)
+		return
+	Spr.poly(PackedVector2Array([Vector2(x - 12, y), Vector2(x - 3, y - 40), Vector2(x + 3, y - 40), Vector2(x + 12, y)]), Color("#f2c230"))
+	Spr.ci.draw_polyline(PackedVector2Array([Vector2(x - 12, y), Vector2(x - 3, y - 40), Vector2(x + 3, y - 40), Vector2(x + 12, y)]), Color("#22252b"), 2.0)
+	Spr.poly(PackedVector2Array([Vector2(x, y - 30), Vector2(x - 5, y - 20), Vector2(x + 5, y - 20)]), Color("#22252b"))
 

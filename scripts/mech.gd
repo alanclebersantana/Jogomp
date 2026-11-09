@@ -391,6 +391,10 @@ func post() -> void:
 				want = 1.0
 		if gt.get("force_open"):
 			want = 1.0
+		if gt.get("auto"):
+			# porta automática de vidro: abre e fecha no ritmo (não fecha em cima de ninguém)
+			var per: int = int(gt.get("per", 200))
+			want = 1.0 if (g.T + int(gt.get("ph", 0))) % per < int(per * .55) else 0.0
 		if want == 0.0 and gt.open > 0.0:
 			for b in bl:
 				if b.x + b.w > gt.x and b.x < gt.x + gt.w and b.y + b.h > gt.y and b.y < gt.y + gt.h:

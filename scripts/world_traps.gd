@@ -290,6 +290,9 @@ static func _spikes(TR: Traps, o: Dictionary, T: int) -> void:
 		sh = sin(T * 1.7) * 1.5
 		if Polish.FRESH and T % 6 == 0:
 			game_dust(x + randf() * w, y)
+	if TR.g.L.get("theme", "") == "aeroporto":
+		_shock_belt(o, h, T)
+		return
 	if Spr.has("p_spiketop"):
 		# espetos de ferro pintados saindo pelas frestas da tábua (a tábua fica sempre no chão)
 		var tw: float = w + 12.0
@@ -324,6 +327,41 @@ static func _spikes(TR: Traps, o: Dictionary, T: int) -> void:
 			Spr.circle(tx, y - 2 - h + 2, 2.0, Color(1, .95, .85, gl))
 		Spr.rr(x - 6, y - 2 - h - 3, w + 12, h + 6, 6, Color(1, .3, .2, .06 + .04 * sin(T * .1)))
 
+## aeroporto: esteira do raio-X ligada na tomada errada — quando "sobe", solta choque azul
+static func _shock_belt(o: Dictionary, h: float, T: int) -> void:
+	var x: float = o.x
+	var y: float = o.y
+	var w: float = o.w
+	Spr.rr(x - 10, y - 9, w + 20, 12, 6, Color("#1b1e24"))
+	Spr.rr(x - 8, y - 8, w + 16, 9, 5, Color("#3b3f47"))
+	# lâminas da esteira andando
+	var off: float = fmod(T * 1.2, 12.0)
+	var xx: float = x - 8 + off
+	while xx < x + w + 8:
+		Spr.rect(xx, y - 7, 2, 7, Color(0, 0, 0, .35))
+		xx += 12
+	for k in [x - 6, x + w + 6]:
+		Spr.circle(k, y - 3, 5, Color("#22252b"))
+		Spr.circle(k, y - 3, 2, Color("#8d97a5"))
+	# aviso: faíscas pequenas antes de ligar
+	if h < 1 and (T + int(x)) % 20 < 3:
+		Spr.circle(x + fmod(T * 37.0 + x, w), y - 9, 2, Color(.6, .85, 1, .9))
+	if h > 2:
+		var f: float = clamp(h / 26.0, 0.0, 1.0)
+		Spr.glow(x + w / 2, y - 14, w * .7, Color(.35, .65, 1, .28 * f))
+		var n: int = max(2, int(w / 18))
+		for i in n:
+			var ax: float = x + (i + .5) * w / n
+			var pts := PackedVector2Array()
+			var yy: float = y - 8
+			var seed_v: float = float((T / 3 + i * 7) % 11)
+			while yy > y - 8 - 34 * f:
+				pts.push_back(Vector2(ax + sin(yy * .7 + seed_v) * 5, yy))
+				yy -= 6
+			if pts.size() > 1:
+				Spr.ci.draw_polyline(pts, Color(.7, .9, 1, .95), 2.0)
+				Spr.ci.draw_polyline(pts, Color(.4, .7, 1, .35), 5.0)
+
 static func game_dust(_x: float, _y: float) -> void:
 	pass
 
@@ -339,6 +377,9 @@ static func _roll(o: Dictionary) -> void:
 		WorldNature.snowball(c, 0)
 		return
 	if o.st in ["idle", "done"]:
+		return
+	if o.get("aero"):
+		_trolley(o)
 		return
 	var R: float = o.get("r", 40.0)
 	var cx: float = o.bx
@@ -597,6 +638,9 @@ static func plant(e: Dictionary, T: int) -> void:
 	Spr.restore()
 
 static func _icicle(g: Game, o: Dictionary, T: int) -> void:
+	if g.L.get("theme", "") == "aeroporto":
+		_falling_bag(g, o, T)
+		return
 	var ln: float = o.get("len", 46)
 	var fl: float = o.get("floor", o.y + 300)
 	var w: float = ln * .55
@@ -1436,3 +1480,68 @@ static func _tunnel_ceiling(g: Game, T: int) -> void:
 				Spr.rr(bx0 + 16, y0 + 50, 12, 16, 3, Color("#5a5048"))
 				Spr.rect(bx0 + 18, y0 + 54, 8, 8, Color(.25, .22, .18))
 		bx0 += 260.0
+
+## aeroporto: carrinho de bagagem desgovernado (no lugar da pedra rolando)
+static func _trolley(o: Dictionary) -> void:
+	var R: float = o.get("r", 40.0)
+	var cx: float = o.bx
+	var gy: float = float(o.y)
+	var w: float = R * 2.6
+	var d: float = -1.0 if float(o.get("vx", 0.0)) < 0 else 1.0
+	Spr.ellipse(cx, gy + 2, w * .5, 6, Color(0, 0, 0, .3))
+	# malas empilhadas
+	var cols := [Color("#c8302a"), Color("#2b6fd6"), Color("#f2b630"), Color("#3a9a5a")]
+	var yy: float = gy - 26
+	for k in 3:
+		var bw: float = w * (.78 - k * .12)
+		var bh: float = R * (.55 - k * .08)
+		var bx: float = cx - bw / 2 + sin(float(o.rot) * 2 + k) * 2
+		Spr.rr(bx - 2, yy - bh - 2, bw + 4, bh + 4, 5, Color("#1b1e24"))
+		Spr.rr(bx, yy - bh, bw, bh, 4, cols[(k + int(o.get("x", 0)) / 7) % 4])
+		Spr.rect(bx + bw * .45, yy - bh - 6, bw * .1, 6, Color("#1b1e24"))
+		yy -= bh + 2
+	# base e alça do carrinho
+	Spr.rect(cx - w / 2, gy - 26, w, 6, Color("#8d97a5"))
+	Spr.rect(cx - w / 2, gy - 28, w, 2, Color("#1b1e24"))
+	Spr.seg(cx - d * w / 2, gy - 24, cx - d * (w / 2 + 14), gy - R * 2.2, Color("#8d97a5"), 4)
+	Spr.seg(cx - d * (w / 2 + 20), gy - R * 2.2, cx - d * (w / 2 + 6), gy - R * 2.2, Color("#c8302a"), 6)
+	for wx in [cx - w * .35, cx + w * .35]:
+		Spr.circle(wx, gy - 9, 9, Color("#1b1e24"))
+		Spr.circle(wx, gy - 9, 4, Color("#8d97a5"))
+		Spr.seg(wx, gy - 9, wx + cos(o.rot) * 8, gy - 9 + sin(o.rot) * 8, Color("#5a616c"), 2)
+
+## aeroporto: mala caindo da esteira alta (no lugar do pingente de gelo)
+static func _falling_bag(g: Game, o: Dictionary, T: int) -> void:
+	var fl: float = o.get("floor", o.y + 300)
+	# esteira alta presa no teto
+	Spr.rr(o.x - 46, o.y - 12, 92, 14, 6, Color("#1b1e24"))
+	Spr.rr(o.x - 44, o.y - 11, 88, 10, 5, Color("#3b3f47"))
+	var off: float = fmod(T * 1.0, 10.0)
+	var xx: float = o.x - 44 + off
+	while xx < o.x + 44:
+		Spr.rect(xx, o.y - 10, 2, 8, Color(0, 0, 0, .35))
+		xx += 10
+	Spr.seg(o.x - 30, o.y - 12, o.x - 30, o.y - 300, Color("#3a414c"), 2)
+	Spr.seg(o.x + 30, o.y - 12, o.x + 30, o.y - 300, Color("#3a414c"), 2)
+	if o.st == "broken":
+		return
+	var gk: float = o.grow if o.st == "idle" else 1.0
+	var sx: float = sin(T * 1.9) * 2.5 if o.st == "shake" else 0.0
+	var y: float = o.y + o.fy
+	if o.st in ["shake", "fall"]:
+		var sk: float = clamp(o.t / 60.0, 0, 1) if o.st == "shake" else .8
+		Spr.ellipse(o.x, fl + 1, 12 + 16 * sk, 4, Color(0, 0, 0, .25 + .3 * sk))
+	var bw: float = 34.0 * gk
+	var bh: float = 26.0 * gk
+	var c: Color = [Color("#8a3fd0"), Color("#c8302a"), Color("#2b6fd6")][int(o.x) % 3]
+	Spr.save()
+	Spr.translate(o.x + sx, y + bh / 2)
+	Spr.rotate(o.fy * .02 if o.st == "fall" else 0.0)
+	Spr.rr(-bw / 2 - 2, -bh / 2 - 2, bw + 4, bh + 4, 5, Color("#1b1e24"))
+	Spr.rr(-bw / 2, -bh / 2, bw, bh, 4, c)
+	Spr.rect(-bw * .1, -bh / 2 - 6, bw * .2, 6, Color("#1b1e24"))
+	Spr.rect(-bw / 2 + 4, -2, bw - 8, 2, Color(0, 0, 0, .25))
+	Spr.restore()
+	if o.st == "shake" and (T / 4) % 2 == 0:
+		Spr.text("!", o.x + 24, o.y + 22, 18, Color("#ffd23a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 3)
+

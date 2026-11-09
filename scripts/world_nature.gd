@@ -13,6 +13,24 @@ static var clip_x1 := 1e9
 static func decor(d: Dictionary) -> void:
 	var s: float = d.get("s", 1.0)
 	match d.k:
+		"scaf":
+			# andaime de manutenção: canos de metal, tábuas e uma lona azul amarrada
+			var sx: float = d.x
+			var sw: float = float(d.w)
+			var top: float = float(d.top) - 70
+			for px in [sx + 4, sx + sw - 8]:
+				Spr.rect(px, top, 5, d.y - top, Color("#8d97a5"))
+				Spr.rect(px, top, 2, d.y - top, Color(1, 1, 1, .3))
+			var yy: float = top + 20
+			var k := 0
+			while yy < d.y - 10:
+				Spr.seg(sx + 6, yy, sx + sw - 6, yy + 60, Color(.55, .6, .67, .8), 2)
+				yy += 70
+				k += 1
+			Spr.poly(PackedVector2Array([Vector2(sx + 8, top + 4), Vector2(sx + sw * .55, top + 10), Vector2(sx + sw * .5, top + 120), Vector2(sx + 12, top + 108)]), Color(.18, .45, .85, .85))
+			Spr.seg(sx + 8, top + 4, sx + sw * .55, top + 10, Color("#1b3a70"), 2)
+			Spr.rr(sx + 18, d.y - 34, 46, 24, 4, Color("#f2c230"))
+			Spr.rr(sx + 21, d.y - 31, 40, 18, 3, Color("#22252b"))
 		"pc":
 			# móvel pintado do aeroporto (só cenário): base no chão, largura w
 			Spr.ABb(str(d.n), d.x, d.y + 2, float(d.get("w", 200)) * s, float(d.get("al", 1.0)))
@@ -454,6 +472,9 @@ static func squirrel(e: Dictionary, T: int) -> void:
 	Spr.frame(Spr.tex.esquilo, fr, 130, 110, 65, 108, 0, 0, .6)
 
 static func crow(e: Dictionary, T: int) -> void:
+	if Spr.AR.has("p_drone_voa"):
+		_drone(e, T)
+		return
 	if e.dead:
 		var ck: Texture2D = Spr.opt("crow_ko")
 		if ck:
@@ -479,6 +500,27 @@ static func crow(e: Dictionary, T: int) -> void:
 		Spr.frame_mix(Spr.tex.en_crow2, T / float(fs) + float(int(e.get("x0", 0.0) * .37) % 4), 4, 0, 170, 130, 85, 65, 0, -8, .74)
 	else:
 		Spr.A_cycle("crow", ["crow0", "crow1", "crow2"], T / 4.0, 0, -8, .74)
+
+## aeroporto: drone espião do ladrão (no lugar do corvo). Pairando no alto, mergulha no Milis e cai
+## soltando faíscas quando é derrubado
+static func _drone(e: Dictionary, T: int) -> void:
+	var nm := "drone_voa"
+	var w := 74.0
+	if e.dead:
+		nm = "drone_ko"
+		w = 70.0
+	elif e.get("st", 0) == 1 and e.get("t", 0) < 28:
+		nm = "drone_mergulho"
+		w = 66.0
+	var r = Spr.AR.get("p_" + nm)
+	var h: float = w * r[3] / r[2]
+	if not e.dead:
+		Spr.translate(0, sin(T * .15 + float(e.get("x0", 0.0))) * 2.0)
+		# luz vermelha da câmera piscando
+		Spr.glow(w * .1, -2, 14, Color(1, .2, .15, .25 + .2 * sin(T * .3)))
+	Spr.P(nm, 0, h * .5, w)
+	if e.dead and int(e.dead) % 4 == 0 and Polish.FRESH:
+		pass
 
 static func piranha(e: Dictionary, T: int) -> void:
 	WorldExtras._pc("piranha%d" % (1 if (not e.dead and (T / 10) % 3 == 0) else 0), 0, 0, 46)
