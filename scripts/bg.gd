@@ -117,7 +117,10 @@ func __draw_raw() -> void:
 	_atmos(nw, w, oy, bh)
 	_aero_planes(ws, w)
 
-## aeroporto: aviões decolando e pousando lá fora, atrás das vidraças (trechos de dia)
+## aeroporto: aviões decolando e pousando lá fora, atrás das vidraças (trechos de dia).
+## A posição é presa ao cenário do fundo (que rola com a câmera) e o avião sempre anda para onde o
+## bico aponta EM RELAÇÃO AO FUNDO: o Milis correndo não faz mais o avião parecer voar de ré.
+var _planes := [{}, {}]
 func _aero_planes(ws: Dictionary, w: float) -> void:
 	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
 		return
@@ -125,18 +128,29 @@ func _aero_planes(ws: Dictionary, w: float) -> void:
 	if day <= .05:
 		return
 	var H: float = game.H
+	var ox: float = -game.rcam * PX
 	for k in 2:
-		var per: int = 1300 + k * 500
+		var per: int = 1100 + k * 500
+		var cyc: int = (game.T + k * 700) / per
 		var u: int = (game.T + k * 700) % per
-		var dur := 900
+		var dur := 760
+		var dir: float = -1.0 if k == 0 else 1.0
+		var st: Dictionary = _planes[k]
+		if int(st.get("cyc", -1)) != cyc:
+			# começa fora da tela, do lado de onde vem (em coordenadas do fundo)
+			st.cyc = cyc
+			st.bx = (w + 160.0 - ox) if dir < 0 else (-160.0 - ox)
 		if u > dur:
 			continue
 		var f: float = u / float(dur)
-		var dir: float = -1.0 if k == 0 else 1.0
-		var x: float = (w + 200) * (1.0 - f) - 100 if dir < 0 else -100 + (w + 200) * f
+		var spd: float = 2.6
+		var x: float = float(st.bx) + dir * spd * u + ox
+		if x < -300 or x > w + 300:
+			continue
 		# decolando (k=0) sobe; pousando (k=1) desce
 		var y: float = H * (.72 - f * .35) if k == 0 else H * (.38 + f * .3)
 		var pw: float = 150.0 - k * 40.0
+		# a arte aponta para a direita: indo para a esquerda, espelha
 		Spr.P("ob_aviao", x, y, pw, dir < 0, (-.18 if k == 0 else .1) * -dir, Color(1, 1, 1, .9 * day))
 
 static func hh(x: float, k: int = 0) -> float:

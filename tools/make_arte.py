@@ -525,6 +525,13 @@ def passageiros():
     nomes = ["exec", "cel", "turista", "pai", "mae", "idosa", "dorme", "menino", "teen", "susto", "comissaria", "piloto"]
     for i, n in enumerate(nomes):
         solta("p_pax_" + n, p[i], 200)
+        # versão "de cenário": duas cores azuladas (azul-marinho nas sombras, azul-claro nas luzes),
+        # para os passageiros nunca serem confundidos com personagens ou capangas
+        q = NOVO["p_pax_" + n][0]
+        lum = ImageOps.autocontrast(q.convert("L"), cutoff=1)
+        duo = ImageOps.colorize(lum, "#26375c", "#d6e2f5", mid="#7d93bd").convert("RGBA")
+        duo.putalpha(q.getchannel("A"))
+        NOVO["p_paxbg_" + n] = (duo, NOVO["p_pax_" + n][1], NOVO["p_pax_" + n][2])
 
 
 def objetos_aero():

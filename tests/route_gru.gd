@@ -55,10 +55,19 @@ func planar_ate(x: float, mx: int = 500):
 func esteira(idx: int, x_embarque: float, x2: float, y2: float):
 	var o: Dictionary = g.MV.MV[idx]
 	var s: Dictionary = o.plats[0]
-	var r = until({}, func(): return abs(s.x + s.w / 2 - x_embarque) < 30 and s.y > P.y + P.h - 40 and s.y < P.y + P.h + 40, 900)
+	# espera a tábua estar DESCENDO para o ponto de embarque e pula no ponto (ela chega lá junto)
+	var prev := [s.y]
+	var r = until({}, func():
+		var down: bool = s.y > float(prev[0]) + .05
+		prev[0] = s.y
+		return down and abs(s.x + s.w / 2 - x_embarque) < 60 and s.y > P.y + P.h - 70 and s.y < P.y + P.h + 40, 1200)
 	if not (r is bool and r):
 		return "esteira não veio: " + str(r)
-	r = jump_to(s.x + s.w / 2)
+	r = jump_to(x_embarque)
+	for i in 40:
+		if P.onGround and g.MV.on_plat(o):
+			break
+		frame()
 	if not (P.onGround and g.MV.on_plat(o)):
 		return "não subiu na esteira x=%d y=%d" % [int(px()), int(P.y)]
 	r = until({}, func():
@@ -104,6 +113,7 @@ func fase_1_1() -> void:
 	S("coluna do painel (pulo duplo)", jump_to(1960, true))
 	walk_to(2030)
 	S("desce", jump_to(2200))
+	S("tapume 1 (rolando)", crawl(2635))
 	walk_to(2640)
 	S("caixa do coração", jump_to(2760))
 	S("degrau 1", jump_to(2840, true))
@@ -142,6 +152,7 @@ func fase_1_1() -> void:
 	S("descansou 1", until({}, func(): return rests.has(1), 40))
 	walk_to(6990)
 	S("caixa", jump_to(7140))
+	S("tapume 2", crawl(7505))
 	# segurança
 	walk_to(7540)
 	S("choque 1", cross_spikes(trap_at("spikes", 7600), 7760))
@@ -161,6 +172,7 @@ func fase_1_1() -> void:
 	use()
 	S("porta da área restrita", g.LOCKS[0].done)
 	S("porta subiu", until({}, func(): return g.M.GATES.filter(func(gt): return gt.get("id", "") == "seg1")[0].open >= 1.0, 300))
+	S("tapume 3", crawl(10675))
 	# mezanino
 	S("escada de serviço", walk_to(10915))
 	S("sobe", climb_to("U", func(): return P.ladder == null and P.onGround and P.y < 160, 500))

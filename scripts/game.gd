@@ -1368,13 +1368,16 @@ func step() -> void:
 					# tipo gelo: soltou o direcional e continua deslizando sem perder velocidade até sair
 					# do molhado (só para empurrando para o outro lado). Parado em cima dele, fica parado.
 					if abs(player.vx) > .3:
-						player.vx = sign(player.vx) * max(abs(player.vx), 1.8) / FRIC
+						player.vx = sign(player.vx) * max(abs(player.vx), 2.8) / FRIC
 					else:
 						player.vx = 0.0
 				elif player.vx * want < 0:
 					acc *= .22
 				else:
 					acc *= .55
+					# segurando para o mesmo lado também escorrega (não anda): no mínimo o embalo do deslize
+					if abs(player.vx) > .3:
+						player.vx = sign(player.vx) * max(abs(player.vx), 2.8)
 				player.skidT = 0
 				if abs(player.vx) > 1.5 and T % 4 == 0:
 					Polish.drops(player.x + player.w / 2, player.y + player.h - 2, 2, 1.4)
@@ -3482,6 +3485,10 @@ func _tick_wet() -> void:
 		i -= 1
 
 func update_enemy(e: Dictionary) -> void:
+	if int(e.get("hitCd", 0)) > 0:
+		e.hitCd -= 1
+	if int(e.get("hitFx", 0)) > 0:
+		e.hitFx -= 1
 	_update_enemy_core(e)
 	_enemy_life(e)
 
@@ -3948,6 +3955,27 @@ func _mole(e: Dictionary) -> void:
 func kill_enemy(e: Dictionary, how: String = "") -> void:
 	if e.dead:
 		return
+	# cambista de terno (aeroporto): aguenta três pancadas, de pulo ou de bastão
+	if e.k == "boar" and L.get("theme", "") == "aeroporto" and how in ["stomp", "hit"]:
+		if int(e.get("hitCd", 0)) > 0:
+			return
+		e.hp = int(e.get("hp", 3)) - 1
+		if e.hp > 0:
+			e.hitCd = 30
+			e.hitFx = 10
+			e.stun = 46
+			e.dizzyT = 46
+			e.charge = false
+			var kd_: float = 1.0 if e.x > player.x + player.w / 2 else -1.0
+			e.x += kd_ * 58.0   # empurrado: o Milis não cai de novo em cima dele no mesmo pulo
+			burst(e.x, e.y - 60, 10, Color("#ffd76a"))
+			Polish.impact(e.x, e.y - (120.0 if how == "stomp" else 70.0))
+			Polish.part("txt", e.x, e.y - 170, 0, -1.0, 40, Color(1, .85, .4), {"txt": "%d/3" % (3 - e.hp), "g": .02, "size": 20.0})
+			shake = max(shake, 4)
+			hit_stop = 4
+			Audio.play("stomp", -2, .8)
+			Audio.vib(18)
+			return
 	e.dead = 1
 	e.dk = "flat" if (how == "stomp" and not FLY.has(e.k)) else "flip"
 	e.ddy = 0.0

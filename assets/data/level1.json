@@ -559,6 +559,27 @@
    "w": 80,
    "h": 120,
    "id": "fiscal_porta"
+  },
+  {
+   "t": "tapume",
+   "x": 2490,
+   "y": -620,
+   "w": 120,
+   "h": 1094
+  },
+  {
+   "t": "tapume",
+   "x": 7360,
+   "y": -620,
+   "w": 120,
+   "h": 1094
+  },
+  {
+   "t": "tapume",
+   "x": 10530,
+   "y": -620,
+   "w": 120,
+   "h": 1094
   }
  ],
  "swamp": [],
@@ -573,18 +594,11 @@
    "kind": "ladder"
   },
   {
-   "x": 9140,
-   "y": -40,
-   "w": 30,
-   "h": 540,
-   "kind": "net"
-  },
-  {
    "x": 10900,
    "y": 160,
    "w": 30,
    "h": 340,
-   "kind": "ladder"
+   "kind": "net"
   }
  ],
  "entrances": [],
@@ -743,32 +757,12 @@
   },
   {
    "k": "frog",
-   "x": 2450,
+   "x": 2670,
    "y": 500,
    "r": [
-    2350,
-    2600
+    2580,
+    2760
    ]
-  },
-  {
-   "k": "crow",
-   "x": 2900,
-   "y": 250,
-   "r": [
-    2700,
-    3200
-   ],
-   "cy": 250
-  },
-  {
-   "k": "crow",
-   "x": 2000,
-   "y": 180,
-   "r": [
-    1750,
-    2300
-   ],
-   "cy": 180
   },
   {
    "k": "boar",
@@ -780,35 +774,6 @@
    ]
   },
   {
-   "k": "fly",
-   "x": 4560,
-   "y": 300,
-   "r": [
-    4420,
-    4700
-   ],
-   "cy": 300
-  },
-  {
-   "k": "boar",
-   "x": 4950,
-   "y": 230,
-   "r": [
-    4820,
-    5080
-   ]
-  },
-  {
-   "k": "fly",
-   "x": 5700,
-   "y": 360,
-   "r": [
-    5550,
-    5850
-   ],
-   "cy": 360
-  },
-  {
    "k": "frog",
    "x": 5420,
    "y": 500,
@@ -816,25 +781,6 @@
     5250,
     5650
    ]
-  },
-  {
-   "k": "frog",
-   "x": 6800,
-   "y": 500,
-   "r": [
-    6600,
-    7000
-   ]
-  },
-  {
-   "k": "crow",
-   "x": 8700,
-   "y": 300,
-   "r": [
-    8500,
-    9000
-   ],
-   "cy": 300
   },
   {
    "k": "fly",
@@ -847,51 +793,12 @@
    "cy": 300
   },
   {
-   "k": "bat",
-   "x": 9700,
-   "y": -160,
-   "r": [
-    9450,
-    9880
-   ],
-   "cy": -160
-  },
-  {
-   "k": "bat",
-   "x": 9600,
-   "y": -200,
-   "r": [
-    9300,
-    9850
-   ],
-   "cy": -200
-  },
-  {
-   "k": "fly",
-   "x": 9500,
-   "y": 360,
-   "r": [
-    9300,
-    9750
-   ],
-   "cy": 360
-  },
-  {
    "k": "boar",
    "x": 10000,
    "y": 500,
    "r": [
     9800,
     10300
-   ]
-  },
-  {
-   "k": "frog",
-   "x": 11300,
-   "y": 160,
-   "r": [
-    11000,
-    11550
    ]
   },
   {
@@ -903,34 +810,6 @@
     12150
    ],
    "cy": 20
-  },
-  {
-   "k": "bat",
-   "x": 12900,
-   "y": 260,
-   "r": [
-    12600,
-    13200
-   ],
-   "cy": 260
-  },
-  {
-   "k": "boar",
-   "x": 13080,
-   "y": 320,
-   "r": [
-    12980,
-    13190
-   ]
-  },
-  {
-   "k": "boar",
-   "x": 13900,
-   "y": 500,
-   "r": [
-    13750,
-    14050
-   ]
   }
  ],
  "coins": [
@@ -1651,11 +1530,6 @@
    "t": "Esteira rolante: a favor ela leva o Milis mais rápido. Contra, segura!"
   },
   {
-   "a": 9050,
-   "b": 9250,
-   "t": "Grade do ar-condicionado: dá para escalar até o mezanino (cima/baixo e para os lados)."
-  },
-  {
    "a": 13340,
    "b": 13420,
    "t": "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas."
@@ -1722,6 +1596,11 @@
    "t": "A porta só abre com crachá. Junte o cartão de acesso com o cordão no compartimento do Milis."
   },
   {
+   "a": 10820,
+   "b": 10960,
+   "t": "Grade de manutenção: escale até a passarela (cima/baixo e para os lados)."
+  },
+  {
    "a": 11550,
    "b": 11700,
    "t": "Um cabo esticado: pule e segure-se nele para atravessar.",
@@ -1742,6 +1621,11 @@
    "b": 15600,
    "t": "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique num vão da grade. Painel piscando? Bastão nele!",
    "boss": 1
+  },
+  {
+   "a": 2380,
+   "b": 2480,
+   "t": "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo."
   }
  ],
  "pits": [
@@ -1839,7 +1723,7 @@
   },
   {
    "k": "pc",
-   "x": 2600,
+   "x": 2740,
    "y": 500,
    "n": "p_pc_coluna",
    "w": 92
@@ -2318,7 +2202,7 @@
    "h": 64
   },
   {
-   "x": 2480,
+   "x": 2060,
    "y": 230,
    "w": 150,
    "h": 64

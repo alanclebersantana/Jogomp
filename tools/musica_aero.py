@@ -60,7 +60,7 @@ def aero_tema():
 
 # ----------------------------------------------------------------- 1-1: samba-rock do terminal
 def gru_saguao():
-    bpm = 116
+    bpm = 130
     spb = 60 / bpm
     chs = ('D Bm G A D Bm Em A G A F#m Bm Em A D D '
            'G Gm D Bm Em A D D7 G Gm F#m B7 Em A D D').split()
@@ -78,10 +78,14 @@ def gru_saguao():
              'G5:.5 F#5:.5 E5:.5 B4:.5 E5:1 G5:1 | A5:1 G5:.5 F#5:.5 E5:1 C#5:1 | D5:.5 F#5:.5 A5:.5 D6:.5 C#6:1 A5:1 | C6:2 r:1 A5:.5 C6:.5 | '
              'B5:1 D6:.5 B5:.5 G5:1 D5:1 | Bb5:1 D6:.5 Bb5:.5 G5:2 | A5:.5 G#5:.5 F#5:.5 C#5:.5 F#5:1 A5:1 | D#6:1 C#6:.5 B5:.5 A5:1 F#5:1 | '
              'G5:.5 B5:.5 E6:.5 B5:.5 G5:1 E5:1 | C#6:1 B5:.5 A5:.5 G5:1 E5:1 | F#5:1 A5:.5 D6:.5 F#6:1 D6:1 | D6:2 r:1 A4:.5 C#5:.5', 4)
-    play_mel(T3, 'xylophone', a, spb, vel=.4, legato=.6, rel=.25)
-    play_mel(T3, 'flute', a, spb, vel=.16, legato=.85, rel=.15, octave=-1)
-    play_mel(T3, 'flute', bb, spb, t0=16 * 4 * spb, vel=.34, legato=.9, rel=.2)
-    play_mel(T3, 'clarinet', bb, spb, t0=16 * 4 * spb, vel=.16, legato=.9, rel=.2, octave=-1)
+    # a melodia fica na camada 2 (que toca sempre): a música já começa animada
+    play_mel(T2, 'xylophone', a, spb, vel=.4, legato=.6, rel=.25)
+    play_mel(T2, 'flute', a, spb, vel=.18, legato=.85, rel=.15, octave=-1)
+    play_mel(T2, 'flute', bb, spb, t0=16 * 4 * spb, vel=.34, legato=.9, rel=.2)
+    play_mel(T2, 'clarinet', bb, spb, t0=16 * 4 * spb, vel=.16, legato=.9, rel=.2, octave=-1)
+    # camada 3 (capanga por perto): metais dobrando a melodia uma oitava abaixo
+    play_mel(T3, 'trumpet', a, spb, vel=.2, legato=.7, rel=.1, octave=-1)
+    play_mel(T3, 'trumpet', bb, spb, t0=16 * 4 * spb, vel=.22, legato=.7, rel=.1, octave=-1)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
@@ -93,6 +97,9 @@ def gru_saguao():
         for (bt, v) in [(0, .26), (.75, .2), (1.5, .24), (2.5, .22), (3, .2), (3.5, .24)]:
             strum(T1, 'guitar-nylon', chord(c, 4), t + bt * spb, spb * .3, v, .08, .006)
         hits(T1, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.35, vel=.45)
+        # pulso já na base: bumbo nos tempos e palma no contratempo
+        hits(T1, p_kick(), [b, b + 2, b + 2.75], spb, vel=.5)
+        hits(T1, p_clap(), [b + 1, b + 3], spb, vel=.35, wet=True)
         # camada 2: bateria e surdo
         hits(T2, p_kick(), [b, b + 1.75, b + 2, b + 3.5], spb, vel=.6)
         hits(T2, p_clap(), [b + 1, b + 3], spb, vel=.5, wet=True)
@@ -108,15 +115,18 @@ def gru_saguao():
         hits(T3, p_block(1180), [b + 1, b + 1.5, b + 3], spb, pan=.4, vel=.45)
         if i % 4 == 3:
             hits(T3, p_tamb(), [b + 3, b + 3.25, b + 3.5, b + 3.75], spb, pan=.2, vel=.7)
-        if i >= 16 and i % 2 == 0:
+        # metais em ataques curtos (todo compasso) e virada de caixa a cada 4
+        for bt in (1.5, 3.5):
             for m in chord(c, 4):
-                T3.note('trumpet', m, t + 3.5 * spb, spb * .4, .14, .1)
+                T3.note('trumpet', m, t + bt * spb, spb * .3, .13, .08)
+        if i % 4 == 3:
+            hits(T3, p_snare(.6), [b + 2 + k * .25 for k in range(8)], spb, vel=.4, hum=.002)
     return render_stems([T1, T2, T3], .2, 1.5)
 
 
 # ----------------------------------------------------------------- 1-1 (segurança): samba-funk tenso
 def gru_seguranca():
-    bpm = 104
+    bpm = 122
     spb = 60 / bpm
     parte = 'Em7 A7 Em7 A7 Cmaj7 B7 Em7 Em7 Am7 D7 Gmaj7 Cmaj7 F#m7b5 B7 Em7 B7'.split()
     chs = parte * 2
@@ -126,9 +136,10 @@ def gru_seguranca():
             'E5:.5 G5:.5 B5:1 C6:1 B5:1 | A5:.5 F#5:.5 D#5:1 F#5:1 B4:1 | G5:1.5 F#5:.5 E5:2 | r:2 B4:.5 D5:.5 E5:.5 G5:.5 | '
             'C6:1 B5:.5 A5:.5 E5:1 G5:1 | F#5:1 A5:.5 C6:.5 A5:2 | B5:.5 A5:.5 G5:.5 F#5:.5 D5:2 | E5:1 G5:1 B5:1 C6:1 | '
             'A5:1 C6:.5 A5:.5 F#5:1 E5:1 | D#5:1 F#5:1 A5:1 B5:1 | G5:.5 F#5:.5 E5:1 B4:1 E5:1 | F#5:2 D#5:1 B4:1', 4)
-    play_mel(T3, 'clarinet', m, spb, vel=.34, legato=.8, rel=.12, octave=-1)
-    play_mel(T3, 'trumpet', m, spb, t0=16 * 4 * spb, vel=.26, legato=.75, rel=.1, octave=-1)
-    play_mel(T3, 'xylophone', m[::2], spb, t0=16 * 4 * spb, vel=.16, legato=.4, rel=.2)
+    play_mel(T2, 'clarinet', m, spb, vel=.34, legato=.8, rel=.12, octave=-1)
+    play_mel(T2, 'xylophone', m[::2], spb, t0=16 * 4 * spb, vel=.18, legato=.4, rel=.2)
+    play_mel(T3, 'trumpet', m, spb, vel=.26, legato=.75, rel=.1, octave=-1)
+    play_mel(T3, 'french-horn', m, spb, t0=16 * 4 * spb, vel=.2, legato=.8, rel=.1, octave=-1)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
@@ -138,6 +149,8 @@ def gru_seguranca():
         for (bt, v) in [(.5, .14), (1.5, .12), (2.5, .14), (3.25, .12)]:
             for mm_ in chord(c, 4):
                 T1.note('piano', mm_, t + bt * spb, spb * .25, v, .1)
+        hits(T1, p_kick(), [b, b + 2.5], spb, vel=.5)
+        hits(T1, p_shaker(), [b + k * .25 for k in range(16)], spb, pan=.3, vel=.3, hum=.002)
         hits(T2, p_kick(), [b, b + 1.75, b + 2.5], spb, vel=.62)
         hits(T2, p_snare(), [b + 1, b + 3], spb, vel=.48, wet=True)
         hits(T2, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.3, vel=.55)

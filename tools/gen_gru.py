@@ -301,7 +301,7 @@ novo("Guarulhos · 1-1 Terminal",
 L["sections"].append({"x": 0, "song": "gru_saguao", "bg": "vila", "gt": "vila", "per": 0})
 chao(-200, 1500)
 # cenário: colunas com painel de voos, carrinhos e bancos atrás
-for cx in [640, 2600, 3500, 5600, 6900]:
+for cx in [640, 2740, 3500, 5600, 6900]:
     movel(cx, "coluna", 92)
 movel(1240, "carrinhos", 110)
 movel(2250, "bancos", 230)
@@ -329,7 +329,7 @@ pax(300, "exec", r=[150, 900], spd=.9, re=1)
 pax(620, "cel", r=[480, 860], spd=.5, re=1)
 painel(220)
 painel(1240, 210, 170)
-painel(2480)
+painel(2060)
 obj(420, "papeis", 60)
 obj(980, "cafe", 46)
 obj(1180, "passaportes", 44)
@@ -374,9 +374,7 @@ obj(10300, "lixeiras", 96)
 porta_auto("auto1", 8900, 240)
 L["traps"].append({"k": "icicle", "x": 9900, "y": 40, "len": 30, "floor": GY, "reach": 60})
 L["traps"].append({"k": "icicle", "x": 10180, "y": 40, "len": 30, "floor": GY, "reach": 60})
-# grade do ar-condicionado até o mezanino (o cartão de acesso fica fácil de pegar)
-escada(9140, -40, GY, kind="net")
-dica(9050, 9250, "Grade do ar-condicionado: dá para escalar até o mezanino (cima/baixo e para os lados).")
+# (a grade de escalar que ficava ao lado do vento saiu: ela tirava a graça da saída de ar)
 # fio de manutenção solto, para balançar (cuidado com a ponta soltando faísca)
 L["vines"].append({"x": 11880, "y": -260, "len": 250, "aim": [12260, 120]})
 # mezanino à noite: neon do duty free
@@ -430,7 +428,7 @@ peca(1880, 2040, 300, 500, "p_pc_cabine", -4, 0, 4)   # cabine de informações 
 milhas(1890, 2030, 270, 35)
 dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
 arco(2050, 2300, 470, 90, 6)
-robo_falso(2450, [2350, 2600])
+robo_falso(2450, [2580, 2760])
 caixa(2700, item="heart")
 plat(2780, 380, 120)
 plat(2960, 280, 120)
@@ -534,7 +532,9 @@ totem(10200)
 # --- D · Mezanino e portão (10600 .. 14200): escada de serviço, corrimãos, escada rolante, sala secreta
 L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
 chao(10600, 11400)
-escada(10900, 160)
+# parede de grade de manutenção para escalar até a passarela (longe de qualquer saída de vento)
+escada(10900, 160, kind="net")
+dica(10820, 10960, "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).")
 passarela(10930, 11600, 160, 200)   # passarela de serviço
 milhas(10960, 11560, 130, 50)
 robo_falso(11300, [11000, 11550], y=160)
@@ -584,6 +584,18 @@ dica(FZ0, FZ1, "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique 
 milhas(15700, 15880, 470, 45)
 fim(15900)
 L["spanX"] = 16000
+# tapumes de obra: parede de tábuas até o teto com um vão embaixo — só passa rolando (corra e abaixe)
+# ou se arrastando abaixado
+for tx in (2490, 7360, 10530):
+    bloco(tx, tx + 120, -620, GY - 26, t="tapume")
+dica(2380, 2480, "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.")
+# um capanga por vez na tela: só estes ficam na 1-1 (os patrulhamentos ficam a ~1 tela de distância
+# um do outro), e a variedade continua: cambista, robô, faxineiro, mala voadora e drone
+_FICA_1_1 = {1300, 2450, 4100, 5420, 6900, 8340, 10000, 11900, 13300}
+L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
+for e in L["enemies"]:
+    if e.get("r") and not (e["r"][0] <= e["x"] <= e["r"][1]):
+        e["x"] = (e["r"][0] + e["r"][1]) // 2
 salvar(1)
 
 

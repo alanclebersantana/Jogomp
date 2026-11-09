@@ -259,6 +259,11 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 		_enemy(e)
 		if not e.dead:
 			_enemy_eyes(e)
+		# cambista que levou pancada (aguenta 3): pisca branco
+		if not e.dead and int(e.get("hitFx", 0)) > 0 and int(e.hitFx) % 4 < 2:
+			Spr.sil_c = Color(1, 1, 1, .8)
+			_enemy(e)
+			Spr.sil_c = Color(0, 0, 0, 0)
 		# clarão branco logo que leva o golpe
 		if e.dead > 0 and e.dead <= 5:
 			Spr.sil_c = Color(1, 1, 1, .9 * (1.0 - (e.dead - 1) / 5.0))
@@ -271,6 +276,13 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 			if e.stun > 0:
 				dizzy(e.x + eo.x, e.y + eo.y - 46, T)
 		_enemy_fx_over(g, e, eo, hop_u)
+		# vida do cambista: 3 bolinhas em cima da cabeça depois da 1ª pancada
+		if e.k == "boar" and not e.dead and e.has("hp") and int(e.hp) < 3:
+			for k in 3:
+				var hx: float = e.x + eo.x - 16 + k * 16
+				var hy: float = e.y + eo.y - 182
+				Spr.circle(hx, hy, 6, Color(0, 0, 0, .5))
+				Spr.circle(hx, hy, 4.5, Color("#ff5a3c") if k < int(e.hp) else Color(.35, .35, .38))
 
 ## cor do ambiente: mais quente no fim da tarde, mais azulada na neve e à noite
 func _env(g: Game) -> Color:
@@ -2031,7 +2043,8 @@ func _player_draw(g: Game) -> void:
 			key = "cheer"
 		elif p.onGround and p.get("pushT", 0) > 0 and abs(p.vx) > .2 and Spr.anim.has("push"):
 			key = "push"
-		elif p.onGround and abs(p.vx) > 1.2 and p._g is Dictionary and str(p._g.get("t", "")) == "ice" and not g.kd("L") and not g.kd("R") and Spr.anim.has("ice"):
+		elif p.onGround and abs(p.vx) > 1.2 and ((p._g is Dictionary and str(p._g.get("t", "")) == "ice" and not g.kd("L") and not g.kd("R")) or g.on_wet_floor()) and Spr.anim.has("ice"):
+			# no gelo (e no piso molhado do aeroporto, mesmo segurando a direção) ele passa escorregando
 			key = "ice"
 		if Spr.anim.has(key):
 			var a: Dictionary = Spr.anim[key]

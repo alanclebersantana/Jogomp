@@ -60,7 +60,8 @@ static func _pax(g, T: int) -> void:
 			p.rt = 70
 		if int(p.rt) > 0 and fresh:
 			p.rt -= 1
-		var nm: String = n
+		# passageiros em azul de duas cores (versão "de cenário"): ninguém confunde com capanga
+		var nm: String = n.replace("pax_", "paxbg_") if Spr.AR.has("p_" + n.replace("pax_", "paxbg_")) else n
 		var hop := 0.0
 		if int(p.rt) > 0 and p.has("re"):
 			# reage sem virar outra pessoa: um pulinho de susto (ou de alegria) e um balão
@@ -79,7 +80,7 @@ static func _pax(g, T: int) -> void:
 		elif k == "sit":
 			bob = sin(T * .03 + x) * .8
 		Spr.ellipse(x, y + 1, w * .32, 5, Color(0, 0, 0, .22))
-		Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(.93, .93, .97))
+		Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(1, 1, 1, .94))
 		if int(p.rt) > 20 and p.has("re"):
 			var by: float = y - hgt - 18 + hop
 			Spr.rr(x - 12, by - 14, 24, 22, 8, Color(1, 1, 1, .95))

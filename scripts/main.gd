@@ -2627,7 +2627,7 @@ func _on_results() -> void:
 	var lvl: int = game.level_idx
 	var story: String = game.L.get("endStory", "")
 	if story != "":
-		vb.add_child(_label(story, 15, Color("#e8dcc0"), Spr.font_i, 700))
+		vb.add_child(_label(story, 14, Color("#e8dcc0"), Spr.font_i, 640))
 	var cont: Callable
 	if lvl + 1 < EPISODES.size():
 		# a próxima fase fica liberada e começa logo depois
@@ -2635,13 +2635,21 @@ func _on_results() -> void:
 		cont = func(): start_level(false, lvl + 1)
 		vb.add_child(_button("PRÓXIMA FASE", cont))
 	else:
+		# última fase liberada: jogar de novo ou ir para o menu (antes o aviso largo empurrava o botão
+		# para fora da tela e não dava para sair do placar)
+		vb.add_child(_label("Próxima fase: Guarulhos 1-2 Bagagens — em breve.", 13, Color(.75, .7, .6), Spr.font_i, 520))
 		var brow := HBoxContainer.new()
 		brow.alignment = BoxContainer.ALIGNMENT_CENTER
 		brow.add_theme_constant_override("separation", 16)
-		brow.add_child(_label("Próxima fase: Guarulhos 1-2 Bagagens — em breve.", 13, Color(.75, .7, .6), Spr.font_i))
-		cont = show_title
-		brow.add_child(_button("CONTINUAR", cont))
+		var again := func(): start_level(false, lvl)
+		var b1 := _button("JOGAR DE NOVO", again)
+		b1.custom_minimum_size = Vector2(210, 44)
+		brow.add_child(b1)
+		var b2 := _button("MENU", show_title)
+		b2.custom_minimum_size = Vector2(150, 44)
+		brow.add_child(b2)
 		vb.add_child(brow)
+		cont = again
 	panel.set_meta("ok", cont)
 
 class _FinalDrawing extends Control:

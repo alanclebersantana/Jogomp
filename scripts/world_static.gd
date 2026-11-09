@@ -145,6 +145,7 @@ func _draw_raw() -> void:
 			"beam": beam(s)
 			"rockw": rockw(s)
 			"portal": portal(s)
+			"tapume": _tapume(s)
 			"brickw":
 				if game.L.get("theme", "") == "aeroporto":
 					_aero_wall(s)
@@ -2172,6 +2173,49 @@ func _aero_wall(s: Dictionary) -> void:
 		Spr.rr(s.x + s.w / 2 - 19, sy + 3, 38, 28, 3, Color("#e8463a"))
 		Spr.text("ÁREA", s.x + s.w / 2, sy + 15, 9, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
 		Spr.text("RESTRITA", s.x + s.w / 2, sy + 27, 7, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+
+## tapume de obra (aeroporto): parede de tábuas de compensado até o teto, com fita zebrada cruzada e o
+## vão embaixo por onde o Milis passa rolando (correr e abaixar) ou se arrastando
+func _tapume(s: Dictionary) -> void:
+	var x: float = s.x
+	var w: float = s.w
+	var yb: float = s.y + s.h
+	var ya: float = max(s.y, yb - 520.0)
+	Spr.rect(x - 3, ya, w + 6, yb - ya, Color("#3a2a1a"))
+	# tábuas horizontais (cada uma num tom de madeira), com pregos e veios
+	var y: float = yb
+	var k := 0
+	while y > ya:
+		var hh: float = 26.0
+		var c: Color = [Color("#c79a5e"), Color("#b98a4f"), Color("#d2a76a"), Color("#a97c45")][k % 4]
+		var off: float = 4.0 if k % 2 == 0 else -3.0
+		Spr.rect(x + off * .3, y - hh, w, hh - 2, c)
+		Spr.rect(x + off * .3, y - hh, w, 2, Color(1, 1, 1, .18))
+		Spr.seg(x + 6, y - hh * .55, x + w * .6, y - hh * .5, Color(0, 0, 0, .12), 1.2)
+		Spr.circle(x + 5, y - hh * .5, 1.6, Color(.25, .25, .28))
+		Spr.circle(x + w - 5, y - hh * .5, 1.6, Color(.25, .25, .28))
+		y -= hh
+		k += 1
+	# viga de reforço na vertical
+	Spr.rect(x + w * .5 - 4, ya, 8, yb - ya, Color("#8a6236"))
+	# fita zebrada cruzando em X (na altura do Milis) e uma faixa reta
+	for f in [[x - 10, yb - 110, x + w + 10, yb - 40], [x - 10, yb - 40, x + w + 10, yb - 110]]:
+		_zebra(f[0], f[1], f[2], f[3])
+	_zebra(x - 14, yb - 150, x + w + 14, yb - 152)
+	# placa "OBRA" e a seta mostrando o vão
+	Spr.rr(x + w / 2 - 34, yb - 196, 68, 36, 4, Color("#22252b"))
+	Spr.rr(x + w / 2 - 31, yb - 193, 62, 30, 3, Color("#f2c230"))
+	Spr.text("OBRA", x + w / 2, yb - 186, 14, Color("#22252b"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+	# borda de baixo (o vão fica escuro, desenhado pelo X.crawl)
+	Spr.rect(x - 3, yb - 4, w + 6, 4, Color("#2a1d10"))
+
+static func _zebra(x0: float, y0: float, x1: float, y1: float) -> void:
+	var d := Vector2(x1 - x0, y1 - y0)
+	var n: int = int(d.length() / 12.0)
+	for i in n:
+		var a: Vector2 = Vector2(x0, y0) + d * (float(i) / n)
+		var b: Vector2 = Vector2(x0, y0) + d * (float(i + 1) / n)
+		Spr.seg(a.x, a.y, b.x, b.y, Color("#f2c230") if i % 2 == 0 else Color("#22252b"), 7)
 
 ## degrau da escada rolante (aeroporto): lateral de metal escovado, degrau com frisos e corrimão preto
 func _escalator(s: Dictionary) -> void:

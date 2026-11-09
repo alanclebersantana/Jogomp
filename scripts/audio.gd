@@ -26,7 +26,10 @@ const AMB_FOR := {"manha": "passaros", "tarde": "passaros", "chuva": "sapos", "n
 ## xilofone, pandeiro). Conforme o Tomé avança no trecho, as camadas entram aos poucos.
 const LAYERED := ["tema", "tarde", "chuva", "noite", "tunel", "aero_tema", "gru_saguao", "gru_seguranca"]
 ## músicas em que a música pode dar uma pausa (nunca em chefes, perseguição e trechos especiais)
-const REST_SONGS := ["manha", "tarde", "chuva", "noite", "tunel", "tema", "aero_tema", "gru_saguao", "gru_seguranca"]
+const REST_SONGS := ["manha", "tarde", "chuva", "noite", "tunel", "tema", "aero_tema"]
+## fases do aeroporto: música animada desde o começo (sem pausas de silêncio); a 3ª camada (metais,
+## agogô, pandeiro) entra quando tem capanga por perto e conforme o Milis avança no trecho
+const ACTION := ["gru_saguao", "gru_seguranca"]
 const BATTLE := ["perseguicao", "gaviao", "bagre", "urso", "pedra", "fiscal"]
 var rain_target := 0.0
 ## barramentos: Música (músicas e tambores), Efeitos (sons curtos e ambiente) e Mundo (chuva e sons
@@ -452,6 +455,8 @@ func _hint_fresh() -> bool:
 ## animação desejada (0..1): o quanto o Tomé andou no trecho, ou o tempo que ele já passou nele
 ## (quem demora explorando também ganha música mais viva: até a metade em 4 minutos)
 func _int_value() -> float:
+	if song_base in ACTION:
+		return clampf(.5 + .5 * maxf(danger_lv * 1.6, _hint_pos), .5, 1.0)
 	if not _hint_fresh():
 		return 0.0
 	return maxf(_hint_pos, minf(_layer_time / 240.0, .55))
@@ -475,7 +480,10 @@ func _music_flow(d: float) -> void:
 	if song_base in LAYERED and fresh:
 		_layer_time += d
 	var tgt := _int_value()
-	_int_cur = move_toward(_int_cur, tgt, d * (1.0 / 30.0 if fresh else .35))
+	var rate: float = (1.0 / 30.0 if fresh else .35)
+	if song_base in ACTION:
+		rate = .5   # entra e sai em ~2 s
+	_int_cur = move_toward(_int_cur, tgt, d * rate)
 	if music and music.stream is AudioStreamSynchronized:
 		_apply_layers(music.stream as AudioStreamSynchronized, _int_cur)
 	# pausas: de tempos em tempos a música desce até o silêncio (~4 s), deixa ouvir o mundo
