@@ -45,6 +45,7 @@ var SPR: Array = []
 var EN: Array = []
 ## piso molhado (aeroporto): poças deixadas pelo faxineiro e as fixas da fase, com placa amarela
 var WET: Array = []
+var WALKS: Array = []   # esteiras rolantes do piso (aeroporto): levam o Milis a favor ou contra
 var COINS: Array = []
 var COIN_GRID := {}      # lápis por faixa de 512 px (para não testar os 660 a cada passo)
 var CHK: Array = []
@@ -83,6 +84,8 @@ var EV: Events
 var SL: Slam
 var WV: Waves
 var MV: Movers
+var CART: CartRide
+var TC: ThiefChase
 var VL: Village
 var RESTED := {}        # fogueiras grandes já descansadas
 var player: Dictionary = {}
@@ -202,6 +205,9 @@ func load_level(i: int) -> void:
 		o.t = 0
 		SPR.append(o)
 	EN = []
+	WALKS = []
+	for wk in L.get("walks", []):
+		WALKS.append({"x0": float(wk.x0), "x1": float(wk.x1), "y": float(wk.get("y", 500)), "dir": float(wk.dir), "spd": float(wk.get("spd", 1.6))})
 	WET = []
 	for wz in L.get("wet", []):
 		WET.append({"x": float(wz.x), "w": float(wz.w), "y": float(wz.get("y", 500)), "t": -1})
@@ -313,6 +319,10 @@ func load_level(i: int) -> void:
 	WV.load_level()
 	MV = Movers.new(self)
 	MV.load_level()
+	CART = CartRide.new(self)
+	CART.load_level()
+	TC = ThiefChase.new(self)
+	TC.load_level()
 	VL = Village.new(self)
 	VL.load_level()
 	RESTED = {}
@@ -772,6 +782,8 @@ func ambient() -> void:
 	var src: Dictionary = a if (t < .5 or b == null) else b
 	AMB.tint = src.get("tint", "")
 	AMB.song = src.get("song", "manha")
+	if CART and CART.on:
+		AMB.song = "carrinho"   # trilha da descida no carrinho de bagagem
 	# cor de tela misturada entre os dois trechos (sem troca num estalo)
 	var ca: Color = _tint_col(str(a.get("tint", "")))
 	var cb: Color = _tint_col(str(b.get("tint", ""))) if b else ca
@@ -888,6 +900,8 @@ func use_available() -> bool:
 	if not running or player.dyingT > 0 or not CINE.is_empty():
 		return false
 	if not near_rest().is_empty():
+		return true
+	if CART and CART.near():
 		return true
 	if player.nearL != null or (M and M.is_dog()):
 		return true
@@ -1049,6 +1063,11 @@ func step() -> void:
 	_comic_check()
 	_tick_wet()
 	_wire_shock()
+	_walkway()
+	if CART:
+		CART.step()
+	if TC:
+		TC.step()
 	if _npc_check():
 		return
 	if not player.get("warp", {}).is_empty():
@@ -1282,7 +1301,7 @@ func step() -> void:
 		# horizontal (logo depois de pular na parede, o controle fica um instante travado)
 		var held_l: bool = keys.get("L", false)
 		var held_r: bool = keys.get("R", false)
-		if player.wlock > 0 or player.get("launchT", 0) > 0:
+		if player.wlock > 0 or player.get("launchT", 0) > 0 or (CART and CART.on):
 			keys.L = false
 			keys.R = false
 		# deslizou para fora da beirada: levanta (no ar não se anda agachado)
@@ -1346,8 +1365,12 @@ func step() -> void:
 			elif slick:
 				# piso molhado do aeroporto: escorrega bastante e custa a parar (e a virar)
 				if want == 0:
-					# solta o direcional e continua deslizando um bom pedaço
-					player.vx *= (.988 if abs(player.vx) > .4 else 0.0) / FRIC
+					# tipo gelo: soltou o direcional e continua deslizando sem perder velocidade até sair
+					# do molhado (só para empurrando para o outro lado). Parado em cima dele, fica parado.
+					if abs(player.vx) > .3:
+						player.vx = sign(player.vx) * max(abs(player.vx), 1.8) / FRIC
+					else:
+						player.vx = 0.0
 				elif player.vx * want < 0:
 					acc *= .22
 				else:
@@ -1434,8 +1457,14 @@ func step() -> void:
 		player.landT = 8
 		if prev_vy > 10:
 			Audio.vib(18)
-		# peso no pouso: poeira proporcional à queda
-		burst(player.x + player.w / 2, player.y + player.h, int(clamp(prev_vy * .6, 4, 10)), Color("#b7a77f"))
+		# peso no pouso: poeira proporcional à queda (no aeroporto, poeira cinza do piso e o "clanc-bip" do robô)
+		var aero_l: bool = L.get("theme", "") == "aeroporto"
+		burst(player.x + player.w / 2, player.y + player.h, int(clamp(prev_vy * .6, 4, 10)), Color("#c9ccd3") if aero_l else Color("#b7a77f"))
+		if aero_l:
+			Audio.play("robo_pouso", -15.0 + min(6.0, (prev_vy - 6.0) * .9), randf_range(.95, 1.08))
+			for k in 6:
+				var sd: float = -1.0 if k < 3 else 1.0
+				PARTS.append({"x": player.x + player.w / 2 + sd * 6, "y": player.y + player.h - 2, "vx": sd * randf_range(1.0, 2.4), "vy": -randf_range(.3, 1.1), "life": 20, "col": Color(.82, .84, .88, .75)})
 		fx("fx_dust", player.x + player.w / 2, player.y + player.h - 6, 16, .08 + prev_vy * .01, -.2)
 	player.squash *= .78
 	if player.landT > 0:
@@ -1618,6 +1647,9 @@ func step() -> void:
 	_plat_dips()
 	EV.step()
 	SL.step()
+	# carrinho de bagagem: sobe tocando no botão usar
+	if CART and CART.near() and pressed("A"):
+		CART.start()
 	# totem de check-in (aeroporto): só abre ao tocar no botão usar
 	var rt: Dictionary = near_rest()
 	if not rt.is_empty() and pressed("A"):
@@ -3354,7 +3386,7 @@ func ebox(e: Dictionary) -> Dictionary:
 	if e.k == "janitor":
 		return R(e.x - 30, e.y - 96, 60, 96)
 	if e.k == "boar" and L.get("theme", "") == "aeroporto":
-		return R(e.x - 28, e.y - 124, 56, 124)
+		return R(e.x - 38, e.y - 162, 76, 162)
 	if FLY.has(e.k):
 		return R(e.x - 22, e.y - 8, 44, 22)
 	return R(e.x - 20, e.y - 34, 40, 34)
@@ -3418,6 +3450,26 @@ func on_wet_floor() -> bool:
 		if cx > wz.x and cx < wz.x + wz.w and abs(fy - wz.y) < 6:
 			return true
 	return false
+
+## esteira rolante: em pé (ou andando) em cima dela, o Milis é levado junto; os capangas e os
+## passageiros não usam
+func on_walkway() -> Dictionary:
+	if not player.onGround:
+		return {}
+	var cx: float = player.x + player.w / 2
+	var fy: float = player.y + player.h
+	for wk in WALKS:
+		if cx > wk.x0 and cx < wk.x1 and abs(fy - wk.y) < 6:
+			return wk
+	return {}
+
+func _walkway() -> void:
+	if not running or not CINE.is_empty() or player.ladder or player.vine:
+		return
+	var wk: Dictionary = on_walkway()
+	if wk.is_empty():
+		return
+	move_x(wk.dir * wk.spd)
 
 func _tick_wet() -> void:
 	var i := WET.size() - 1
@@ -4061,6 +4113,8 @@ func _back_to_fire() -> void:
 	K.reset_on_respawn()
 	EV.on_respawn()
 	VH.on_respawn()
+	if CART:
+		CART.on_respawn()
 	X.breath = Extras.BREATH
 	snap_camera()
 	_tick_fx()

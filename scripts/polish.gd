@@ -348,6 +348,7 @@ static func _tick_player() -> void:
 	if p.dyingT > 0 or p.get("dog", false):
 		return
 	var T: int = g.T
+	_tick_expr(p, T)
 	# E4 linhas de velocidade correndo no máximo
 	if p.onGround and p.get("run", 0) and abs(p.vx) > 4.6 and T % 3 == 0 and not p.swim:
 		var d: float = sign(p.vx)
@@ -370,6 +371,52 @@ static func _tick_player() -> void:
 			p.face = int(p._look0)
 	elif it == 0 and p.has("_look0"):
 		p.erase("_look0")
+
+## expressões no visor do Milis (aeroporto): olhos de LED que mudam com o que acontece.
+## p.expr = "" (a arte normal), "happy", "angry", "scared", "wow"
+static var _ex_last := {"coins": 0, "clues": 0, "cards": 0}
+static func _tick_expr(p: Dictionary, T: int) -> void:
+	if g.L.get("theme", "") != "aeroporto":
+		p.expr = ""
+		return
+	if not FRESH:
+		return
+	var coins: int = int(g.coins)
+	var clues: int = g.CLUEGOT.size()
+	var cards: int = g.DRAWN.size()
+	if clues > int(_ex_last.clues) or cards > int(_ex_last.cards):
+		p.happyT = 90
+	elif coins > int(_ex_last.coins) + 0:
+		p.happyT = max(int(p.get("happyT", 0)), 26)
+	_ex_last = {"coins": coins, "clues": clues, "cards": cards}
+	if int(p.get("happyT", 0)) > 0:
+		p.happyT -= 1
+	var want := ""
+	var fx: float = p.x + p.w / 2
+	if not p.onGround and p.vy > 8.5 and not p.get("puff", false):
+		want = "scared"
+	elif p.onGround and abs(p.vx) > 1.4 and g.on_wet_floor():
+		want = "scared"
+	elif g.CART and g.CART.on:
+		want = "wow"
+	elif int(p.get("happyT", 0)) > 0:
+		want = "happy"
+	else:
+		for e in g.EN:
+			if not e.dead and abs(e.x - fx) < 150 and abs(e.y - (p.y + p.h)) < 120:
+				want = "angry"
+				break
+	# troca com uma folguinha (não pisca entre duas expressões) e um bip do robô
+	if want != str(p.get("expr", "")):
+		p.exprHold = int(p.get("exprHold", 0)) + 1
+		if p.exprHold > (2 if want == "scared" else 6):
+			p.expr = want
+			p.exprHold = 0
+			if want != "" and T - int(p.get("bipT", -999)) > 80:
+				p.bipT = T
+				Audio.play("robo_bip", -16, 1.0 if want != "scared" else 1.25)
+	else:
+		p.exprHold = 0
 
 ## E2 impacto: raios saindo do ponto do golpe
 static func impact(x: float, y: float, col: Color = Color(1, .96, .82), n: int = 7, size: float = 22.0) -> void:

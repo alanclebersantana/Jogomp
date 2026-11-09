@@ -19,6 +19,8 @@ class Dot:
 const DIV := 4.0
 var game: Game
 var ambient := Color.WHITE
+var _on_t := 0
+var _off_t := 99
 var dots: Array = []
 var vp: SubViewport
 var painter: Node2D
@@ -101,12 +103,23 @@ func clear() -> void:
 func _process(_d: float) -> void:
 	var vs := get_viewport().get_visible_rect().size
 	# de dia não há o que escurecer: nem desenha (economiza a passada)
-	var on: bool = ambient.r < .995 or ambient.g < .995 or ambient.b < .995
-	show.visible = on
+	# liga/desliga com folga (antes alternava no limite e, ao religar, o 1º quadro da textura vinha
+	# preto: a tela inteira piscava escura). Só mostra depois que a textura já foi pintada.
+	var want: bool = ambient.r < .995 or ambient.g < .995 or ambient.b < .995
+	if want:
+		_off_t = 0
+		_on_t += 1
+	else:
+		_off_t += 1
+		if _off_t > 30:
+			_on_t = 0
+	var on: bool = _on_t > 0
 	if not on:
+		show.visible = false
 		vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		return
 	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	show.visible = _on_t > 2
 	var sz := Vector2i(int(ceil(vs.x / DIV)), int(ceil(vs.y / DIV)))
 	if vp.size != sz:
 		vp.size = sz

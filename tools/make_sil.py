@@ -17,7 +17,9 @@ for n in names:
     if not os.path.exists(p):
         continue
     im = Image.open(p).convert('RGBA')
-    a = im.getchannel('A')
+    # alfa em degrau: as bordas meio transparentes (borrão da hélice, franja do recorte) não viram
+    # manchas no contorno vermelho — o traço fica fino e limpo em volta do desenho
+    a = im.getchannel('A').point(lambda v: 255 if v >= 110 else 0)
     w = Image.new('RGBA', im.size, (255, 255, 255, 0))
     w.putalpha(a)
     out = os.path.join(S, n + '_sil.png')

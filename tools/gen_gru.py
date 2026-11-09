@@ -323,10 +323,10 @@ atendente(14280, GY, "barros2", [
 
 # ---------- vida do aeroporto na 1-1 (só cenário) ----------
 # saguão
-pax(300, "exec", r=[150, 1300], spd=.9, re=1)
-pax(1900, "cel", r=[1750, 2050], spd=.5, re=1)
-pax(2250, "dorme", k="sit", y=GY - 26, sc=.8, z=1, look=False, flip=True)
-pax(2780, "menino", k="stand", sc=.62)
+# passageiros só nos trechos calmos (nunca perto de capangas, armadilhas ou piso molhado):
+# começo do saguão, a pausa antes do check-in, depois do carrinho e antes do Fiscal
+pax(300, "exec", r=[150, 900], spd=.9, re=1)
+pax(620, "cel", r=[480, 860], spd=.5, re=1)
 painel(220)
 painel(1240, 210, 170)
 painel(2480)
@@ -344,9 +344,11 @@ L.setdefault("carts", []).append({"x0": 9950, "x1": 10500})
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
 # check-in
-pax(3500, "pai", r=[3450, 5200], spd=2.2)
-pax(3420, "mae", r=[3400, 5150], spd=2.1)
-pax(5300, "comissaria", r=[5150, 6200], spd=.8)
+pax(3470, "menino", k="stand", sc=.62)
+# esteiras rolantes do piso: no check-in a favor (ajuda a correr), no mezanino contra (segura o Milis)
+L.setdefault("walks", []).append({"x0": 3220, "x1": 3580, "y": GY, "dir": 1, "spd": 1.8})
+dica(3150, 3300, "Esteira rolante: a favor ela leva o Milis mais rápido. Contra, segura!")
+pax(3420, "mae", r=[3380, 3580], spd=.6)
 painel(3700, 200, 170)
 painel(5150, 180)
 painel(6180, 210)
@@ -362,8 +364,7 @@ molhado(5980, 140)
 obj(5960, "placa", 34)
 faxineiro(6900, [6650, 7150])
 # segurança: luz fluorescente, porta automática, fios e malas caindo
-pax(7400, "piloto", r=[7250, 7550], spd=.6)
-pax(9000, "comissaria", r=[8600, 9150], spd=.7, re=1)
+pax(10650, "comissaria", r=[10560, 10840], spd=.7, re=1)
 painel(8700, 200)
 obj(7300, "fila", 70)
 obj(7480, "fila", 70)
@@ -383,8 +384,27 @@ neon(12400, "#ff4fb4")
 neon(12950, "#4fd8ff")
 neon(13500, "#ffd84a")
 neon(13950, "#9b6bff")
-pax(12500, "turista", r=[12300, 12900], spd=.6, re=1)
-pax(13700, "teen", k="stand", re=1, bal="oi!")
+L.setdefault("walks", []).append({"x0": 12230, "x1": 12570, "y": GY, "dir": -1, "spd": 1.5})
+milhas(12260, 12540, 470, 40)
+# carrinho de bagagem pilotável: desce o corredor do duty free embalado (pular malas, abaixar nas placas)
+# mini-perseguições do vulto de capuz: alcançou, ele larga a mala (milhas extras + uma pista a mais)
+L["chases"] = [
+    {"trig": 230, "x0": 390, "x1": 990, "y": GY, "spd": 4.8, "bonus": 15,
+     "pista": "Na mala, um lenço bordado com um B dourado..."},
+    {"trig": 3150, "x0": 3320, "x1": 3740, "y": GY, "spd": 4.8, "bonus": 15,
+     "pista": "Caiu do bolso dele um bilhete: Encontro no portão 7. Assinado: B."}]
+# objetos em primeiro plano (escuros e desfocados, passando na frente da câmera): poucos, longe da ação
+L["fg"] = [{"x": 760, "k": "coluna"}, {"x": 3500, "k": "fila"}, {"x": 6350, "k": "lixeira"},
+           {"x": 8020, "k": "coluna"}, {"x": 10720, "k": "bancos"}, {"x": 12380, "k": "coluna"}, {"x": 14300, "k": "fila", "flip": True}]
+L["cartRide"] = {"x0": 13375, "x1": 14560, "y": GY, "obs": [
+    {"k": "low", "x": 13530, "w": 80, "txt": "PORTÃO 7"},
+    {"k": "pile", "x": 13770, "w": 44},
+    {"k": "low", "x": 13990, "w": 80, "txt": "SAÍDA"},
+    {"k": "pile", "x": 14190, "w": 44},
+    {"k": "low", "x": 14450, "w": 80, "txt": "EMBARQUE"}]}
+dica(13340, 13420, "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas.")
+pax(14380, "piloto", r=[14220, 14520], spd=.6)
+pax(14470, "teen", k="stand", re=1, bal="oi!")
 painel(12700, 190)
 obj(12520, "folhetos", 40)
 obj(13100, "papeis", 60)

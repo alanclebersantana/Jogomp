@@ -955,6 +955,38 @@
    230
   ],
   [
+   12260,
+   470
+  ],
+  [
+   12300,
+   470
+  ],
+  [
+   12340,
+   470
+  ],
+  [
+   12380,
+   470
+  ],
+  [
+   12420,
+   470
+  ],
+  [
+   12460,
+   470
+  ],
+  [
+   12500,
+   470
+  ],
+  [
+   12540,
+   470
+  ],
+  [
    300,
    470
   ],
@@ -1614,9 +1646,19 @@
  ],
  "hints": [
   {
+   "a": 3150,
+   "b": 3300,
+   "t": "Esteira rolante: a favor ela leva o Milis mais rápido. Contra, segura!"
+  },
+  {
    "a": 9050,
    "b": 9250,
    "t": "Grade do ar-condicionado: dá para escalar até o mezanino (cima/baixo e para os lados)."
+  },
+  {
+   "a": 13340,
+   "b": 13420,
+   "t": "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas."
   },
   {
    "a": 0,
@@ -2195,50 +2237,29 @@
    "y": 500,
    "r": [
     150,
-    1300
+    900
    ],
    "spd": 0.9,
    "re": 1
   },
   {
-   "x": 1900,
+   "x": 620,
    "n": "pax_cel",
    "k": "walk",
    "y": 500,
    "r": [
-    1750,
-    2050
+    480,
+    860
    ],
    "spd": 0.5,
    "re": 1
   },
   {
-   "x": 2250,
-   "n": "pax_dorme",
-   "k": "sit",
-   "y": 474,
-   "sc": 0.8,
-   "z": 1,
-   "look": false,
-   "flip": true
-  },
-  {
-   "x": 2780,
+   "x": 3470,
    "n": "pax_menino",
    "k": "stand",
    "y": 500,
    "sc": 0.62
-  },
-  {
-   "x": 3500,
-   "n": "pax_pai",
-   "k": "walk",
-   "y": 500,
-   "r": [
-    3450,
-    5200
-   ],
-   "spd": 2.2
   },
   {
    "x": 3420,
@@ -2246,59 +2267,36 @@
    "k": "walk",
    "y": 500,
    "r": [
-    3400,
-    5150
-   ],
-   "spd": 2.1
-  },
-  {
-   "x": 5300,
-   "n": "pax_comissaria",
-   "k": "walk",
-   "y": 500,
-   "r": [
-    5150,
-    6200
-   ],
-   "spd": 0.8
-  },
-  {
-   "x": 7400,
-   "n": "pax_piloto",
-   "k": "walk",
-   "y": 500,
-   "r": [
-    7250,
-    7550
+    3380,
+    3580
    ],
    "spd": 0.6
   },
   {
-   "x": 9000,
+   "x": 10650,
    "n": "pax_comissaria",
    "k": "walk",
    "y": 500,
    "r": [
-    8600,
-    9150
+    10560,
+    10840
    ],
    "spd": 0.7,
    "re": 1
   },
   {
-   "x": 12500,
-   "n": "pax_turista",
+   "x": 14380,
+   "n": "pax_piloto",
    "k": "walk",
    "y": 500,
    "r": [
-    12300,
-    12900
+    14220,
+    14520
    ],
-   "spd": 0.6,
-   "re": 1
+   "spd": 0.6
   },
   {
-   "x": 13700,
+   "x": 14470,
    "n": "pax_teen",
    "k": "stand",
    "y": 500,
@@ -2379,6 +2377,22 @@
    "x1": 10500
   }
  ],
+ "walks": [
+  {
+   "x0": 3220,
+   "x1": 3580,
+   "y": 500,
+   "dir": 1,
+   "spd": 1.8
+  },
+  {
+   "x0": 12230,
+   "x1": 12570,
+   "y": 500,
+   "dir": -1,
+   "spd": 1.5
+  }
+ ],
  "neon": [
   {
    "x": 12400,
@@ -2401,6 +2415,92 @@
    "c": "#9b6bff"
   }
  ],
+ "chases": [
+  {
+   "trig": 230,
+   "x0": 390,
+   "x1": 990,
+   "y": 500,
+   "spd": 4.8,
+   "bonus": 15,
+   "pista": "Na mala, um lenço bordado com um B dourado..."
+  },
+  {
+   "trig": 3150,
+   "x0": 3320,
+   "x1": 3740,
+   "y": 500,
+   "spd": 4.8,
+   "bonus": 15,
+   "pista": "Caiu do bolso dele um bilhete: Encontro no portão 7. Assinado: B."
+  }
+ ],
+ "fg": [
+  {
+   "x": 760,
+   "k": "coluna"
+  },
+  {
+   "x": 3500,
+   "k": "fila"
+  },
+  {
+   "x": 6350,
+   "k": "lixeira"
+  },
+  {
+   "x": 8020,
+   "k": "coluna"
+  },
+  {
+   "x": 10720,
+   "k": "bancos"
+  },
+  {
+   "x": 12380,
+   "k": "coluna"
+  },
+  {
+   "x": 14300,
+   "k": "fila",
+   "flip": true
+  }
+ ],
+ "cartRide": {
+  "x0": 13375,
+  "x1": 14560,
+  "y": 500,
+  "obs": [
+   {
+    "k": "low",
+    "x": 13530,
+    "w": 80,
+    "txt": "PORTÃO 7"
+   },
+   {
+    "k": "pile",
+    "x": 13770,
+    "w": 44
+   },
+   {
+    "k": "low",
+    "x": 13990,
+    "w": 80,
+    "txt": "SAÍDA"
+   },
+   {
+    "k": "pile",
+    "x": 14190,
+    "w": 44
+   },
+   {
+    "k": "low",
+    "x": 14450,
+    "w": 80,
+    "txt": "EMBARQUE"
+   }
+  ]
+ },
  "gold": {
   "x": 13380,
   "y": 930

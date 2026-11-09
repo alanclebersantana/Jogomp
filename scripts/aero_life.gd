@@ -125,6 +125,7 @@ static func front(g, T: int) -> void:
 	_papers(g, T)
 	_plane_shadow(g, T)
 	_fluor(g, T)
+	_foreground(g, T)
 
 static func _section(g) -> Dictionary:
 	var px: float = g.player.x
@@ -191,12 +192,43 @@ static func _plane_shadow(g, T: int) -> void:
 	Spr.poly(PackedVector2Array([Vector2(cx - 40, cy), Vector2(cx + 60, cy), Vector2(cx - 80, cy - 170), Vector2(cx - 150, cy - 170)]), col)
 	Spr.poly(PackedVector2Array([Vector2(cx - 260, cy), Vector2(cx - 220, cy), Vector2(cx - 300, cy - 90), Vector2(cx - 330, cy - 90)]), col)
 
+## objetos bem na frente da câmera, escuros e desfocados, passando mais rápido que o cenário
+## (coluna, vaso de planta, poste de fila, lixeira): dão profundidade. Poucos, longe da ação, e
+## ficam quase transparentes quando passam na frente do Milis.
+const FG_ART := {"coluna": ["pc_coluna", 150.0], "lixeira": ["ob_lixeiras", 200.0], "fila": ["ob_fila", 170.0], "bancos": ["pc_bancos", 330.0]}
+static func _foreground(g, T: int) -> void:
+	var list: Array = g.L.get("fg", [])
+	if list.is_empty():
+		return
+	var cx: float = g.cam + g.W / 2
+	var pl: Dictionary = g.player
+	var pcx: float = pl.x + pl.w / 2
+	for f in list:
+		var x: float = float(f.x)
+		# paralaxe: anda 1,45x mais rápido que o mundo
+		var wx: float = cx + (x - cx) * 1.45
+		var art: Array = FG_ART.get(str(f.k), FG_ART["coluna"])
+		var w: float = art[1]
+		if wx + w < g.cam - 20 or wx - w > g.cam + g.W + 20:
+			continue
+		var by: float = g.cam_y + g.H + float(f.get("dy", 30))
+		var a: float = .9
+		var d: float = abs(wx - pcx)
+		if d < w * .5 + 90:
+			a = lerpf(.18, .9, clamp((d - w * .5) / 90.0, 0.0, 1.0))
+		var c := Color(.05, .06, .09, a * .5)
+		# desfoque: três cópias deslocadas, translúcidas
+		for o in [-5.0, 0.0, 5.0]:
+			Spr.P(str(art[0]), wx + o, by + abs(o) * .4, w, bool(f.get("flip", false)), 0.0, c)
+
 ## segurança: luz fria fluorescente com uma lâmpada falhando
 static func _fluor(g, T: int) -> void:
 	var sc := _section(g)
 	if not str(sc.get("song", "")).contains("seguranca"):
 		return
-	Spr.rect(g.cam - 10, g.cam_y - 10, g.W + 20, g.H + 20, Color(.75, .9, 1, .05))
+	# (sem o véu frio na tela inteira: um retângulo do tamanho da tela no mundo fazia o contorno
+	# trabalhar na tela toda e, antes, a lâmpada piscando escurecia tudo)
+	pass
 
 
 ## painéis de voos pendurados no teto (com cabos), as linhas trocando

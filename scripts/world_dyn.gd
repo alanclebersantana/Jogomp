@@ -117,6 +117,11 @@ func __draw_raw() -> void:
 	WorldProps.draw(g, T)
 	Spr.pt("d_Props_draw", __d_Props_draw)
 	_npcs(g)
+	_walks(g)
+	if g.CART:
+		g.CART.draw_back(T)
+	if g.TC:
+		g.TC.draw(T)
 	_wet(g)
 	AeroLife.back(g, T)
 	WorldLake.back(g, T)
@@ -226,8 +231,9 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 			Spr.translate(0, -sin(hop_u * PI) * 12)
 		# inimigo: contorno vermelho pulsando (mais forte quando o Tomé está perto) — os bichos
 		# do cenário nunca têm isso
-		var no_line: bool = g.L.get("theme", "") == "aeroporto" and e.k in ["janitor", "fly", "crow"]
-		if not no_line and not e.dead and not (e.k == "leech" and e.get("hid", true)) and not (e.k == "mole" and e.get("st", 0) in [0, 1]):
+		# (no aeroporto o traço é mais fino: todos os capangas com o mesmo contorno vermelho limpo)
+		var ow: float = 1.7 if g.L.get("theme", "") == "aeroporto" else 2.6
+		if not e.dead and not (e.k == "leech" and e.get("hid", true)) and not (e.k == "mole" and e.get("st", 0) in [0, 1]):
 			var pp: Dictionary = g.player
 			var dn: float = clamp(1.0 - Vector2(pp.x + pp.w / 2 - e.x, pp.y + pp.h / 2 - e.y).length() / 420.0, 0, 1)
 			var pul: float = .5 + .5 * sin(T * .14 + e.x * .01)
@@ -242,11 +248,11 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 				var rr: Array = Spr.rec
 				Spr.rec = null
 				for d in OUT8:
-					Spr.replay(rr, d * 2.6)
+					Spr.replay(rr, d * ow)
 			else:
 				for d in OUT8:
 					Spr.save()
-					Spr.translate(d.x * 2.6, d.y * 2.6)
+					Spr.translate(d.x * ow, d.y * ow)
 					_enemy(e)
 					Spr.restore()
 			Spr.sil_c = Color(0, 0, 0, 0)
@@ -332,6 +338,8 @@ func _draw_front_node(n: CanvasItem) -> void:
 	Spr.pt("d_Extras_grass", __d_Extras_grass)
 	WorldTraps.draw_shadows(g, T)
 	Polish.draw_front(g, T)
+	if g.CART:
+		g.CART.draw_front(T)
 	AeroLife.front(g, T)
 	for f in g.FXS:
 		Spr.A(f.n, f.x, f.y, f.sc, false, 1.0 - float(f.t) / f.life)
@@ -1099,9 +1107,10 @@ func _enemy(e: Dictionary) -> void:
 					Spr.PR("leech1", -ww / 2, -lh * lu, ww, lh * lu)
 					Spr.restore()
 		_:
-			# javali (no aeroporto: o cambista de terno, bem maior que os passageiros)
+			# javali (no aeroporto: o cambista de terno, um grandalhão ~40% mais alto e mais largo
+			# que os passageiros: ~165 px de altura contra ~118)
 			if game.L.get("theme", "") == "aeroporto":
-				Spr.scale(2.05, 2.05)
+				Spr.scale(2.95, 2.72)
 			var fr: int
 			if e.dead or e.stun:
 				fr = 6
@@ -2124,6 +2133,8 @@ func _player_draw(g: Game) -> void:
 			var cx3: float = cx + p.face * 8.0 * wk
 			var rot3: float = p.lean + (p.face * .1 + sin(T * 1.1) * .012) * wk + p.face * (1.0 - dk3) * .35
 			_pose("wall" if wsl else key, tx3, src3, dst3, cx3, by, rot3, sx3, sy3)
+			if not front_t and not wsl:
+				_visor_expr(p, "tome/" + key, f, dst3, cx3, by, rot3, sx3, sy3)
 			# vento forte com ele parado: a ponta do cachecol voa para o lado do vento
 			var wnd: float = g.AMB.get("wind", 0.0)
 			if wnd > .3 and key in ["idle", "look", "lantern", "shiver", "rain"]:
@@ -2224,6 +2235,7 @@ func _player_draw(g: Game) -> void:
 	_mg_setup(170.0, 160.0, _mg_anchor("pai", 0.0) if (tex == pai and fr == 0 and om.is_empty()) else [], 0.0, 52.0)
 	_turn_mg(p, tst)
 	_pose("old%d_%d" % [tex.get_instance_id(), fr], otex, osrc, Rect2(-85, -156, 170, 160), cx, by, rot0, sx0, sy0)
+	_visor_expr(p, "pai" if tex == pai else "pai2", fr, Rect2(-85, -156, 170, 160), cx, by, rot0, sx0, sy0)
 	# J10 mergulho: borrão vertical acima do corpo
 	if p.slam and p.vy > 6 and not g.low_fx:
 		for si in 2:
@@ -2716,6 +2728,55 @@ func _rim(g: Game, p: Dictionary) -> Color:
 	var tw: float = g.section_weights().get("tarde", 0.0)
 	return Color(1, .95, .78).lerp(Color(1, .72, .4), tw) * Color(1, 1, 1, .7)
 
+## expressões de LED no visor (aeroporto): cobre os olhos pintados e desenha os novos por cima,
+## no mesmo lugar e com a mesma escala/rotação do quadro (assets/data/visor.json, tools/visor.py)
+static var VIS: Dictionary = {}
+const LED := Color(1, .62, .18)
+func _visor_expr(p: Dictionary, sheet: String, fr: int, dst: Rect2, cx: float, by: float, rot: float, sx: float, sy: float) -> void:
+	var ex: String = str(p.get("expr", ""))
+	if ex == "":
+		return
+	if VIS.is_empty():
+		VIS = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/visor.json"))
+	var lst = VIS.get(sheet)
+	if lst == null or fr < 0 or fr >= lst.size() or lst[fr] == null:
+		return
+	var v: Array = lst[fr]
+	var r := Rect2(dst.position.x + float(v[0]) * dst.size.x, dst.position.y + float(v[1]) * dst.size.y, float(v[2]) * dst.size.x, float(v[3]) * dst.size.y)
+	Spr.save()
+	Spr.translate(cx, by)
+	Spr.rotate(rot)
+	Spr.scale(sx, sy)
+	var c: Vector2 = r.get_center()
+	# tampa os olhos pintados (o visor é preto liso)
+	Spr.ellipse(c.x, c.y, r.size.x * .44, r.size.y * .4, Color("#0b0d11"))
+	var e: float = r.size.x * .15
+	var lw: float = r.size.x * .1
+	var ec := Color(LED.r, LED.g, LED.b, Spr.alpha)
+	for k in [-1.0, 1.0]:
+		var ox: float = c.x + k * r.size.x * .2
+		var oy: float = c.y - r.size.y * .04
+		Spr.glow(ox, oy, e * 2.4, Color(1, .55, .15, .22 * Spr.alpha))
+		match ex:
+			"happy":
+				Spr.seg(ox - e, oy + e * .45, ox, oy - e * .55, ec, lw)
+				Spr.seg(ox, oy - e * .55, ox + e, oy + e * .45, ec, lw)
+			"angry":
+				# sobrancelha de LED caindo para o meio: olhar decidido
+				Spr.seg(ox + e * 1.1 * k, oy - e * .9, ox - e * .9 * k, oy - e * .05, ec, lw * 1.2)
+				Spr.ellipse(ox, oy + e * .45, e * .6, e * .45, ec)
+			"scared":
+				Spr.ring(ox, oy, e * .95, ec, lw * .8)
+				Spr.circle(ox, oy, e * .3, ec)
+			"wow":
+				Spr.ellipse(ox, oy, e * .7, e * .95, ec)
+	if ex == "happy" or ex == "wow":
+		Spr.seg(c.x - e * .9, c.y + r.size.y * .22, c.x, c.y + r.size.y * .3, ec, lw * .8)
+		Spr.seg(c.x, c.y + r.size.y * .3, c.x + e * .9, c.y + r.size.y * .22, ec, lw * .8)
+	elif ex == "scared":
+		Spr.ring(c.x, c.y + r.size.y * .26, e * .35, ec, lw * .6)
+	Spr.restore()
+
 ## piscadinha: de vez em quando as pálpebras descem sobre os olhos (só na pose parada)
 func _blink(p: Dictionary) -> void:
 	var t: int = (T + int(p.x)) % 220
@@ -2793,6 +2854,42 @@ func _npcs(g) -> void:
 		Spr.P(nm.substr(2), x, y + 2 + br * .2, w, px > x)
 
 ## piso molhado: brilho azulado no chão (some aos poucos) e placa amarela nas poças fixas
+## esteira rolante do piso: corrimão de vidro atrás, lona de borracha com sulcos andando e setas
+## amarelas mostrando o sentido; pentes de metal nas pontas
+func _walks(g) -> void:
+	for wk in g.WALKS:
+		if wk.x1 < g.cam - 60 or wk.x0 > g.cam + g.W + 60:
+			continue
+		var x0: float = wk.x0
+		var x1: float = wk.x1
+		var y: float = wk.y
+		var w: float = x1 - x0
+		# corrimão: vidro com a borracha preta em cima, apoiado em duas pontas arredondadas
+		Spr.rect(x0 + 14, y - 44, w - 28, 40, Color(.7, .88, 1, .16))
+		Spr.seg(x0 + 14, y - 44, x1 - 14, y - 44, Color("#16181c"), 5)
+		Spr.rr(x0 - 4, y - 50, 22, 50, 10, Color("#5b6470"))
+		Spr.rr(x1 - 18, y - 50, 22, 50, 10, Color("#5b6470"))
+		Spr.rr(x0 - 2, y - 48, 18, 10, 5, Color("#16181c"))
+		Spr.rr(x1 - 16, y - 48, 18, 10, 5, Color("#16181c"))
+		# lona
+		Spr.rect(x0, y - 3, w, 9, Color("#2a2e35"))
+		Spr.rect(x0, y - 3, w, 2, Color("#4a515c"))
+		var off: float = fposmod(T * wk.spd * wk.dir, 14.0)
+		var gx: float = x0 + off
+		while gx < x1:
+			Spr.seg(gx, y - 1, gx, y + 5, Color("#1a1d22"), 2)
+			gx += 14.0
+		# setas no sentido da esteira (andando junto)
+		var aoff: float = fposmod(T * wk.spd * wk.dir, 90.0)
+		var ax: float = x0 + 30 + aoff
+		while ax < x1 - 24:
+			var d: float = wk.dir
+			Spr.poly(PackedVector2Array([Vector2(ax - 7 * d, y - 2), Vector2(ax + 5 * d, y + 1.5), Vector2(ax - 7 * d, y + 5)]), Color(1, .82, .2, .85))
+			ax += 90.0
+		# pentes de metal nas pontas
+		Spr.rect(x0 - 8, y - 4, 14, 10, Color("#9aa3ad"))
+		Spr.rect(x1 - 6, y - 4, 14, 10, Color("#9aa3ad"))
+
 func _wet(g) -> void:
 	for wz in g.WET:
 		if wz.x + wz.w < g.cam - 40 or wz.x > g.cam + g.W + 40:
