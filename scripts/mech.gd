@@ -346,6 +346,8 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 				p.wlock = 0
 				p.actT = 0
 	FiscalBoss.swing(g, g.X, hb)
+	if g.QB:
+		g.QB.hit_box(hb, float(p.face), how)
 	for c in g.CR:
 		if not c.dead and c.t == "break" and not book.has(c) and Game.hit(hb, c):
 			book[c] = 1

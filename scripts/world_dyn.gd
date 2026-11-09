@@ -118,6 +118,10 @@ func __draw_raw() -> void:
 	Spr.pt("d_Props_draw", __d_Props_draw)
 	_npcs(g)
 	_walks(g)
+	if g.QB:
+		g.QB.draw(T)
+	if g.GD:
+		g.GD.draw(T)
 	if g.CART:
 		g.CART.draw_back(T)
 	if g.TC:
@@ -154,7 +158,7 @@ func __draw_raw() -> void:
 	Spr.pt("d_levhint", __q_levhint)
 	var __q_vinespr := Time.get_ticks_usec()
 	for v in g.VINES:
-		if v.x + v.len < cx0 or v.x - v.len > cx1:
+		if v.x + v.len < cx0 or v.x - v.len > cx1 or v.get("hook"):
 			continue
 		_vine(v)
 	for s in g.SPR:
@@ -212,9 +216,10 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 	mat.set_shader_parameter("shade_amt", .26)
 	n.self_modulate = _env(g)
 	for e in g.EN:
-		if e.dead > 50:
+		var segk: bool = e.k == "boar" and SegGuard.is_seg(g, e)
+		if e.dead > (180 if segk and e.get("dk", "") == "seg" else 50):
 			continue
-		if e.x < g.cam - 200 or e.x > g.cam + g.W + 200:
+		if e.x < g.cam - 400 or e.x > g.cam + g.W + 400:
 			continue
 		var eo := g.e_off(e)
 		Spr.edist(e)
@@ -257,8 +262,17 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 					Spr.restore()
 			Spr.sil_c = Color(0, 0, 0, 0)
 		_enemy(e)
-		if not e.dead:
+		if segk:
+			# irritado: o rosto e o corpo esquentam (vermelho pulsando por cima do desenho)
+			if e.get("mad", false) and not e.dead:
+				Spr.sil_c = Color(1, .2, .1, .06 + .04 * sin(T * .3))
+				_enemy(e)
+				Spr.sil_c = Color(0, 0, 0, 0)
+			SegGuard.draw_fx(g, e, T)
+			SegGuard.draw_shield(e)
+		elif not e.dead:
 			_enemy_eyes(e)
+			Capangas.draw_fx(g, e, T)
 		# cambista que levou pancada (aguenta 3): pisca branco
 		if not e.dead and int(e.get("hitFx", 0)) > 0 and int(e.hitFx) % 4 < 2:
 			Spr.sil_c = Color(1, 1, 1, .8)
@@ -273,7 +287,7 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 		if e.get("dizzyT", 0) > 0 and not e.dead:
 			if FRESH:
 				e.dizzyT -= 1
-			if e.stun > 0:
+			if e.stun > 0 and not segk:
 				dizzy(e.x + eo.x, e.y + eo.y - 46, T)
 		_enemy_fx_over(g, e, eo, hop_u)
 		# vida do cambista: 3 bolinhas em cima da cabeça depois da 1ª pancada
@@ -850,7 +864,7 @@ const OUT8 := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vec
 const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1], "mole": [2]}
 ## nomes para a dica do primeiro encontro
 const EN_NAME := {"crow": "Drone espião", "janitor": "Faxineiro (só dá para pisar por trás)", "bat": "Mala-monstro", "fly": "Mala voadora", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
-	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Cambista", "owl": "Coruja brava", "mole": "Toupeira"}
+	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Falso segurança", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
 const EYES := {}   # a arte nova já tem os olhos acesos dos capangas
 
@@ -892,11 +906,17 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	if e.dead:
 		return
 	var hx: float = e.x + eo.x
+	var segk: bool = e.k == "boar" and SegGuard.is_seg(g, e)
 	var hy: float = e.y + eo.y - (34 if not Game.FLY.has(e.k) else 30)
+	if segk:
+		hy = e.y + eo.y - 172   # o grandalhão: aviso e estrelinhas em cima da cabeça
 	# primeiro encontro com cada tipo de inimigo: dica curta dizendo que ele é perigoso
 	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k):
 		g.en_seen[e.k] = true
-		g.flash("%s: capanga do ladrão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
+		if segk:
+			g.flash("Falso segurança: de frente ele defende com o escudo. Bata por trás ou logo depois da investida!", 190)
+		else:
+			g.flash("%s: capanga do ladrão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
 	var s: int = e.get("st", 0)
 	if s != e.get("pst", 0) and ATK.get(e.k, []).has(s):
 		e.warnT = 34
@@ -904,7 +924,7 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	if e.get("charge") and not e.get("pch"):
 		e.warnT = 34
 	if e.k == "boar" and e.get("wind", 0) == 15:
-		Polish.snort(e.x + e.dir * 34, e.y - 22, e.dir)
+		Polish.snort(e.x + e.dir * (24 if segk else 34), e.y - (150.0 if segk else 22.0), e.dir)
 	e.pch = e.get("charge", false)
 	if e.k == "frog":
 		var jt: int = int(e.get("jt", 0)) % 130
@@ -976,7 +996,25 @@ func _enemy(e: Dictionary) -> void:
 		Spr.alpha = clamp(1 - (e.dead - 24) / 14.0, 0, 1) if e.dk == "flat" else clamp(1 - (e.dead - 34) / 16.0, 0, 1)
 	var dist: float = e.get("_dd", 0.0)
 	var fs: float = e.get("_fs", 1.0 if e.dir > 0 else -1.0)
+	if e.k == "boar" and SegGuard.is_seg(game, e):
+		# falso segurança: poses pintadas próprias (fica caído no chão um tempo antes de sumir)
+		if e.dead:
+			Spr.alpha = clamp(1 - (e.dead - 150) / 30.0, 0, 1)
+			Spr.translate(e.x + float(e.get("ddx", 0.0)), e.y)
+			Spr.scale(-1.0 if float(e.get("dvx", 1.0)) >= 0 else 1.0, 1)
+		else:
+			Spr.translate(e.x, e.y)
+			_enemy_body(e, dist)
+			Spr.scale(sign(fs) * (1.0 + (1.0 - Spr.tsy(e)) * .6), Spr.tsy(e))
+		SegGuard.draw(game, e, dist, T)
+		Spr.restore()
+		return
 	Spr.translate(e.x, e.y)
+	if e.k == "janitor" and Capangas.down(e) and not e.dead:
+		# escorregou no próprio molhado: estatelado de costas
+		var su: float = clamp((90 - int(e.slip)) / 8.0, 0, 1) * clamp(int(e.slip) / 10.0, 0, 1)
+		Spr.translate(0, -6 * su)
+		Spr.rotate(-e.dir * 1.35 * su)
 	if not e.dead:
 		_enemy_body(e, dist)
 	if e.dead:
@@ -1987,10 +2025,11 @@ func _player_draw_raw(g: Game) -> void:
 					n = "pai_throw2" if (p.actT / 3) % 2 == 0 else "pai_throw1"
 					if (p.actT / 6) % 2 == 1:
 						fneg = not fneg
-				"sweep", "flykick": n = "pai_slide"
-				"dodge": n = "pai_crouch"
+				"sweep": n = "pai_kick_low" if Spr.AR.has("pai_kick_low") else "pai_slide"
+				"flykick": n = "pai_kick_fly" if Spr.AR.has("pai_kick_fly") else "pai_slide"
+				"dodge": n = "pai_dodge" if Spr.AR.has("pai_dodge") else "pai_crouch"
 		elif p.get("guard", false) and g.L.get("theme", "") == "aeroporto":
-			n = "pai_push1"
+			n = "pai_guard" if Spr.AR.has("pai_guard") else "pai_push1"
 		elif p.crouch:
 			if p.slideT:
 				n = "pai_slide"
@@ -2939,6 +2978,9 @@ func _walks(g) -> void:
 	for wk in g.WALKS:
 		if wk.x1 < g.cam - 60 or wk.x0 > g.cam + g.W + 60:
 			continue
+		if wk.get("esc"):
+			_escalator_moving(wk)
+			continue
 		var x0: float = wk.x0
 		var x1: float = wk.x1
 		var y: float = wk.y
@@ -2968,6 +3010,58 @@ func _walks(g) -> void:
 		# pentes de metal nas pontas
 		Spr.rect(x0 - 8, y - 4, 14, 10, Color("#9aa3ad"))
 		Spr.rect(x1 - 6, y - 4, 14, 10, Color("#9aa3ad"))
+
+## escada rolante que anda: lateral de aço, degraus (o friso amarelo de cada degrau desliza junto),
+## balaustrada de vidro e corrimão de borracha; placa no pé dizendo o sentido
+func _escalator_moving(wk: Dictionary) -> void:
+	var x0: float = wk.x0
+	var x1: float = wk.x1
+	var yb: float = wk.yb
+	var yt: float = wk.y
+	var run := 20.0
+	var n: int = int(round((x1 - x0) / run))
+	var rise: float = (yb - yt) / max(1, n)
+	# lateral (o corpo da escada até o chão)
+	Spr.poly(PackedVector2Array([Vector2(x0 - 6, yb), Vector2(x1, yt - 2), Vector2(x1 + 6, yt - 2), Vector2(x1 + 6, yb), Vector2(x0 - 6, yb)]), Color("#59626e"))
+	Spr.poly(PackedVector2Array([Vector2(x0 + 30, yb), Vector2(x1, yt + 26), Vector2(x1, yb)]), Color("#6d7784"))
+	var k := 1
+	while k < 6:
+		var u: float = k / 6.0
+		Spr.seg(lerpf(x0 + 30, x1, u), lerpf(yb, yt + 26, u), lerpf(x0 + 30, x1, u), yb, Color(0, 0, 0, .18), 2)
+		k += 1
+	# degraus (silhueta da escada: o que o Milis pisa)
+	for i in n:
+		var sx: float = x0 + i * run
+		var sy: float = yb - rise * (i + 1)
+		Spr.rect(sx, sy, run + 1, rise + 3, Color("#30353d"))
+		Spr.rect(sx, sy, run + 1, 2, Color("#9aa3ad"))
+	# frisos amarelos andando no sentido da escada
+	var ph: float = fposmod(T * float(wk.spd) * float(wk.dir) / run, 1.0)
+	for i in n:
+		var f: float = i + ph
+		var fx: float = x0 + f * run
+		if fx < x0 + 2 or fx > x1 - 2:
+			continue
+		var fy: float = yb - rise * (floor(f) + 1)
+		Spr.rect(fx - 1, fy, 3, rise, Color(1, .8, .2, .8))
+	# pentes de metal nas pontas
+	Spr.rect(x0 - 16, yb - 4, 20, 6, Color("#9aa3ad"))
+	Spr.rect(x1 - 2, yt - 4, 22, 6, Color("#9aa3ad"))
+	# balaustrada de vidro e corrimão
+	var hh := 46.0
+	Spr.poly(PackedVector2Array([Vector2(x0 - 10, yb - 8), Vector2(x1 + 10, yt - 8), Vector2(x1 + 10, yt - 8 - hh), Vector2(x0 - 10, yb - 8 - hh)]), Color(.72, .9, 1, .16))
+	Spr.seg(x0 - 10, yb - 8 - hh, x1 + 10, yt - 8 - hh, Color("#16181c"), 5)
+	Spr.seg(x0 - 10, yb - 9 - hh, x1 + 10, yt - 9 - hh, Color(1, 1, 1, .18), 1.5)
+	Spr.rr(x0 - 26, yb - 14 - hh, 24, hh + 14, 11, Color("#5b6470"))
+	Spr.rr(x1 + 4, yt - 14 - hh, 24, hh + 14, 11, Color("#5b6470"))
+	# placa no pé da escada: seta verde (sobe) ou contramão (vermelha, desce)
+	var up: bool = float(wk.dir) > 0
+	var px: float = x0 - 40
+	Spr.rect(px - 2, yb - 70, 4, 70, Color("#3a3f47"))
+	Spr.rr(px - 15, yb - 96, 30, 28, 5, Color("#1b5e2a") if up else Color("#8a1c1c"))
+	var by: float = yb - 75.0 if up else yb - 89.0
+	var ty: float = yb - 89.0 if up else yb - 75.0
+	Spr.poly(PackedVector2Array([Vector2(px - 8, by), Vector2(px + 8, by), Vector2(px, ty)]), Color(1, 1, 1, .95))
 
 func _wet(g) -> void:
 	for wz in g.WET:

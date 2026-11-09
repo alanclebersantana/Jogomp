@@ -233,6 +233,9 @@ func _wheel(o: Dictionary, T: int) -> void:
 		_plank(s)
 
 func _lift(o: Dictionary, T: int) -> void:
+	if o.get("skin", "") == "vidro":
+		_lift_glass(o, T)
+		return
 	var s: Dictionary = o.plats[0]
 	var x: float = s.x
 	var w: float = s.w
@@ -263,3 +266,49 @@ func _lift(o: Dictionary, T: int) -> void:
 	if g.player and on_plat(o) and o.goal == o.pos:
 		var a2: float = .6 + .4 * sin(T * .12)
 		Spr.text("✦ USAR", x + w / 2, s.y - 84, 13, Color(1, .9, .6, a2), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 3, Color(0, 0, 0, .8))
+
+## elevador panorâmico (aeroporto): coluna de aço com trilho, cabine de vidro com moldura cromada,
+## luz no teto e o painel de botões; ✋ USAR aparece quando o Milis está dentro
+func _lift_glass(o: Dictionary, T: int) -> void:
+	var s: Dictionary = o.plats[0]
+	var x: float = s.x
+	var w: float = s.w
+	var top: float = float(o.y0) - 150.0
+	var bot: float = float(o.y1)
+	# coluna/trilho atrás da cabine (vidro escuro com estrutura de aço)
+	Spr.rect(x + 6, top, w - 12, bot - top, Color(.55, .75, .9, .12))
+	for sx in [x + 4, x + w - 10]:
+		Spr.rect(sx, top, 6, bot - top, Color("#7d8794"))
+		Spr.rect(sx + 1, top, 2, bot - top, Color(1, 1, 1, .25))
+	var yy: float = top + 40
+	while yy < bot:
+		Spr.seg(x + 8, yy, x + w - 8, yy + 30, Color(.45, .5, .58, .35), 1.5)
+		yy += 70
+	Spr.rect(x - 10, top - 12, w + 20, 14, Color("#5b6470"))
+	# cabos
+	Spr.seg(x + w / 2 - 3, top, x + w / 2 - 3, s.y - 112, Color(.15, .15, .17), 2)
+	Spr.seg(x + w / 2 + 3, top, x + w / 2 + 3, s.y - 112, Color(.15, .15, .17), 2)
+	# cabine
+	var ch := 112.0
+	var cy: float = s.y - ch
+	Spr.rect(x, cy, w, ch, Color(.7, .9, 1, .18))
+	Spr.poly(PackedVector2Array([Vector2(x + 8, cy + 8), Vector2(x + 22, cy + 8), Vector2(x + 8, cy + 40)]), Color(1, 1, 1, .25))
+	Spr.rect(x, cy, w, 8, Color("#c9ced6"))
+	Spr.rect(x, cy, 4, ch, Color("#c9ced6"))
+	Spr.rect(x + w - 4, cy, 4, ch, Color("#c9ced6"))
+	Spr.rect(x, cy + ch * .55, w, 3, Color(.85, .9, .95, .6))   # barra de apoio
+	# luz do teto
+	var lit: float = .7 + .3 * sin(T * .05)
+	Spr.rect(x + 10, cy + 8, w - 20, 3, Color(1, .97, .8, lit))
+	Spr.glow(x + w / 2, cy + 14, 30, Color(1, .95, .7, .18))
+	# piso da cabine
+	Spr.rect(x - 2, s.y, w + 4, 10, Color("#3a3f47"))
+	Spr.rect(x - 2, s.y, w + 4, 2, Color("#9aa3ad"))
+	# painel de botões e setinha do andar
+	Spr.rr(x + w - 18, cy + 46, 10, 22, 2, Color("#2a2e35"))
+	var going: float = float(o.goal) - float(o.pos)
+	Spr.circle(x + w - 13, cy + 52, 2.5, Color(1, .8, .3) if going < 0 else Color(.5, .5, .5))
+	Spr.circle(x + w - 13, cy + 62, 2.5, Color(1, .8, .3) if going > 0 else Color(.5, .5, .5))
+	if g.player and on_plat(o) and o.goal == o.pos:
+		var a2: float = .6 + .4 * sin(T * .12)
+		Spr.text("✋ USAR", x + w / 2, cy - 10, 13, Color(1, .9, .6, a2), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 3, Color(0, 0, 0, .8))

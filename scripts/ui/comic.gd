@@ -24,6 +24,12 @@ const DATA := {
 	"carrinho": {"img": ["carrinho"], "txt": "Um carrinho! Segura firme, Tomé: PULAR salta os buracos, ↓ abaixa nas vigas."},
 	"jangada": {"img": ["jangada"], "txt": "Segura firme, Tomé... essa correnteza é forte!"},
 	"colmeia": {"img": ["colmeia_a", "colmeia_b"], "title": "COLMEIA!", "txt": "Se encostar na colmeia, o enxame vem atrás. Mergulhe na água para despistar as abelhas!"},
+	# aeroporto (Milhas Plus): ficam na tela até tocar
+	"seguranca": {"img": ["seguranca"], "hold": true, "who": "MILIS (pensando)", "txt": "Eu conheço todo mundo que trabalha aqui. Mas quem é esse segurança?"},
+	"drone": {"img": ["drone"], "hold": true, "who": "MILIS", "txt": "Um drone me filmando? Alguém quer saber cada passo meu..."},
+	"vento": {"img": ["vento"], "hold": true, "who": "MILIS", "txt": "Que ventania! Se eu pular aqui em cima, acho que ela me leva lá para o alto."},
+	"fiscal": {"img": ["fiscal_a", "fiscal_b"], "hold": true, "title": "O FISCAL", "who": "MILIS", "txt": "O senhor é o fiscal? Então me diga para onde foram as milhas!",
+		"who2": "FISCAL", "txt2": "Bagagem sem etiqueta não passa! E robô curioso também não!"},
 }
 
 var id := ""
@@ -47,6 +53,8 @@ func _ready() -> void:
 		elif ResourceLoader.exists(p):
 			texs.append(load(p))
 	dur = 5.0 if d.img.size() > 1 else 3.0
+	if d.get("hold", false):
+		dur = 1e9   # pausa: só sai com um toque
 	Save.setv("comic", id, true)
 	if texs.is_empty() or auto:
 		_end.call_deferred()
@@ -96,7 +104,7 @@ func _panel(tex: Texture2D, cx: float, cy: float, side: float, k: float, rot: fl
 	Spr.rr(-s / 2 + 8, -s / 2 + 10, s, s, 6, Color(0, 0, 0, .45))
 	Spr.rr(-s / 2 - 7, -s / 2 - 7, s + 14, s + 14, 6, Color(.98, .96, .9))
 	# Ken Burns dentro do quadro: zoom 1,0 -> 1,06 e passeio de lado, alternando o sentido por quadro
-	var u: float = clamp(t / max(dur, .1), 0.0, 1.0)
+	var u: float = clamp(t / clamp(dur, .1, 6.0), 0.0, 1.0)
 	u = u * u * (3.0 - 2.0 * u)
 	var z: float = 1.0 + .06 * u
 	var ts := Vector2(tex.get_width(), tex.get_height())
@@ -140,24 +148,43 @@ func _draw() -> void:
 	# legenda em caixa de quadrinho
 	var ca: float = clamp((t - (.5 if texs.size() == 1 else 1.6)) / .25, 0, 1)
 	if ca > 0:
-		var txt: String = d.txt
-		var fs := 19
-		# texto comprido quebra em linhas (antes passava da caixa em tela estreita)
-		var lines: Array = _wrap(txt, fs, W - 80)
-		var tw := 0.0
-		for ln in lines:
-			tw = max(tw, Spr.font_i.get_string_size(ln, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x)
-		var bw: float = min(W - 40, tw + 40)
-		var bh: float = 16.0 + 24.0 * lines.size()
-		var by: float = min(cap_y, H - 30 - bh)
-		Spr.rr(W / 2 - bw / 2 + 4, by + 4, bw, bh, 6, Color(0, 0, 0, .4 * ca))
-		Spr.rr(W / 2 - bw / 2, by, bw, bh, 6, Color(1, .95, .78, ca))
-		draw_rect(Rect2(W / 2 - bw / 2, by, bw, bh), Color(.1, .07, .04, ca), false, 2.5)
-		for i in lines.size():
-			Spr.text(lines[i], W / 2, by + 27 + i * 24, fs, Color(.16, .1, .05, ca), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_i)
+		if d.has("txt2"):
+			# diálogo: uma fala embaixo de cada quadro (Milis à esquerda, o outro à direita)
+			var side3: float = min(H * .6, W * .36)
+			var gap3: float = side3 * .08
+			_caption(d.txt, d.get("who", ""), W / 2 - side3 / 2 - gap3, cap_y, side3 + 30, ca, Color(1, .95, .78))
+			var ca2: float = clamp((t - 2.4) / .25, 0, 1)
+			if ca2 > 0:
+				_caption(d.txt2, d.get("who2", ""), W / 2 + side3 / 2 + gap3, cap_y + 10, side3 + 30, ca2, Color(1, .86, .82))
+		else:
+			_caption(d.txt, d.get("who", ""), W / 2, cap_y, W - 80, ca, Color(1, .95, .78))
 	if t > .8 and leaving < 0:
 		Spr.text(("aperte um botão ▸" if Save.getv("opt", "stick", "") == "gamepad" else "toque para continuar ▸"), W - 20, H - 16, 14, Color(1, .9, .7, .55 + .3 * sin(t * 4)), HORIZONTAL_ALIGNMENT_RIGHT, Spr.font_b)
 	Spr.alpha = 1.0
+
+## caixa de legenda (com o nome de quem fala em cima, se houver)
+func _caption(txt: String, who: String, cx: float, cy: float, maxw: float, ca: float, bg: Color) -> void:
+	var W := size.x
+	var H := size.y
+	var fs := 19 if maxw > 420 else 16
+	var lines: Array = _wrap(txt, fs, maxw - 40)
+	var tw := 0.0
+	for ln in lines:
+		tw = max(tw, Spr.font_i.get_string_size(ln, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x)
+	var bw: float = min(min(W - 40, maxw), tw + 40)
+	var lh: float = fs + 5.0
+	var bh: float = 16.0 + lh * lines.size()
+	var by: float = min(cy, H - 30 - bh)
+	var bx: float = clamp(cx - bw / 2, 12, W - 12 - bw)
+	Spr.rr(bx + 4, by + 4, bw, bh, 6, Color(0, 0, 0, .4 * ca))
+	Spr.rr(bx, by, bw, bh, 6, Color(bg.r, bg.g, bg.b, ca))
+	draw_rect(Rect2(bx, by, bw, bh), Color(.1, .07, .04, ca), false, 2.5)
+	if who != "":
+		var ww: float = Spr.font_b.get_string_size(who, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x + 16
+		Spr.rr(bx + 10, by - 12, ww, 20, 4, Color(.12, .08, .05, ca))
+		Spr.text(who, bx + 18, by + 3, 13, Color(1, .86, .45, ca), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b)
+	for i in lines.size():
+		Spr.text(lines[i], bx + bw / 2, by + 8 + fs + i * lh, fs, Color(.16, .1, .05, ca), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_i)
 
 func _wrap(s: String, fs: int, maxw: float) -> Array:
 	var out: Array = []

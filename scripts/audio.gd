@@ -44,7 +44,7 @@ var world_gain := 1.0
 var _mus_tw: Tween
 var _amb_tw: Tween
 var bus_amb := 0
-const NAMES := ["jump", "dj", "pen", "stomp", "hurt", "item", "clue", "combine", "unlock", "splash", "slide", "fire", "thunder", "door", "spring", "climb", "die", "special", "roar", "robo_pouso", "robo_bip"]   # (o latido do Pipoca ficou mudo: era irritante)
+const NAMES := ["jump", "dj", "pen", "stomp", "hurt", "item", "clue", "combine", "unlock", "splash", "slide", "fire", "thunder", "door", "spring", "climb", "die", "special", "roar", "robo_pouso", "robo_bip", "clanc", "escudo_voa"]   # (o latido do Pipoca ficou mudo: era irritante)
 
 func _bus(n: String, send: String) -> int:
 	var i := AudioServer.get_bus_index(n)

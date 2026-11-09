@@ -86,6 +86,8 @@ var WV: Waves
 var MV: Movers
 var CART: CartRide
 var TC: ThiefChase
+var QB: Quebra
+var GD: Gadgets
 var VL: Village
 var RESTED := {}        # fogueiras grandes já descansadas
 var player: Dictionary = {}
@@ -137,7 +139,7 @@ var auto_cine: bool = DisplayServer.get_name() == "headless"
 ## quadrinhos: chefes e primeiras vezes (cipó, mergulho, neve...). A tela principal mostra e o jogo espera.
 var comic_req := ""
 var COMIC_TRIG: Array = []
-const COMIC_CINE := {"boss": "javali", "gaviao": "gaviao", "bagre": "bagre", "urso": "urso", "vargas": "vargas", "cao": "pipoca", "cavalo": "cavalo"}   # testes automáticos: falas passam sozinhas
+const COMIC_CINE := {"boss": "javali", "gaviao": "gaviao", "bagre": "bagre", "urso": "urso", "vargas": "vargas", "cao": "pipoca", "cavalo": "cavalo", "fiscal": "fiscal"}   # testes automáticos: falas passam sozinhas
 var max_x := 0.0          # até onde o Tomé já chegou (para o mapa)
 var tps := 60
 ## celular com dificuldade: desliga os enfeites menos importantes (reflexo, poeira, fachos de sol)
@@ -207,7 +209,11 @@ func load_level(i: int) -> void:
 	EN = []
 	WALKS = []
 	for wk in L.get("walks", []):
-		WALKS.append({"x0": float(wk.x0), "x1": float(wk.x1), "y": float(wk.get("y", 500)), "dir": float(wk.dir), "spd": float(wk.get("spd", 1.6))})
+		var wd := {"x0": float(wk.x0), "x1": float(wk.x1), "y": float(wk.get("y", 500)), "dir": float(wk.dir), "spd": float(wk.get("spd", 1.6))}
+		if wk.get("esc"):
+			wd.esc = 1
+			wd.yb = float(wk.yb)
+		WALKS.append(wd)
 	WET = []
 	for wz in L.get("wet", []):
 		WET.append({"x": float(wz.x), "w": float(wz.w), "y": float(wz.get("y", 500)), "t": -1})
@@ -323,6 +329,10 @@ func load_level(i: int) -> void:
 	CART.load_level()
 	TC = ThiefChase.new(self)
 	TC.load_level()
+	QB = Quebra.new(self)
+	QB.load_level()
+	GD = Gadgets.new(self)
+	GD.load_level()
 	VL = Village.new(self)
 	VL.load_level()
 	RESTED = {}
@@ -918,6 +928,11 @@ func near_rest() -> Dictionary:
 	return {}
 
 func use_available() -> bool:
+	if use_available_base():
+		return true
+	return running and player.dyingT == 0 and CINE.is_empty() and GD != null and not GD.target().is_empty()
+
+func use_available_base() -> bool:
 	if not running or player.dyingT > 0 or not CINE.is_empty():
 		return false
 	if not near_rest().is_empty():
@@ -1089,6 +1104,10 @@ func step() -> void:
 		CART.step()
 	if TC:
 		TC.step()
+	if QB:
+		QB.step()
+	if GD:
+		GD.step()
 	if _npc_check():
 		return
 	if not player.get("warp", {}).is_empty():
@@ -1295,6 +1314,9 @@ func step() -> void:
 				# apertou PULAR caindo, a um palmo do chão: guarda o toque para o pulo do chão (sai mais alto
 				# um quadro depois, e o pulo duplo continua guardado) em vez de gastar o duplo rente ao chão
 				pass
+			elif player.airJumps == 0 and GD and GD.try_rocket():
+				player.jbuf = 0
+				player.cutOk = false
 			elif player.airJumps > 0 and not player.dog and not player.get("isis"):
 				player.vy = DJUMP
 				Polish.air_ring(player.x + player.w / 2, player.y + player.h)
@@ -1674,6 +1696,9 @@ func step() -> void:
 	# carrinho de bagagem: sobe tocando no botão usar
 	if CART and CART.near() and pressed("A"):
 		CART.start()
+	# gancho magnético: o botão ✋ sem outra coisa para usar por perto
+	if GD and keys.get("Ap", false) and not use_available_base() and GD.fire():
+		keys.Ap = false
 	# totem de check-in (aeroporto): só abre ao tocar no botão usar
 	var rt: Dictionary = near_rest()
 	if not rt.is_empty() and pressed("A"):
@@ -1730,6 +1755,14 @@ func step() -> void:
 					e.dvy += .45
 					# X1 voa girando para longe do golpe
 					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
+				elif e.get("dk") == "seg":
+					# o segurança derrubado escorrega de costas no piso, freando
+					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
+					e.dvx = float(e.get("dvx", 0.0)) * .9
+					SegGuard.tick_dead(self, e)
+				# capanga arremessado derruba o cenário pelo caminho
+				if QB and e.dead < 40 and abs(float(e.get("dvx", 0.0))) > 2.0:
+					QB.hit_point(e.x + float(e.get("ddx", 0.0)), e.y + float(e.get("ddy", 0.0)) - 30, float(e.dvx))
 			continue
 		# bem longe da tela e do Tomé: espera parado (não aparece; a fase tem muitos bichos)
 		if abs(e.x - camc) > 1700.0 and abs(e.x - pcm.x) > 1700.0:
@@ -1758,7 +1791,7 @@ func step() -> void:
 				continue
 			if e.k == "mole" and e.get("st", 0) == 5 and not stomp:
 				continue
-			if stomp and e.k == "janitor" and sign(player.x + player.w / 2 - e.x) == float(e.dir):
+			if stomp and e.k == "janitor" and not Capangas.down(e) and sign(player.x + player.w / 2 - e.x) == float(e.dir):
 				# de frente, a enceradeira atrapalha: quica e machuca
 				player.vy = STOMP * .7
 				player.cutOk = false
@@ -1771,7 +1804,7 @@ func step() -> void:
 				player.squash = .6
 				player.cutOk = false
 				player.airJumps = 1
-			elif not e.stun:
+			elif not e.stun and not Capangas.down(e):
 				hurt(1, e.x)
 	if ZN.zone != null:
 		player.x = clamp(player.x, ZN.zone.x0, ZN.zone.x1 - player.w)
@@ -3038,6 +3071,8 @@ func _p1_post(pcx: float, _pcy: float) -> void:
 			c.got = true
 			CLUEGOT[int(c.id)] = 1
 			Save.setv("gallery", "c%d" % int(c.id), true)
+			if not L.get("posters", []).is_empty():
+				set_meta("poster_t", T)   # os cartazes de PROCURADO ganham um detalhe novo
 			Audio.play("clue")
 			Audio.vib(80)
 			clue_opened.emit(int(c.id))
@@ -3484,8 +3519,13 @@ func on_walkway() -> Dictionary:
 	var cx: float = player.x + player.w / 2
 	var fy: float = player.y + player.h
 	for wk in WALKS:
-		if cx > wk.x0 and cx < wk.x1 and abs(fy - wk.y) < 6:
-			return wk
+		if cx > wk.x0 and cx < wk.x1:
+			if wk.get("esc"):
+				# escada rolante: qualquer degrau dela (os pés entre o chão de baixo e o patamar de cima)
+				if fy > float(wk.y) - 6 and fy < float(wk.yb) + 4:
+					return wk
+			elif abs(fy - wk.y) < 6:
+				return wk
 	return {}
 
 func _walkway() -> void:
@@ -3545,6 +3585,11 @@ func _enemy_life(e: Dictionary) -> void:
 func _update_enemy_core(e: Dictionary) -> void:
 	if e.stun > 0:
 		e.stun -= 1
+		return
+	if e.k == "boar" and SegGuard.is_seg(self, e):
+		SegGuard.update(self, e)
+		return
+	if Capangas.update(self, e):
 		return
 	if e.k == "plant":
 		TR.plant_update(e)
@@ -3977,25 +4022,10 @@ func _mole(e: Dictionary) -> void:
 func kill_enemy(e: Dictionary, how: String = "") -> void:
 	if e.dead:
 		return
-	# cambista de terno (aeroporto): aguenta três pancadas, de pulo ou de bastão
-	if e.k == "boar" and L.get("theme", "") == "aeroporto" and how in ["stomp", "hit"]:
-		if int(e.get("hitCd", 0)) > 0:
-			return
-		e.hp = int(e.get("hp", 3)) - 1
-		if e.hp > 0:
-			e.hitCd = 30
-			e.hitFx = 10
-			e.stun = 46
-			e.dizzyT = 46
-			e.charge = false
-			var kd_: float = 1.0 if e.x > player.x + player.w / 2 else -1.0
-			e.x += kd_ * 58.0   # empurrado: o Milis não cai de novo em cima dele no mesmo pulo
-			burst(e.x, e.y - 60, 10, Color("#ffd76a"))
-			Polish.impact(e.x, e.y - (120.0 if how == "stomp" else 70.0))
-			shake = max(shake, 4)
-			hit_stop = 4
-			Audio.play("stomp", -2, .8)
-			Audio.vib(18)
+	# falso segurança (aeroporto): defende de frente com o escudo e só cai com três pancadas de verdade
+	var seg: bool = e.k == "boar" and SegGuard.is_seg(self, e)
+	if seg:
+		if how in ["stomp", "hit", "cart"] and SegGuard.on_hit(self, e, how if how != "cart" else "hit"):
 			return
 	e.dead = 1
 	e.dk = "flat" if (how == "stomp" and not FLY.has(e.k)) else "flip"
@@ -4003,6 +4033,18 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 	e.dvy = -6.0
 	e.ddx = 0.0
 	e.dvx = (1.0 if e.x > player.x + player.w / 2 else -1.0) * (2.4 if how != "stomp" else 1.2)
+	if seg:
+		# desaba de costas, escorrega um pouco e fica no chão um tempo (sem girar no ar)
+		e.dk = "seg"
+		e.dvx *= 2.2
+		e.ddx = 0.0
+		burst(e.x, e.y - 60, 16, Color("#ffd76a"))
+		Polish.impact(e.x, e.y - 90, Color(1, .96, .82), 9, 30.0)
+		shake = max(shake, 9)
+		hit_stop = 8
+		Audio.play("stomp", 0, .6)
+		Audio.vib(40)
+		return
 	burst(e.x, e.y - 12, 14, Color("#ccbbbb"))
 	Polish.ko(e)
 	Polish.impact(e.x, e.y - (6.0 if how == "stomp" else 18.0))

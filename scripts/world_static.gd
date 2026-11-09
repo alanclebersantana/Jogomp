@@ -113,10 +113,13 @@ func _draw_raw() -> void:
 			continue
 		# morros e paredões grandes são desenhados por todos os pedaços que eles cruzam: cada pedaço corta
 		# na sua faixa (clip em _ready), a ordem é sempre a mesma e o morro não cobre o carrinho
-		_contact_shadow(s)
+		if int(s.get("esc", 0)) != 3:
+			_contact_shadow(s)
 		match s.t:
 			"ground":
-				if s.get("esc"):
+				if int(s.get("esc", 0)) == 3:
+					pass   # degraus da escada rolante que anda: desenhados junto com ela (camada que se mexe)
+				elif s.get("esc"):
 					_escalator(s)
 				else:
 					ground(s)

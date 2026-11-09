@@ -166,6 +166,12 @@ def milis():
          "pai_gear": A[0], "pai_harpoon": golpe, "pai_beam": defesa, "pai_blow": A[7]}
     for n, q in P.items():
         troca(n, q)
+    # poses de luta do aeroporto (art_src/gemini/milis_luta.jpg): rasteira, voadora, base, defesa, esquiva
+    lu = componentes(abrir_sem_verde(os.path.join(G, "milis_luta.jpg")), dil=4, area_min=1500)
+    kl = 118.0 / lu[3].height
+    for n, q in [("pai_kick_low", lu[0]), ("pai_kick_fly", lu[1]), ("pai_ready", lu[2]), ("pai_guard", lu[3]), ("pai_dodge", lu[4])]:
+        w, h = int(q.width * kl) + 2, int(q.height * kl) + 2
+        troca(n, q, w, h, w / 2.0, float(h))
     # retratos (botões e falas)
     retrato = A[7].crop((0, 0, A[7].width, int(A[7].height * .55)))
     for n in ["btn_tome"]:
@@ -434,8 +440,12 @@ def barros():
     sem.save(tmp, quality=95)
     b = componentes(abrir_sem_verde(tmp), dil=6, area_min=2500)
     # 0 parado, 1 acenando (cortado pelo retrato), 2 apontando, 3 cochichando, 4 sorriso maroto
-    for n, i in [("parado", 0), ("aponta", 2), ("cochicha", 3), ("maroto", 4)]:
+    for n, i in [("parado", 0), ("aponta", 2), ("maroto", 4)]:
         solta("p_barros_" + n, b[i], 240)
+    # cochichando: arte refeita (a antiga tinha um braço a mais) — mão em concha na boca, prancheta no peito
+    cc = componentes(abrir_sem_verde(os.path.join(G, "barros_cochicha.jpg")), dil=6, area_min=2500)
+    cq = max(cc, key=lambda q: q.width * q.height)
+    solta("p_barros_cochicha", cq, 240 * 0.97)
     r = im.crop((140, 275, 370, 572))
     rt = "/tmp/_barros_retrato.jpg"
     r.save(rt, quality=95)

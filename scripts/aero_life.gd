@@ -29,6 +29,7 @@ static func back(g, T: int) -> void:
 	_reset(g)
 	_neon_floor(g, T)
 	_boards(g, T)
+	_posters(g, T)
 	_carts(g, T)
 	_pax(g, T)
 
@@ -101,8 +102,19 @@ static func _carts(g, T: int) -> void:
 		if x < g.cam - 200 or x > g.cam + g.W + 200:
 			continue
 		var y: float = float(c.get("y", 500))
-		Spr.ellipse(x, y + 1, 52, 6, Color(0, 0, 0, .22))
-		Spr.P("ob_limpeza", x, y + 3 + sin(T * .3) * .5, 120, left, 0.0, Color(.88, .9, .95))
+		Spr.ellipse(x, y + 1, 62, 6, Color(0, 0, 0, .22))
+		var lt: Texture2D = Spr.opt("aero_lavadora")
+		if lt != null:
+			# lavadora de piso com o funcionário da limpeza sentado pilotando (cores de cenário, sem contorno)
+			var lw := 150.0
+			var lh: float = lw * lt.get_height() / lt.get_width()
+			Spr.save()
+			Spr.translate(x, y + 3 + sin(T * .3) * .5)
+			Spr.scale(-1.0 if left else 1.0, 1.0)
+			Spr.ci.draw_texture_rect(lt, Rect2(-lw / 2, -lh, lw, lh), false, Color(.86, .88, .93, Spr.alpha))
+			Spr.restore()
+		else:
+			Spr.P("ob_limpeza", x, y + 3 + sin(T * .3) * .5, 120, left, 0.0, Color(.88, .9, .95))
 		if Polish.FRESH and T % 6 == 0:
 			g.PARTS.append({"x": x + (-50.0 if not left else 50.0), "y": y - 2, "vx": randf_range(-.5, .5), "vy": -randf_range(.2, .6), "life": 18, "col": Color(.8, .9, 1, .7)})
 
@@ -284,3 +296,54 @@ static func aviso(T: int) -> String:
 	if u > 520 or T < 600:
 		return ""
 	return AVISOS[(T / per) % AVISOS.size()]
+
+## cartazes de PROCURADO do vulto: aparecem depois da 1ª pista e revelam mais a cada pista
+## (1: o vulto de capuz; 2: o B dourado no peito; 3: a sombra da cartola e do bigode)
+static func _posters(g, T: int) -> void:
+	var n: int = g.CLUEGOT.size()
+	if n <= 0:
+		return
+	for ps in g.L.get("posters", []):
+		var x: float = float(ps.x)
+		if x < g.cam - 120 or x > g.cam + g.W + 120:
+			continue
+		var y: float = float(ps.get("y", 300))
+		var rot: float = float(ps.get("rot", -.04))
+		var fresh_t: int = T - int(g.get_meta("poster_t", -999))
+		var pop: float = clamp(fresh_t / 20.0, 0.0, 1.0)
+		Spr.save()
+		Spr.translate(x, y)
+		Spr.rotate(rot + (1.0 - pop) * .3)
+		Spr.scale(.6 + .4 * pop, .6 + .4 * pop)
+		var w := 70.0
+		var h := 96.0
+		Spr.rect(-w / 2 + 3, -h / 2 + 4, w, h, Color(0, 0, 0, .25))
+		Spr.rect(-w / 2, -h / 2, w, h, Color("#efe6cf"))
+		Spr.rect(-w / 2, -h / 2, w, 17, Color("#b3261e"))
+		Spr.text("PROCURADO", 0, -h / 2 + 13, 11, Color(1, .95, .85), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		# o vulto
+		var dk := Color("#1d1b22")
+		Spr.poly(PackedVector2Array([Vector2(-26, 32), Vector2(-20, 6), Vector2(-9, -4), Vector2(9, -4), Vector2(20, 6), Vector2(26, 32)]), dk)
+		Spr.poly(PackedVector2Array([Vector2(-15, 2), Vector2(-14, -18), Vector2(0, -30), Vector2(14, -18), Vector2(15, 2)]), dk)
+		Spr.circle(-5, -10, 2.2, Color(1, .85, .3))
+		Spr.circle(5, -10, 2.2, Color(1, .85, .3))
+		if n >= 2:
+			# o B dourado bordado (do lenço e do bilhete)
+			Spr.text("B", 0, 24, 16, Color("#e8b830"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_title)
+		if n >= 3:
+			# por baixo do capuz: a sombra de uma cartola e de um bigode de barão
+			Spr.rect(-11, -42, 22, 13, Color(.12, .1, .14, .85))
+			Spr.rect(-17, -30, 34, 3, Color(.12, .1, .14, .85))
+			Spr.poly(PackedVector2Array([Vector2(-10, -3), Vector2(0, -6), Vector2(10, -3), Vector2(4, -2), Vector2(0, -3), Vector2(-4, -2)]), Color(.85, .8, .7, .9))
+		else:
+			Spr.text("?", 0, -34, 14, Color(.85, .2, .15), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		Spr.text("RECOMPENSA", 0, h / 2 - 12, 8, Color(.25, .2, .15), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		Spr.text("%d/3 pistas" % n, 0, h / 2 - 3, 7, Color(.45, .35, .25), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		# fita adesiva nos cantos
+		for cx in [-w / 2 + 4, w / 2 - 4]:
+			Spr.save()
+			Spr.translate(cx, -h / 2 + 2)
+			Spr.rotate(.6 if cx < 0 else -.6)
+			Spr.rect(-9, -3, 18, 6, Color(.95, .93, .8, .75))
+			Spr.restore()
+		Spr.restore()

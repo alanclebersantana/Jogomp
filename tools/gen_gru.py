@@ -194,6 +194,22 @@ def peca(x0, x1, y0, y1, sprite, ox=0, oy=0, ob=4, dx=0):
     S.append({"t": "peca", "x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "sprite": sprite, "ox": ox, "oy": oy, "ob": ob, "dx": dx})
 
 
+def escada_rolante(x0, yb, yt, dir=1, spd=1.6, run=20, rise=10):
+    """escada rolante de verdade: degraus baixos (o Milis sobe sozinho de degrau em degrau) que andam.
+    Sobe para a direita: de (x0, yb) até (x1, yt). dir=1 leva para cima; dir=-1 é a contramão (desce)."""
+    n = int(round((yb - yt) / rise))
+    for i in range(n):
+        S.append({"t": "ground", "x": x0 + i * run, "y": yb - rise * (i + 1), "w": run, "h": rise * (i + 1), "esc": 3})
+    x1 = x0 + n * run
+    L.setdefault("walks", []).append({"x0": x0, "x1": x1, "y": yt, "yb": yb, "esc": 1, "dir": dir, "spd": spd})
+    return x1
+
+
+def elevador_vidro(x, y_top, y_bot=GY, w=80):
+    """elevador panorâmico de vidro: entre e toque em ✋ USAR; chamado de longe, ele vem buscar"""
+    L["movers"].append({"k": "lift", "x": x, "w": w, "y0": y_top, "y1": y_bot, "start": "bottom", "skin": "vidro"})
+
+
 def passarela(x0, x1, y0, y1):
     """passarela suspensa: piso de grade com corrimão (a arte sobe acima do piso)"""
     w = x1 - x0
@@ -212,6 +228,11 @@ def movel(x, nome, w, y=GY, **kw):
 def atendente(x, y, fid, falas, pose="parado"):
     """Seu Barros, o atendente simpático: fica parado e fala com o Milis quando ele chega perto"""
     L.setdefault("npcs", []).append({"x": x, "y": y, "id": fid, "pose": pose, "lines": falas})
+
+
+def quebra(x, k, w, y=GY):
+    """cenário que reage ao golpe: placa, vaso, malas, lanche (máquina), carrinho"""
+    L.setdefault("brk", []).append({"x": x, "y": y, "k": k, "w": w})
 
 
 def obj(x, nome, w, y=GY, **kw):
@@ -319,7 +340,7 @@ atendente(1040, 410, "barros1", [
 atendente(14280, GY, "barros2", [
     ["SEU BARROS", "Psiu! Você de novo? A segurança está estranha hoje. Aquele fiscal da cabine não é daqui, não...", "barros"],
     ["MILIS", "Seu Barros? Como o senhor chegou aqui antes de mim?", "tome"],
-    ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]])   # (pose "cochicha" saiu: a arte tinha um braço a mais)
+    ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]], "cochicha")
 
 # ---------- vida do aeroporto na 1-1 (só cenário) ----------
 # saguão
@@ -335,33 +356,58 @@ obj(980, "cafe", 46)
 obj(1180, "passaportes", 44)
 obj(1440, "lixeiras", 96)
 obj(2100, "ursinho", 30)
-obj(2420, "malas", 74)
+quebra(2420, "malas", 74)
 obj(2960, "folhetos", 40)
 obj(3240, "etiqueta", 26)
-molhado(2050, 150)
-obj(2030, "placa", 34)
+molhado(2860, 140)
+quebra(2840, "placa", 34)
 L.setdefault("carts", []).append({"x0": 9950, "x1": 10500})
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
+# segredos para voltar depois: o duto alto do começo (só com as botas-foguete) e malas presas no alto
+# dos painéis (só o gancho magnético alcança)
+plat(140, 210, 170)
+milhas(160, 290, 180, 26)
+caixa(290, y=210, item="heart")
+L.setdefault("stuck", []).extend([{"x": 1240, "y": 70, "n": 20}, {"x": 3700, "y": 50, "n": 20}])
+# ímã no teto em cima do vão das bandejas: com o gancho, atravessa balançando
+L.setdefault("anchors", []).append({"x": 8340, "y": 230})
+# cartazes de PROCURADO do vulto (aparecem e se completam conforme as pistas)
+L["posters"] = [{"x": 3060, "y": 300}, {"x": 5320, "y": 250, "rot": .05}, {"x": 7120, "y": 200}, {"x": 9150, "y": 330, "rot": .04},
+                {"x": 11000, "y": 330}, {"x": 13480, "y": 330, "rot": .05}, {"x": 14480, "y": 320}]
+# cenário que reage: máquinas de lanche (soltam milhas), vasos e um carrinho de bagagem desgovernado
+quebra(1110, "lanche", 64)
+quebra(3120, "vaso", 40)
+quebra(9820, "carrinho", 70)
+quebra(12330, "lanche", 64)
+quebra(14260, "vaso", 40)
 # check-in
 pax(3470, "menino", k="stand", sc=.62)
 # esteiras rolantes do piso: no check-in a favor (ajuda a correr), no mezanino contra (segura o Milis)
+# a favor: ajuda a alcançar o vulto que foge pelo check-in
 L.setdefault("walks", []).append({"x0": 3220, "x1": 3580, "y": GY, "dir": 1, "spd": 1.8})
-dica(3150, 3300, "Esteira rolante: a favor ela leva o Milis mais rápido. Contra, segura!")
+dica(3150, 3300, "Esteira rolante a favor: use o embalo para alcançar o vulto!")
+# a favor, levando direto para a esteira do raio-x que dá choque: espere o choque passar antes de subir nela
+L["walks"].append({"x0": 7490, "x1": 7598, "y": GY, "dir": 1, "spd": 2.0})
+# a favor antes do vão das bandejas: o embalo dá o pulo comprido
+L["walks"].append({"x0": 8010, "x1": 8196, "y": GY, "dir": 1, "spd": 2.4})
+dica(7990, 8120, "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!")
+# contra, embaixo da porta automática de vidro: passe correndo enquanto a porta está aberta
+L["walks"].append({"x0": 8760, "x1": 8996, "y": GY, "dir": -1, "spd": 1.7})
 pax(3420, "mae", r=[3380, 3580], spd=.6)
 painel(3700, 200, 170)
 painel(5150, 180)
 painel(6180, 210)
 for fx in [3560, 3860, 4160]:
     obj(fx, "fila", 70)
-obj(4380, "malas", 70)
+quebra(4380, "malas", 70)
 obj(5200, "passaportes", 40)
 obj(5480, "papeis", 60)
 obj(5960, "cafe", 44)
 obj(6250, "lixeiras", 96)
 obj(6720, "ursinho", 28)
 molhado(5980, 140)
-obj(5960, "placa", 34)
+quebra(5960, "placa", 34)
 faxineiro(6900, [6650, 7150])
 # segurança: luz fluorescente, porta automática, fios e malas caindo
 pax(10650, "comissaria", r=[10560, 10840], spd=.7, re=1)
@@ -369,7 +415,7 @@ painel(8700, 200)
 obj(7300, "fila", 70)
 obj(7480, "fila", 70)
 obj(8560, "etiqueta", 26)
-obj(9300, "malas", 72)
+quebra(9300, "malas", 72)
 obj(10300, "lixeiras", 96)
 porta_auto("auto1", 8900, 240)
 L["traps"].append({"k": "icicle", "x": 9900, "y": 40, "len": 30, "floor": GY, "reach": 60})
@@ -382,7 +428,6 @@ neon(12400, "#ff4fb4")
 neon(12950, "#4fd8ff")
 neon(13500, "#ffd84a")
 neon(13950, "#9b6bff")
-L.setdefault("walks", []).append({"x0": 12230, "x1": 12570, "y": GY, "dir": -1, "spd": 1.5})
 milhas(12260, 12540, 470, 40)
 # carrinho de bagagem pilotável: desce o corredor do duty free embalado (pular malas, abaixar nas placas)
 # mini-perseguições do vulto de capuz: alcançou, ele larga a mala (milhas extras + uma pista a mais)
@@ -407,9 +452,9 @@ painel(12700, 190)
 obj(12520, "folhetos", 40)
 obj(13100, "papeis", 60)
 obj(13820, "cafe", 44)
-obj(14050, "malas", 70)
+quebra(14050, "malas", 70)
 molhado(13650, 130)
-obj(13630, "placa", 34)
+quebra(13630, "placa", 34)
 faxineiro(13300, [13100, 13560])
 L["traps"].append({"k": "roll", "x": 13550, "y": GY, "trig": 13200, "dir": -1, "vmax": 3.6, "end": 12250, "r": 30, "aero": True})
 dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
@@ -419,16 +464,26 @@ dica(700, 950, "Malas abandonadas pelo ladrão: pise em cima ou bata com o bast�
 plat(980, 410, 140)                 # balcão de informações (dá para subir)
 milhas(1000, 1100, 380, 40)
 cambista(1300, [1150, 1450])
-dica(1120, 1320, "Um cambista trabalhando para o ladrão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização.")
+L["comics"].append({"id": "seguranca", "x": 1000})
+dica(1120, 1320, "Falso segurança! De frente ele defende com o escudo. Bata por trás, ou logo depois da investida, quando ele abaixa o escudo.")
 totem(1460)
 # fileira de bancos e a primeira subida dupla
 peca(1500, 1700, 456, 500, "p_pc_bancos", 30, 57, 2)   # bancos do saguão (o Milis pisa no assento)
-chao(1500, 3400)
+chao(1500, 2070)
+chao(2150, 3400)
 peca(1880, 2040, 300, 500, "p_pc_cabine", -4, 0, 4)   # cabine de informações (de vidro)
 milhas(1890, 2030, 270, 35)
 dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
 arco(2050, 2300, 470, 90, 6)
 robo_falso(2450, [2580, 2760])
+# elevador panorâmico de vidro até o mirante (o único jeito de chegar lá): uma pista do ladrão
+elevador_vidro(2070, -40)
+bloco(2070, 2150, 511, 640)   # fundo do poço do elevador (um degrauzinho abaixo do piso)
+passarela(2160, 2520, -40, 0)
+pista(2440, -40, 1)
+L.setdefault("gadgets", []).append({"x": 2300, "y": -40, "id": "botas_foguete"})
+milhas(2190, 2400, -70, 42)
+dica(1990, 2160, "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...")
 caixa(2700, item="heart")
 plat(2780, 380, 120)
 plat(2960, 280, 120)
@@ -450,13 +505,14 @@ for i, bx in enumerate([3600, 3900, 4200]):
 caixa(3810, n=3)
 cambista(4100, [3760, 4180])
 drone(4560, 300, [4420, 4700])
+L["comics"].append({"id": "drone", "x": 4330})
 cambista(4950, [4820, 5080], y=230)
 dica(3420, 3700, "Fila do check-in. Os balcões dão bons degraus.")
 # esteira de despacho que sobe (plataforma que anda)
 L["movers"].append({"k": "path", "x0": 4400, "x1": 4680, "y0": 400, "y1": 230, "w": 110, "per": 260})
 peca(4800, 5100, 230, 500, "p_pc_porta", 6, 2)   # parede do despacho, com a porta restrita
 milhas(4830, 5080, 200, 50)
-pista(5050, 230, 1)
+milhas(5030, 5080, 200, 40)
 dica(4380, 4600, "A esteira de despacho sobe e desce: espere ela chegar e pule em cima.")
 totem(4880, 230)
 # lá de cima, planar com as asas por cima da fila até a ilha seguinte
@@ -479,8 +535,16 @@ bloco(6460, 6540, -620, 380, t="brickw")     # parede da área restrita acima da
 dica(6000, 6320, "A catraca da área restrita está fechada. Empurre o caixote até a placa no chão!")
 milhas(6100, 6450, 470, 50)
 robo_falso(6800, [6600, 7000])
-totem(6600, GY, 1)
-caixa(7050, n=4)
+# escada rolante na contramão (desce): correndo contra ela, chega a um nicho secreto no alto
+escada_rolante(6560, GY, 280, dir=-1, spd=1.7)
+bloco(7000, 7120, 280, GY)
+milhas(7010, 7110, 250, 34)
+milhas(7010, 7110, 200, 34)
+caixa(7095, y=280, item="heart")
+L.setdefault("gadgets", []).append({"x": 7030, "y": 280, "id": "gancho"})
+dica(6540, 6700, "Uma escada rolante na contramão... corra contra ela: lá em cima tem alguma coisa!")
+totem(7170, GY, 1)
+caixa(7240, n=4)
 
 # --- C · Segurança (7200 .. 10600): raio-x com pinos elétricos, ar-condicionado que sopra para cima, crachá
 L["sections"].append({"x": 7200, "song": "gru_seguranca", "bg": "tarde", "gt": "vila", "per": 2})
@@ -502,6 +566,7 @@ drone(8340, 300, [8220, 8460])
 mala_monstro(9700, -160, [9450, 9880])
 # saída de ar-condicionado: o vento leva o Milis planando até o mezanino de cima
 L["traps"].append({"k": "wind", "x": 9000, "y": -90, "w": 120, "h": 590, "pow": 1.0})
+L["comics"].append({"id": "vento", "x": 8760})
 passarela(9200, 9900, -40, 0)       # mezanino da segurança
 milhas(9020, 9100, 300, 40)
 coluna(9060, 260, -60)
@@ -549,17 +614,14 @@ chao(12200, 13580)
 chao(13640, 14200)
 mala_monstro(12900, 260, [12600, 13200])
 cambista(13080, [12980, 13190], y=GY - 180)
-# escada rolante (degraus que sobem) e mola
-for i in range(6):
-    bloco(12600 + i * 60, 12660 + i * 60, GY - 30 * (i + 1), GY)
-    S[-1]["esc"] = 1
-bloco(12960, 13200, GY - 180, GY)
+# escada rolante subindo até o mezanino do duty free: o único caminho até o cartão dourado 3/3
+escada_rolante(12480, GY, 260, dir=1, spd=1.6)
+bloco(12960, 13200, 260, GY)
 S[-1]["esc"] = 2
-milhas(12620, 12940, 440, 64)
-mola(13280, pow=-23)
-plat(13250, 170, 160)
-cartao(13330, 170, "Cartão de embarque dourado 3/3: a hora do voo — 23h59.")
-dica(13200, 13350, "Uma balança de bagagem com mola: pule em cima para ir bem alto!")
+plat(13030, 140, 130)
+milhas(12990, 13180, 230, 46)
+cartao(13095, 140, "Cartão de embarque dourado 3/3: a hora do voo — 23h59.")
+dica(12380, 12560, "Escada rolante: fique em cima que ela leva você ao mezanino. Lá do alto, um pulo duplo alcança a prateleira.")
 # sala secreta embaixo do piso (mergulho no alçapão)
 deposito(13580, "s1", "alc1")
 pista(13330, 960, 2)
@@ -591,10 +653,10 @@ for tx in (2490, 7360, 10530):
 dica(2380, 2480, "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.")
 # um capanga por vez na tela: só estes ficam na 1-1 (os patrulhamentos ficam a ~1 tela de distância
 # um do outro), e a variedade continua: cambista, robô, faxineiro, mala voadora e drone
-_FICA_1_1 = {1300, 2450, 4100, 5420, 6900, 8340, 10000, 11900, 13300}
+_FICA_1_1 = {1300, 2450, 4100, 5420, 8340, 10000, 11900, 13300}
 L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
 # longe dos tapumes (vão de rolar): ninguém patrulha a menos de 300 px de uma passagem baixa
-_NOVA_FAIXA = {2450: [1950, 2180], 6900: [6550, 7000], 10000: [9750, 10200]}
+_NOVA_FAIXA = {2450: [1720, 1860], 10000: [9750, 10200]}
 for e in L["enemies"]:
     if int(e["x"]) in _NOVA_FAIXA:
         e["r"] = _NOVA_FAIXA[int(e["x"])]

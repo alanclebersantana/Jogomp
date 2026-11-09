@@ -688,7 +688,7 @@ func _boss() -> void:
 					if not b.get("seen", false):
 						b.seen = true
 						g.start_cine("fiscal", b.cab_x - 200, 400, 260,
-							[[165, 250, "MILIS", "Um fiscal de segurança? Não... é um capanga do ladrão disfarçado! Ele controla os lasers do raio-X daquela cabine.", "tome"]],
+							[[165, 250, "MILIS", "Ele controla os lasers do raio-X daquela cabine... e a esteira do chão também!", "tome"]],
 							[75, 160, "FISCAL FALSO", "capanga do ladrão misterioso"])
 					return
 				if b.skin == "dog" and b.get("seen", false):
