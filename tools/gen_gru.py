@@ -189,16 +189,17 @@ def deposito(xc, sid, aid):
     milhas(xc - 280, xc - 160, 930, 40)
 
 
-def peca(x0, x1, y0, y1, sprite, ox=0, oy=0, ob=4):
+def peca(x0, x1, y0, y1, sprite, ox=0, oy=0, ob=4, dx=0):
     """bloco maciço desenhado com um móvel pintado (balcão, bancos, cabine...)"""
-    S.append({"t": "peca", "x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "sprite": sprite, "ox": ox, "oy": oy, "ob": ob})
+    S.append({"t": "peca", "x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0, "sprite": sprite, "ox": ox, "oy": oy, "ob": ob, "dx": dx})
 
 
 def passarela(x0, x1, y0, y1):
     """passarela suspensa: piso de grade com corrimão (a arte sobe acima do piso)"""
     w = x1 - x0
     alt = w * 120.0 / 612.0
-    peca(x0, x1, y0, y1, "p_pc_passarela_topo", 0, int(alt - (y1 - y0) - 4), 4)
+    oy = int(alt * .55)
+    peca(x0, x1, y0, y1, "p_pc_passarela_topo", 0, oy, int(alt - oy - (y1 - y0)))
 
 
 def movel(x, nome, w, y=GY, **kw):
@@ -322,13 +323,10 @@ atendente(14280, GY, "barros2", [
 
 # ---------- vida do aeroporto na 1-1 (só cenário) ----------
 # saguão
-pax(300, "exec", r=[150, 1350], spd=.9)
-pax(800, "cel", r=[500, 1400], spd=.6, re="pax_susto")
-pax(1900, "turista", r=[1750, 3200], spd=.7)
-pax(2600, "idosa", r=[2000, 3300], spd=.45)
+pax(300, "exec", r=[150, 1300], spd=.9, re=1)
+pax(1900, "cel", r=[1750, 2050], spd=.5, re=1)
 pax(2250, "dorme", k="sit", y=GY - 26, sc=.8, z=1, look=False, flip=True)
 pax(2780, "menino", k="stand", sc=.62)
-pax(3150, "teen", k="stand", re="pax_teen")
 painel(220)
 painel(1240, 210, 170)
 painel(2480)
@@ -342,17 +340,13 @@ obj(2960, "folhetos", 40)
 obj(3240, "etiqueta", 26)
 molhado(2050, 150)
 obj(2030, "placa", 34)
-L.setdefault("carts", []).append({"x0": 2300, "x1": 3300})
-L["carts"].append({"x0": 5300, "x1": 6200})
-L["carts"].append({"x0": 12300, "x1": 13500})
+L.setdefault("carts", []).append({"x0": 9950, "x1": 10500})
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
 # check-in
 pax(3500, "pai", r=[3450, 5200], spd=2.2)
 pax(3420, "mae", r=[3400, 5150], spd=2.1)
 pax(5300, "comissaria", r=[5150, 6200], spd=.8)
-pax(6000, "piloto", r=[5600, 7000], spd=.85)
-pax(6800, "exec", r=[6450, 7150], spd=.8, re="pax_susto")
 painel(3700, 200, 170)
 painel(5150, 180)
 painel(6180, 210)
@@ -369,7 +363,7 @@ obj(5960, "placa", 34)
 faxineiro(6900, [6650, 7150])
 # segurança: luz fluorescente, porta automática, fios e malas caindo
 pax(7400, "piloto", r=[7250, 7550], spd=.6)
-pax(9000, "comissaria", r=[8600, 9150], spd=.7, re="pax_susto")
+pax(9000, "comissaria", r=[8600, 9150], spd=.7, re=1)
 painel(8700, 200)
 obj(7300, "fila", 70)
 obj(7480, "fila", 70)
@@ -389,9 +383,8 @@ neon(12400, "#ff4fb4")
 neon(12950, "#4fd8ff")
 neon(13500, "#ffd84a")
 neon(13950, "#9b6bff")
-pax(12600, "turista", r=[12300, 13500], spd=.6)
-pax(13700, "teen", k="stand", re="pax_teen")
-pax(13300, "idosa", r=[12900, 13560], spd=.4)
+pax(12500, "turista", r=[12300, 12900], spd=.6, re=1)
+pax(13700, "teen", k="stand", re=1, bal="oi!")
 painel(12700, 190)
 obj(12520, "folhetos", 40)
 obj(13100, "papeis", 60)
@@ -399,7 +392,7 @@ obj(13820, "cafe", 44)
 obj(14050, "malas", 70)
 molhado(13650, 130)
 obj(13630, "placa", 34)
-faxineiro(12800, [12600, 13400])
+faxineiro(13300, [13100, 13560])
 L["traps"].append({"k": "roll", "x": 13550, "y": GY, "trig": 13200, "dir": -1, "vmax": 3.6, "end": 12250, "r": 30, "aero": True})
 dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
@@ -411,9 +404,9 @@ cambista(1300, [1150, 1450])
 dica(1120, 1320, "Um cambista trabalhando para o ladrão! Pule na cabeça dele ou dê um golpe com o bastão de sinalização.")
 totem(1460)
 # fileira de bancos e a primeira subida dupla
-peca(1500, 1700, 430, 500, "p_pc_bancos", 8, 10)   # bancos do saguão
+peca(1500, 1700, 456, 500, "p_pc_bancos", 30, 57, 2)   # bancos do saguão (o Milis pisa no assento)
 chao(1500, 3400)
-peca(1880, 2040, 300, 500, "p_pc_cabine", 0, 12)   # cabine de informações (de vidro)
+peca(1880, 2040, 300, 500, "p_pc_cabine", -4, 0, 4)   # cabine de informações (de vidro)
 milhas(1890, 2030, 270, 35)
 dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
 arco(2050, 2300, 470, 90, 6)
@@ -434,7 +427,7 @@ chao(3400, 6300)
 chao(6370, 7200)
 # balcões de check-in: blocos de altura média com esteira de despacho atrás
 for i, bx in enumerate([3600, 3900, 4200]):
-    peca(bx, bx + 140, 410, 500, "p_pc_balcao", 30, 0)
+    peca(bx, bx + 140, 410, 500, "p_pc_balcao", 75, 40, 4, 58)
     milhas(bx + 20, bx + 120, 380, 50)
 caixa(3810, n=3)
 cambista(4100, [3760, 4180])

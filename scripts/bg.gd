@@ -137,7 +137,7 @@ func _aero_planes(ws: Dictionary, w: float) -> void:
 		# decolando (k=0) sobe; pousando (k=1) desce
 		var y: float = H * (.72 - f * .35) if k == 0 else H * (.38 + f * .3)
 		var pw: float = 150.0 - k * 40.0
-		Spr.P("ob_aviao", x, y, pw, dir > 0, (-.18 if k == 0 else .1) * -dir, Color(1, 1, 1, .9 * day))
+		Spr.P("ob_aviao", x, y, pw, dir < 0, (-.18 if k == 0 else .1) * -dir, Color(1, 1, 1, .9 * day))
 
 static func hh(x: float, k: int = 0) -> float:
 	var v := sin(x * 12.9898 + k * 78.233) * 43758.5453

@@ -137,7 +137,9 @@ func fase_1_1() -> void:
 	walk_to(6280)
 	S("pula o caixote", jump_to(6420, true))
 	S("totem grande", walk_to(6620))
-	S("descansou 1", rests.has(1))
+	# no aeroporto o check-in só abre ao tocar no botão usar
+	g.keys["Ap"] = true
+	S("descansou 1", until({}, func(): return rests.has(1), 40))
 	walk_to(6990)
 	S("caixa", jump_to(7140))
 	# segurança

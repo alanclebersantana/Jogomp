@@ -100,7 +100,7 @@ func _draw_raw() -> void:
 		var mg: float = 480.0 if d.k == "bearden" else 340.0
 		if d.x + mg < x0 or d.x - mg > x1:
 			continue
-		if WorldNature.is_front(L, d):
+		if WorldNature.is_front(L, d) or d.k == "pc":
 			continue
 		WorldNature.clip_x0 = x0
 		WorldNature.clip_x1 = x1
@@ -156,11 +156,7 @@ func _draw_raw() -> void:
 				# casa da vila (Episódio 2): o telhado é o caminho do Tomé
 				Spr.P("casa%d" % int(s.get("v", 0)), s.x + s.w / 2, s.y + 3, s.w, bool(s.get("flip", false)))
 			"peca":
-				# peça pintada (balcão, painel, contêiner...): a arte cobre a caixa, com folga ox/oy
-				var ox: float = float(s.get("ox", 0))
-				var oy: float = float(s.get("oy", 0))
-				var ob: float = float(s.get("ob", 4))
-				Spr.AB(str(s.sprite), s.x - ox, s.y - oy, s.w + 2 * ox, s.h + oy + ob)
+				pass   # desenhada depois do chão (abaixo), para o piso não cobrir o pé dos móveis
 			"cart":
 				if s.get("sprite"):
 					Spr.ABb(s.sprite, s.x + s.w / 2, s.y + s.h + 4, s.w + 20)
@@ -206,6 +202,19 @@ func _draw_raw() -> void:
 					bt_ellipse(fx2, s.y + 1.5 * sin(fx2 * .05) + 1, 1.3, 1.3, Color(1, 1, 1, .8), 0.0, 6)
 					fx2 += 9 + hh(fx2, 137) * 8
 				bt_flush()
+	# móveis do aeroporto por cima da faixa do piso: o pé fica no chão, na mesma linha do Milis
+	for d in L.get("decor", []):
+		if d.k != "pc" or d.x + 340 < x0 or d.x - 340 > x1:
+			continue
+		WorldNature.decor(d)
+	for s in L.solids:
+		if s.t != "peca" or s.x + s.w + 200 < x0 or s.x - 200 > x1:
+			continue
+		var ox: float = float(s.get("ox", 0))
+		var oy: float = float(s.get("oy", 0))
+		var ob: float = float(s.get("ob", 4))
+		var dx: float = float(s.get("dx", 0))
+		Spr.AB(str(s.sprite), s.x - ox + dx, s.y - oy, s.w + 2 * ox, s.h + oy + ob)
 
 # ---------- peças ----------
 func tile_h(t: Texture2D, x0_: float, x1_: float, y: float, src: Rect2 = Rect2()) -> void:

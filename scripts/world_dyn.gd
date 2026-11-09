@@ -226,7 +226,8 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 			Spr.translate(0, -sin(hop_u * PI) * 12)
 		# inimigo: contorno vermelho pulsando (mais forte quando o Tomé está perto) — os bichos
 		# do cenário nunca têm isso
-		if not e.dead and not (e.k == "leech" and e.get("hid", true)) and not (e.k == "mole" and e.get("st", 0) in [0, 1]):
+		var no_line: bool = g.L.get("theme", "") == "aeroporto" and e.k in ["janitor", "fly", "crow"]
+		if not no_line and not e.dead and not (e.k == "leech" and e.get("hid", true)) and not (e.k == "mole" and e.get("st", 0) in [0, 1]):
 			var pp: Dictionary = g.player
 			var dn: float = clamp(1.0 - Vector2(pp.x + pp.w / 2 - e.x, pp.y + pp.h / 2 - e.y).length() / 420.0, 0, 1)
 			var pul: float = .5 + .5 * sin(T * .14 + e.x * .01)
@@ -1098,7 +1099,9 @@ func _enemy(e: Dictionary) -> void:
 					Spr.PR("leech1", -ww / 2, -lh * lu, ww, lh * lu)
 					Spr.restore()
 		_:
-			# javali
+			# javali (no aeroporto: o cambista de terno, bem maior que os passageiros)
+			if game.L.get("theme", "") == "aeroporto":
+				Spr.scale(2.05, 2.05)
 			var fr: int
 			if e.dead or e.stun:
 				fr = 6

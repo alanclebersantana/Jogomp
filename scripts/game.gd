@@ -875,9 +875,20 @@ func period_stars() -> Array:
 	return out
 
 ## o botão da mão (USAR) só aparece quando há algo para usar ou quando o facho da lanterna serve
+## totem de check-in ainda não aberto, com o Milis do lado (aeroporto)
+func near_rest() -> Dictionary:
+	if L.get("theme", "") != "aeroporto":
+		return {}
+	for c in CHK:
+		if c.has("rest") and not RESTED.has(c.rest) and abs(player.x + player.w / 2 - c.x) < 60 and abs(player.y + player.h - c.y) < 60:
+			return c
+	return {}
+
 func use_available() -> bool:
 	if not running or player.dyingT > 0 or not CINE.is_empty():
 		return false
+	if not near_rest().is_empty():
+		return true
 	if player.nearL != null or (M and M.is_dog()):
 		return true
 	if RD and RD.near_horse():
@@ -1303,7 +1314,7 @@ func step() -> void:
 			var acc: float = PUFF_ACC if player.puff else (( RUN_ACC if run else ACCg) if player.onGround else ACCa)
 			var top: float = PUFF_TOP if player.puff else (RUN_TOP if run else TOP)
 			var want := -1 if (kd("L") and not kd("R")) else (1 if (kd("R") and not kd("L")) else 0)
-			if player.onGround and want != 0 and player.vx * want < -2.2 and not player.puff:
+			if player.onGround and want != 0 and player.vx * want < -2.2 and not player.puff and not on_wet_floor():
 				player.vx += want * acc * 1.3
 				player.skidT = 6
 				if T % 3 == 0:
@@ -1335,9 +1346,13 @@ func step() -> void:
 			elif slick:
 				# piso molhado do aeroporto: escorrega bastante e custa a parar (e a virar)
 				if want == 0:
-					player.vx *= .962 / FRIC
+					# solta o direcional e continua deslizando um bom pedaço
+					player.vx *= (.988 if abs(player.vx) > .4 else 0.0) / FRIC
 				elif player.vx * want < 0:
-					acc *= .35
+					acc *= .22
+				else:
+					acc *= .55
+				player.skidT = 0
 				if abs(player.vx) > 1.5 and T % 4 == 0:
 					Polish.drops(player.x + player.w / 2, player.y + player.h - 2, 2, 1.4)
 			if player.onGround and abs(player.vx) < 1.4 and not player.run and not player.puff:
@@ -1603,6 +1618,15 @@ func step() -> void:
 	_plat_dips()
 	EV.step()
 	SL.step()
+	# totem de check-in (aeroporto): só abre ao tocar no botão usar
+	var rt: Dictionary = near_rest()
+	if not rt.is_empty() and pressed("A"):
+		RESTED[rt.rest] = 1
+		time_left = int(L.get("period", L.get("time", 300))) * 60
+		player.vx = 0.0
+		running = false
+		rest_reached.emit(rt.rest)
+		return
 	# fogueiras
 	for k in CHK.size():
 		var c: Dictionary = CHK[k]
@@ -1622,6 +1646,13 @@ func step() -> void:
 		else:
 			note("Progresso salvo.")
 		if c.has("rest") and not RESTED.has(c.rest):
+			if L.get("theme", "") == "aeroporto":
+				# totem de check-in: salva sem parar o jogo; a tela do check-in só abre se tocar no botão ✋
+				save_checkpoint(k)
+				if not c.get("asked", false):
+					c.asked = true
+					flash_tut("Check-in", "Totem de check-in: progresso salvo. Toque no botão ✋ (usar) aqui para fazer o check-in e ver as pistas.", 200)
+				continue
 			RESTED[c.rest] = 1
 			time_left = int(L.get("period", L.get("time", 300))) * 60
 			player.vx = 0.0
@@ -3322,6 +3353,8 @@ func ebox(e: Dictionary) -> Dictionary:
 		return R(e.x - 22, e.y - 26, 44, 50)
 	if e.k == "janitor":
 		return R(e.x - 30, e.y - 96, 60, 96)
+	if e.k == "boar" and L.get("theme", "") == "aeroporto":
+		return R(e.x - 28, e.y - 124, 56, 124)
 	if FLY.has(e.k):
 		return R(e.x - 22, e.y - 8, 44, 22)
 	return R(e.x - 20, e.y - 34, 40, 34)

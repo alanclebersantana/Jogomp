@@ -63,8 +63,8 @@ static func _pax(g, T: int) -> void:
 		var nm: String = n
 		var hop := 0.0
 		if int(p.rt) > 0 and p.has("re"):
-			nm = str(p.re)
-			hop = -abs(sin(float(p.rt) * .2)) * 6.0
+			# reage sem virar outra pessoa: um pulinho de susto (ou de alegria) e um balão
+			hop = -abs(sin(float(p.rt) * .2)) * 7.0
 		var r2 = Spr.AR.get("p_" + nm)
 		if r2 == null:
 			continue
@@ -80,6 +80,10 @@ static func _pax(g, T: int) -> void:
 			bob = sin(T * .03 + x) * .8
 		Spr.ellipse(x, y + 1, w * .32, 5, Color(0, 0, 0, .22))
 		Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(.93, .93, .97))
+		if int(p.rt) > 20 and p.has("re"):
+			var by: float = y - hgt - 18 + hop
+			Spr.rr(x - 12, by - 14, 24, 22, 8, Color(1, 1, 1, .95))
+			Spr.text(str(p.get("bal", "!")), x, by + 3, 15, Color("#c8302a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
 		if k == "sit" and str(p.get("z", "")) != "":
 			var zt: int = (T + int(x)) % 120
 			Spr.text("z", x + 18 + zt * .15, y - hgt * .78 - zt * .3, 12 + zt / 30, Color(1, 1, 1, 1.0 - zt / 120.0), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b, 3)
@@ -134,9 +138,9 @@ static func _section(g) -> Dictionary:
 static func _papers(g, T: int) -> void:
 	var pl: Dictionary = g.player
 	if Polish.FRESH:
-		if PAPERS.size() < 10 and T % 50 == 0:
+		if PAPERS.size() < 4 and T % 140 == 0:
 			PAPERS.append({"x": g.cam + randf() * g.W, "y": g.cam_y + 40 + randf() * 120, "vx": randf_range(.6, 1.6), "vy": randf_range(.2, .6), "r": randf() * TAU, "life": 520, "c": _paper_col()})
-		if pl.onGround and abs(pl.vx) > 3.2 and T % 7 == 0 and PAPERS.size() < 18:
+		if pl.onGround and abs(pl.vx) > 3.6 and T % 16 == 0 and PAPERS.size() < 8:
 			PAPERS.append({"x": pl.x + pl.w / 2 - sign(pl.vx) * 10, "y": pl.y + pl.h - 6, "vx": -sign(pl.vx) * randf_range(.5, 1.5) + pl.vx * .3, "vy": -randf_range(1.5, 3.0), "r": randf() * TAU, "life": 220, "c": _paper_col()})
 		var i := PAPERS.size() - 1
 		while i >= 0:
@@ -179,7 +183,7 @@ static func _plane_shadow(g, T: int) -> void:
 	var k: float = u / float(dur)
 	var cx: float = g.cam - 500 + (g.W + 1000) * k
 	var cy: float = g.cam_y + g.H * .35 + k * 40
-	var a: float = .12 * sin(k * PI)
+	var a: float = .07 * sin(k * PI)
 	var col := Color(0, 0, .05, a)
 	# fuselagem, asas e cauda (silhueta grande e borrada)
 	Spr.ellipse(cx, cy, 300, 36, col)
@@ -193,9 +197,7 @@ static func _fluor(g, T: int) -> void:
 	if not str(sc.get("song", "")).contains("seguranca"):
 		return
 	Spr.rect(g.cam - 10, g.cam_y - 10, g.W + 20, g.H + 20, Color(.75, .9, 1, .05))
-	var f: int = T % 300
-	if f < 4 or (f > 9 and f < 12) or (f > 200 and f < 203):
-		Spr.rect(g.cam - 10, g.cam_y - 10, g.W + 20, g.H + 20, Color(0, .02, .06, .22))
+
 
 ## painéis de voos pendurados no teto (com cabos), as linhas trocando
 static func _boards(g, T: int) -> void:

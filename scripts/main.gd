@@ -2615,11 +2615,14 @@ func _on_results() -> void:
 		Save.setv("gallery", "bonus" if game.level_idx == 0 else "bonus%d" % (game.level_idx + 1), true)
 		var bcol := VBoxContainer.new()
 		bcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		bcol.add_child(_label("Todos os segredos!\nCena bônus:", 13, Color("#ffd76a"), Spr.font_b))
-		var bd = preload("res://scripts/ui/kid_drawing.gd").new()
-		bd.kind = 4
-		bd.custom_minimum_size = Vector2(200, 125)
-		bcol.add_child(bd)
+		if game.L.get("theme", "") == "aeroporto":
+			bcol.add_child(_label("Todos os segredos!\nO Milis não deixou\nnenhuma milha para trás.", 13, Color("#ffd76a"), Spr.font_b))
+		else:
+			bcol.add_child(_label("Todos os segredos!\nCena bônus:", 13, Color("#ffd76a"), Spr.font_b))
+			var bd = preload("res://scripts/ui/kid_drawing.gd").new()
+			bd.kind = 4
+			bd.custom_minimum_size = Vector2(200, 125)
+			bcol.add_child(bd)
 		mid.add_child(bcol)
 	var lvl: int = game.level_idx
 	var story: String = game.L.get("endStory", "")

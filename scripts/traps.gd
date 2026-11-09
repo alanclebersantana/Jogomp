@@ -228,6 +228,10 @@ func post() -> void:
 				if pcx > o.x and pcx < o.x + o.w and p.y + p.h > o.y and p.y < o.y + o.h and not p.vine and not p.ladder:
 					if p.puff:
 						p.vy = max(p.vy - o.pow, -6.5)
+					elif not p.onGround and g.L.get("theme", "") == "aeroporto":
+						# saída do ar-condicionado: pulou dentro, o vento leva até o alto (sem precisar planar)
+						p.vy = max(p.vy - o.pow * 1.05, -6.0)
+						p.cutOk = false
 					elif not p.onGround:
 						p.vy -= o.pow * .3
 			"spikes":
