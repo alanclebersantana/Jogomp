@@ -88,6 +88,7 @@ var CART: CartRide
 var TC: ThiefChase
 var QB: Quebra
 var GD: Gadgets
+var ARN: ArenaSeg
 var VL: Village
 var RESTED := {}        # fogueiras grandes já descansadas
 var player: Dictionary = {}
@@ -333,6 +334,8 @@ func load_level(i: int) -> void:
 	QB.load_level()
 	GD = Gadgets.new(self)
 	GD.load_level()
+	ARN = ArenaSeg.new(self)
+	ARN.load_level()
 	VL = Village.new(self)
 	VL.load_level()
 	RESTED = {}
@@ -602,6 +605,25 @@ func coins_near(x0: float, x1: float) -> Array:
 			out.append_array(COIN_GRID[cell])
 	return out
 
+## ponto dentro de parede/bloco (plataformas finas não contam)
+func wall_at(x: float, y: float) -> bool:
+	for s in blockers():
+		if s.get("oneway") or s.get("brk_of") != null:
+			continue
+		if x > s.x and x < s.x + s.w and y > s.y and y < s.y + float(s.get("h", 0.0)):
+			return true
+	return false
+
+## linha de visão livre entre dois pontos (sem parede no meio)
+func los(ax: float, ay: float, bx: float, by: float) -> bool:
+	var d := Vector2(bx - ax, by - ay)
+	var n: int = int(d.length() / 14.0)
+	for i in range(1, n):
+		var u: float = float(i) / n
+		if wall_at(ax + d.x * u, ay + d.y * u):
+			return false
+	return true
+
 func blockers_dirty() -> void:
 	_blk_key = ""
 	_cand_n = -1
@@ -815,6 +837,8 @@ func ambient() -> void:
 	AMB.song = src.get("song", "manha")
 	if CART and CART.on:
 		AMB.song = "carrinho"   # trilha da descida no carrinho de bagagem
+	if ARN and ARN.song() != "":
+		AMB.song = ARN.song()   # mini-chefe: arena fechada
 	# cor de tela misturada entre os dois trechos (sem troca num estalo)
 	var ca: Color = _tint_col(str(a.get("tint", "")))
 	var cb: Color = _tint_col(str(b.get("tint", ""))) if b else ca
@@ -1756,7 +1780,9 @@ func step() -> void:
 					# X1 voa girando para longe do golpe
 					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
 				elif e.get("dk") == "seg":
-					# o segurança derrubado escorrega de costas no piso, freando
+					# o segurança derrubado escorrega de costas no piso, freando (para na parede)
+					if wall_at(e.x + float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0)) + sign(float(e.get("dvx", 0.0))) * 50, e.y - 20):
+						e.dvx = 0.0
 					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
 					e.dvx = float(e.get("dvx", 0.0)) * .9
 					SegGuard.tick_dead(self, e)
@@ -1810,6 +1836,9 @@ func step() -> void:
 		player.x = clamp(player.x, ZN.zone.x0, ZN.zone.x1 - player.w)
 	else:
 		player.x = clamp(player.x, 0, L.spanX - player.w)
+	# arena do falso segurança: grades dos dois lados até ele cair
+	if ARN:
+		ARN.step()
 	# saída (porta da mina)
 	if not player.dog and hit(player, R(DOOR.x + 10, DOOR.y, DOOR.w - 20, DOOR.h)) and not DOOR.locked and (VIL == null or VIL.gone):
 		player.exitT = 40

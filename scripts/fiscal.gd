@@ -436,11 +436,13 @@ static func draw(g, b: Dictionary, T: int) -> void:
 	Spr.rect(cx - 72, cy - 2, 144, 8, Color("#f2c230"))
 	for i in 6:
 		Spr.rect(cx + 70, cy + 18 + i * 26, 18, 4, Color("#8b95a3"))
-	Spr.rect(cx - 74, cy - 96, 148, 96, Color(.16, .19, .24, .55))
-	Spr.rect(cx - 66, cy - 88, 132, 58, Color(.55, .8, .95, .25))
+	# posto de controle em cima da cabine: uma salinha de vidro (o Fiscal fica DENTRO dela)
+	Spr.rect(cx - 78, cy - 200, 156, 200, Color(.12, .15, .2, .7))
+	Spr.rect(cx - 70, cy - 190, 140, 110, Color(.55, .8, .95, .18))
+	Spr.rect(cx - 84, cy - 212, 168, 14, Color("#5b6470"))
 	var luz: Color = Color("#e8302a") if b.get("st", "") == "lasers" and int(T / 8) % 2 == 0 else Color("#36c26a")
-	Spr.circle(cx + 58, cy - 108, 9, luz)
-	Spr.text("SEGURANÇA", cx - 66, cy - 102, 14, Color("#f2c230"))
+	Spr.circle(cx + 62, cy - 222, 9, luz)
+	Spr.text("SEGURANÇA", cx - 70, cy - 216, 14, Color("#f2c230"))
 	if b.get("zap", 0) > 0:
 		b.zap -= 1
 		for i in 4:
@@ -561,6 +563,7 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		var w: float = hgt * r[2] / r[3]
 		# a arte olha para a direita
 		Spr.P("fiscal_" + pose, b.x, b.y + 2, w, face_left, 0.0, c)
+		_booth_front(b, T)
 		if st == "tonto":
 			for i in 3:
 				var a2: float = T * .12 + i * TAU / 3.0
@@ -570,3 +573,23 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		Spr.P("boar_ko" if st == "down" else "boar_wind", b.x, b.y + 2, 110, not face_left, 0.0, c)
 	else:
 		Spr.P("boar_wind", b.x, b.y + 2, 100, not face_left, 0.0, c)
+
+## frente da salinha de controle (por cima do Fiscal quando ele está lá dentro): vidro, moldura e o
+## console com o botão vermelho na altura da cintura
+static func _booth_front(b: Dictionary, T: int) -> void:
+	var cx: float = b.get("cab_x", float(b.x1) - 120.0)
+	var cy: float = b.get("cab_y", 330.0)
+	if abs(float(b.x) - cx) > 80 or float(b.y) > cy + 4:
+		return
+	Spr.rect(cx - 78, cy - 200, 156, 200, Color(.7, .9, 1, .1))
+	Spr.poly(PackedVector2Array([Vector2(cx - 66, cy - 186), Vector2(cx - 40, cy - 186), Vector2(cx - 66, cy - 140)]), Color(1, 1, 1, .18))
+	for fx in [cx - 78, cx + 74]:
+		Spr.rect(fx, cy - 200, 4, 200, Color("#c9ced6"))
+	# console
+	Spr.rect(cx - 78, cy - 64, 156, 64, Color("#2c323c"))
+	Spr.rect(cx - 78, cy - 66, 156, 6, Color("#8d97a3"))
+	for i in 3:
+		Spr.rect(cx - 64 + i * 44, cy - 52, 34, 20, Color("#123047"))
+		Spr.rect(cx - 62 + i * 44, cy - 50, 30, 3, Color(.4, .9, 1, .5 + .3 * sin(T * .1 + i)))
+	Spr.circle(cx + 52, cy - 20, 8, Color("#d8302a"))
+	Spr.rect(cx - 72, cy - 4, 144, 4, Color("#f2c230"))

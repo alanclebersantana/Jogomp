@@ -321,14 +321,20 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 		if e.dead or book.has(i):
 			continue
 		if Game.hit(hb, g.ebox(e)):
+			# sem acertar através de balcão ou parede
+			var eb: Dictionary = g.ebox(e)
+			if not g.los(p.x + p.w / 2, p.y + p.h * .4, eb.x + eb.w / 2, eb.y + eb.h * .5):
+				continue
 			book[i] = 1
 			var dir: float = 1.0 if e.x > p.x + p.w / 2 else -1.0
 			g.kill_enemy(e, "hit")
+			if int(e.get("blockT", 0)) == 16:
+				book.erase(i)   # defendeu com o escudo: o próximo golpe do combo ainda pode acertar
 			# empurrão com peso: o capanga é jogado para trás (no giro e no chute, bem mais longe)
 			var push: float = 70.0 if how in ["spin", "kick"] else 30.0
 			if not e.dead:
 				e.x += dir * push * .5
-			else:
+			elif e.get("dk", "") != "seg":
 				# derrubado: voa girando para longe (no giro e no chute, bem mais longe)
 				e.dk = "flip"
 				e.dvx = dir * (9.0 if how in ["spin", "kick"] else 5.0)

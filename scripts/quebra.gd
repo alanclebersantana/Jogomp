@@ -8,11 +8,14 @@ class_name Quebra
 ##  malas    a pilha desaba: malas quicando (2 milhas)
 ##  lanche   máquina de lanches: cada pancada balança, racha o vidro e solta um lanche + milhas (até 3)
 ##  carrinho carrinho de bagagem: rola para longe e bate nas coisas
+## Malas, vaso e carrinho são sólidos (dá para subir neles; o carrinho o Milis empurra andando). A máquina
+## de lanches fica encostada na parede do fundo (o Milis passa na frente dela).
 
 var g
 var O: Array = []
 
 const NOMES := {"placa": "p_ob_placa", "malas": "p_ob_malas"}
+const SOLIDO := {"malas": 56.0, "vaso": 70.0, "carrinho": 60.0}
 
 func _init(game) -> void:
 	g = game
@@ -34,6 +37,10 @@ func load_level() -> void:
 		o.shk = 0
 		o.cd = 0
 		o.bits = []
+		if SOLIDO.has(o.k):
+			var sh: float = SOLIDO[o.k]
+			o.sol = {"t": "brk", "x": o.x - o.w / 2, "y": o.base - sh, "w": o.w, "h": sh, "brk_of": true}
+			g.SOL.append(o.sol)
 		O.append(o)
 
 func _h(o: Dictionary) -> float:
@@ -54,6 +61,9 @@ func hit_box(hb: Dictionary, dir: float, how: String) -> void:
 		if o.cd > 0 or (o.done and o.k != "carrinho"):
 			continue
 		if Game.hit(hb, box(o)):
+			var p: Dictionary = g.player
+			if not g.los(p.x + p.w / 2, p.y + p.h * .4, o.x, o.y - _h(o) * .5):
+				continue
 			_knock(o, dir, 5.0 if how in ["spin", "kick"] else 3.5)
 
 ## algo voando ou correndo bate no ponto (x, y) com velocidade vx
@@ -73,6 +83,11 @@ func _coins(o: Dictionary, n: int) -> void:
 	for i in 5:
 		g.PARTS.append({"x": o.x + randf_range(-8, 8), "y": o.y - _h(o) * .6, "vx": randf_range(-2, 2), "vy": -randf_range(2.5, 5.0), "life": 34, "col": Color(1, .82, .3), "gy": o.base - 2})
 
+func _unsolid(o: Dictionary) -> void:
+	if o.has("sol") and not o.sol.get("fallen", false):
+		o.sol.fallen = true
+		g.blockers_dirty()
+
 func _knock(o: Dictionary, dir: float, pw: float) -> void:
 	o.cd = 12
 	g.shake = max(g.shake, 2.5)
@@ -85,6 +100,7 @@ func _knock(o: Dictionary, dir: float, pw: float) -> void:
 			Audio.play("slide", -8, 1.4)
 		"vaso":
 			o.done = true
+			_unsolid(o)
 			Audio.play("door", -6, 1.8)
 			for i in 9:
 				Polish.part("chip", o.x + randf_range(-12, 12), o.y - 30, dir * randf_range(.5, 3.5) + randf_range(-1, 1), -randf_range(2.0, 5.0), 70,
@@ -94,6 +110,7 @@ func _knock(o: Dictionary, dir: float, pw: float) -> void:
 			_coins(o, 1)
 		"malas":
 			o.done = true
+			_unsolid(o)
 			Audio.play("stomp", -8, 1.2)
 			for i in 3:
 				o.bits.append({"x": o.x + (i - 1) * 12.0, "y": o.y - 20.0 - i * 16.0, "vx": dir * randf_range(1.5, 4.0) + (i - 1) * .6, "vy": -randf_range(2.5, 5.5),
@@ -126,6 +143,9 @@ func step() -> void:
 		match o.k:
 			"placa":
 				if o.done and (o.vy != 0.0 or o.y < o.base):
+					if g.wall_at(o.x + o.vx + sign(o.vx) * 10, o.y - 20):
+						o.vx = -o.vx * .3
+						o.vr = -o.vr * .5
 					o.x += o.vx
 					o.y += o.vy
 					o.vy += .5
@@ -144,8 +164,14 @@ func step() -> void:
 							o.rot = PI / 2 * sign(o.rot) if o.rot != 0.0 else PI / 2
 			"carrinho":
 				if abs(o.vx) > .05:
+					if g.wall_at(o.x + sign(o.vx) * (o.w / 2 + 3) + o.vx, o.base - 20):
+						# bateu na parede: volta um pouco
+						o.vx = -o.vx * .3
+						Audio.play("clanc", -10, 1.2)
 					o.x += o.vx
 					o.vx *= .965
+					if o.has("sol"):
+						o.sol.x = o.x - o.w / 2
 					o.rot = sin(g.T * .5) * .02 * abs(o.vx)
 					# o carrinho desgovernado derruba o que encontrar
 					for o2 in O:
@@ -160,6 +186,8 @@ func step() -> void:
 		for b in o.bits:
 			if b.vy == 0.0 and b.y >= o.base:
 				continue
+			if g.wall_at(b.x + b.vx + sign(b.vx) * 8, b.y - 6):
+				b.vx = -b.vx * .3
 			b.x += b.vx
 			b.y += b.vy
 			b.vy += .45
@@ -173,16 +201,25 @@ func step() -> void:
 					b.vy = 0.0
 					b.vx = 0.0
 					b.vr = 0.0
-	# o Milis correndo empurra o carrinho de bagagem
+	# o Milis empurra o carrinho de bagagem encostando nele e andando (correndo, ele sai rolando)
 	var p: Dictionary = g.player
 	for o in O:
-		if o.k == "carrinho" and p.onGround and abs(p.vx) > 2.5:
-			var cx: float = p.x + p.w / 2
-			if abs(cx - o.x) < o.w / 2 + p.w / 2 and abs(p.y + p.h - o.base) < 10 and sign(o.x - cx) == sign(p.vx):
-				o.vx = p.vx * 1.4
-				if o.cd == 0:
-					Audio.play("slide", -10, 1.1)
-					o.cd = 20
+		if o.k != "carrinho" or not p.onGround or abs(p.y + p.h - o.base) > 6:
+			continue
+		var left_gap: float = (o.x - o.w / 2) - (p.x + p.w)
+		var right_gap: float = p.x - (o.x + o.w / 2)
+		var push := 0.0
+		if left_gap > -4 and left_gap < 4 and g.keys.get("R", false):
+			push = 1.0
+		elif right_gap > -4 and right_gap < 4 and g.keys.get("L", false):
+			push = -1.0
+		if push != 0.0:
+			var sp: float = 4.5 if p.get("run", 0) else 2.2
+			if abs(o.vx) < sp:
+				o.vx = push * sp
+			if o.cd == 0:
+				Audio.play("slide", -10, 1.1)
+				o.cd = 20
 
 func draw(T: int) -> void:
 	var x0: float = g.cam - 200
@@ -235,6 +272,10 @@ func _tex_or(o: Dictionary, n: String, T: int) -> void:
 	if t != null:
 		var w: float = o.w * 1.25
 		var hh: float = w * t.get_height() / t.get_width()
+		if o.k == "lanche":
+			# encostada na parede do fundo: um tom mais escura e um pouco acima do chão da frente
+			Spr.ci.draw_texture_rect(t, Rect2(o.x - w / 2, o.y - hh - 2, w, hh), false, Color(.8, .8, .86, Spr.alpha))
+			return
 		Spr.trect(t, Rect2(o.x - w / 2, o.y - hh + 3, w, hh))
 		return
 	match o.k:

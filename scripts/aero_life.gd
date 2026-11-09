@@ -187,7 +187,7 @@ static func _paper_col() -> Color:
 ## de tempos em tempos a sombra de um avião passa pelas vidraças (só de dia, no saguão e check-in)
 static func _plane_shadow(g, T: int) -> void:
 	var sc := _section(g)
-	if not str(sc.get("bg", "")) in ["vila", "tarde"]:
+	if not str(sc.get("bg", "")) in ["vila"]:
 		return
 	var per := 1500
 	var u: int = (T + 400) % per

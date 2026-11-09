@@ -124,7 +124,9 @@ var _planes := [{}, {}]
 func _aero_planes(ws: Dictionary, w: float) -> void:
 	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
 		return
-	var day: float = float(ws.get("vila", 0.0)) + float(ws.get("tarde", 0.0)) * .8
+	# só onde a pintura do fundo tem vidraça para fora (saguão e check-in); na segurança o fundo é
+	# parede interna, raio-x e plantas: avião ali passaria por dentro do prédio
+	var day: float = float(ws.get("vila", 0.0))
 	if day <= .05:
 		return
 	var H: float = game.H

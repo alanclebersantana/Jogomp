@@ -122,6 +122,8 @@ func __draw_raw() -> void:
 		g.QB.draw(T)
 	if g.GD:
 		g.GD.draw(T)
+	if g.ARN:
+		g.ARN.draw(T)
 	if g.CART:
 		g.CART.draw_back(T)
 	if g.TC:

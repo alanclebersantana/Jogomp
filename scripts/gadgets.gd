@@ -70,18 +70,17 @@ func target() -> Dictionary:
 	for s in STUCK:
 		if s.st == 0:
 			var d: float = Vector2(s.x - hx, s.y - hy).length()
-			if d < RANGE + 60 and d < bd and s.y < hy:
+			if d < RANGE + 60 and d < bd and s.y < hy and g.los(hx, hy, s.x, s.y - 14):
 				best = {"kind": "stuck", "tgt": s, "x": s.x, "y": s.y}
 				bd = d
-	if not best.is_empty():
-		return best
+	# o alvo é sempre o mais perto (mala presa, capanga ou ímã)
 	for e in g.EN:
 		if e.dead:
 			continue
 		var ex: float = e.x
 		var ey: float = e.y - (90.0 if e.k == "boar" else 10.0)
 		var d2: float = Vector2(ex - hx, ey - hy).length()
-		if d2 > RANGE - 40 or not _front(ex - hx):
+		if d2 > RANGE - 40 or not _front(ex - hx) or not g.los(hx, hy, ex, ey):
 			continue
 		if e.k == "boar" and SegGuard.is_seg(g, e) and int(e.get("disarm", 0)) == 0:
 			if d2 < bd:
@@ -91,11 +90,10 @@ func target() -> Dictionary:
 			if d2 < bd:
 				best = {"kind": "voador", "tgt": e, "x": ex, "y": ey}
 				bd = d2
-	if not best.is_empty():
-		return best
+	# ímã no teto: vale o que estiver mais perto (capanga ou ímã)
 	for a in ANCH:
 		var d3: float = Vector2(a.x - hx, a.y - hy).length()
-		if d3 < RANGE and a.y < hy - 40 and d3 < bd and _front(a.x - hx):
+		if d3 < RANGE and a.y < hy - 40 and d3 < bd and _front(a.x - hx) and g.los(hx, hy, a.x, a.y + 8):
 			best = {"kind": "ima", "tgt": a, "x": a.x, "y": a.y}
 			bd = d3
 	return best
@@ -270,6 +268,8 @@ func draw(T: int) -> void:
 			continue
 		if Polish.FRESH:
 			if ls.vy != 0.0:
+				if g.wall_at(ls.x + ls.vx + sign(ls.vx) * 16, ls.y):
+					ls.vx = -ls.vx * .3
 				ls.x += ls.vx
 				ls.y += ls.vy
 				ls.vy += .45

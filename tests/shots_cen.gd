@@ -35,7 +35,7 @@ func _initialize() -> void:
 		e.dead = 99
 	g.CLUEGOT[1] = 1
 	g.CLUEGOT[2] = 1
-	_go(g, 3000)
+	_go(g, 2800)
 	for i in 40:
 		await process_frame
 	_snap("cartaz")

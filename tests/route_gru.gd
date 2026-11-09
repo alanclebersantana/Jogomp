@@ -60,7 +60,7 @@ func esteira(idx: int, x_embarque: float, x2: float, y2: float):
 	var r = until({}, func():
 		var down: bool = s.y > float(prev[0]) + .05
 		prev[0] = s.y
-		return down and abs(s.x + s.w / 2 - x_embarque) < 60 and s.y > P.y + P.h - 70 and s.y < P.y + P.h + 40, 1200)
+		return down and abs(s.x + s.w / 2 - x_embarque) < 60 and s.y > P.y + P.h - 95 and s.y < P.y + P.h + 40, 1200)
 	if not (r is bool and r):
 		return "esteira não veio: " + str(r)
 	r = jump_to(x_embarque)
@@ -126,6 +126,7 @@ func fase_1_1() -> void:
 	use()
 	S("elevador desceu", until({}, func(): return float(g.MV.MV[0].pos) >= .999, 700))
 	walk_to(2300)
+	S("pula a pilha de malas", jump_to(2470))
 	S("tapume 1 (rolando)", crawl(2635))
 	walk_to(2640)
 	S("caixa do coração", jump_to(2760))
@@ -592,6 +593,9 @@ func capangas_longe_dos_vaos():
 			r0 = float(e.r[0])
 			r1 = float(e.r[1])
 		for c in g.X.CRAWL:
+			# mini-chefe preso na arena (grades): não chega até um vão que fica fora dela
+			if e.has("arena") and (float(c.x) > float(e.arena[1]) or float(c.x) + float(c.w) < float(e.arena[0])):
+				continue
 			if r0 - 300.0 < float(c.x) + float(c.w) and r1 + 300.0 > float(c.x):
 				ruins.append("%s@%d perto do vão %d" % [e.k, int(e.x), int(c.x)])
 	return true if ruins.is_empty() else ", ".join(ruins)

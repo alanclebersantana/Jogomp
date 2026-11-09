@@ -90,13 +90,14 @@ func _initialize() -> void:
 		if o != e:
 			o.dead = 99
 	e.ccd = 9999
-	P.x = e.x + 150
+	P.x = e.x + 105
 	P.y = 440
 	P.face = -1
 	P.iframe = 9999
 	wait_ground()
 	e.dir = 1
 	P.face = -1
+	print("   alvo=", g.GD.target().get("kind", "nenhum"), " base=", g.use_available_base(), " ex=", int(e.x), " px=", int(px()), " dir=", e.dir, " face=", P.face)
 	g.keys["Ap"] = true
 	for i in 14:
 		frame()

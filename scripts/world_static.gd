@@ -107,6 +107,8 @@ func _draw_raw() -> void:
 		WorldNature.decor(d)
 		WorldNature.clip_x0 = -1e9
 		WorldNature.clip_x1 = 1e9
+	if L.get("theme", "") == "aeroporto":
+		_basement_wall(L)
 	for s in L.solids:
 		var pad := 140.0 + float(s.get("tun", 0))
 		if s.x + s.get("w", 0) + pad < x0 or s.x - pad > x1:
@@ -119,6 +121,8 @@ func _draw_raw() -> void:
 			"ground":
 				if int(s.get("esc", 0)) == 3:
 					pass   # degraus da escada rolante que anda: desenhados junto com ela (camada que se mexe)
+				elif int(s.get("esc", 0)) == 2:
+					_mezz_block(s)
 				elif s.get("esc"):
 					_escalator(s)
 				else:
@@ -126,7 +130,11 @@ func _draw_raw() -> void:
 			"plat", "branch":
 				pass   # desenhados na camada que se mexe (afundam quando o Tomé pisa)
 			"trunk": trunk(s)
-			"dirt": dirt(s)
+			"dirt":
+				if game.L.get("theme", "") == "aeroporto":
+					_sub_block(s)   # subsolo das bagagens: concreto e tubulação (não terra)
+				else:
+					dirt(s)
 			"fakewall":
 				Spr.rect(s.x, s.y, s.w, s.h, EARTH)
 				Spr.seg(s.x + 4, s.y + 10, s.x + 14, s.y + 30, Color(0, 0, 0, .35), 1.5)
@@ -2237,3 +2245,95 @@ func _escalator(s: Dictionary) -> void:
 	for k in 3:
 		Spr.circle(s.x + 10 + k * (s.w - 20) / 2.0, s.y + s.h * .55, 3, Color(0, 0, 0, .2))
 
+
+## bloco de mezanino do terminal (topo da escada rolante, nicho): painéis de concreto claro com juntas,
+## rodapé de aço, faixa de aço com borda amarela no alto e guarda-corpo de vidro
+func _mezz_block(s: Dictionary) -> void:
+	var x: float = s.x
+	var y: float = s.y
+	var w: float = s.w
+	var h: float = s.h
+	Spr.rect(x, y, w, h, Color("#2b3038"))
+	Spr.hgrad(x + 2, y + 14, w - 4, h - 14, Color("#c3c9d1"), Color("#9aa3ad"))
+	var pw := 60.0
+	var xx: float = x + pw
+	while xx < x + w - 4:
+		Spr.rect(xx, y + 14, 2, h - 14, Color(0, 0, 0, .18))
+		xx += pw
+	var yy: float = y + 14 + 70
+	while yy < y + h - 20:
+		Spr.rect(x + 2, yy, w - 4, 2, Color(0, 0, 0, .14))
+		yy += 70
+	Spr.rect(x, y, w, 14, Color("#5b6470"))
+	Spr.rect(x, y + 12, w, 3, Color("#f2c230"))
+	Spr.rect(x, y + h - 12, w, 12, Color("#3a3f47"))
+	# luminárias embutidas
+	var lx: float = x + 30
+	while lx < x + w - 20:
+		Spr.rect(lx - 10, y + 22, 20, 3, Color(1, .96, .8, .7))
+		lx += 80
+	# guarda-corpo de vidro em cima
+	Spr.rect(x, y - 40, w, 40, Color(.72, .9, 1, .18))
+	Spr.rect(x, y - 42, w, 4, Color("#16181c"))
+	var px: float = x
+	while px <= x + w:
+		Spr.rect(px - 1, y - 42, 3, 42, Color("#8d97a3"))
+		px += 60
+
+## subsolo das bagagens: blocos de concreto com faixa de segurança e um cano passando
+func _sub_block(s: Dictionary) -> void:
+	var x: float = s.x
+	var y: float = s.y
+	var w: float = s.w
+	var h: float = s.h
+	Spr.rect(x, y, w, h, Color("#4a4f57"))
+	Spr.rect(x, y, w, 4, Color("#7d8794"))
+	var xx: float = x + 40
+	while xx < x + w - 4:
+		Spr.rect(xx, y + 4, 2, h - 4, Color(0, 0, 0, .18))
+		xx += 40
+	if w >= h:
+		var k := 0
+		while k * 16 < w:
+			Spr.rect(x + k * 16, y + 4, 8, 5, Color("#f2c230") if k % 2 == 0 else Color("#1b1d22"))
+			k += 1
+
+## parede do fundo do subsolo das bagagens (atrás dos blocos): concreto escuro, canos, luz de
+## emergência e uma esteira de bagagens no alto
+func _basement_wall(L: Dictionary) -> void:
+	var bx0 := 1e9
+	var bx1 := -1e9
+	var by0 := 1e9
+	var by1 := -1e9
+	for s in L.solids:
+		if s.t == "dirt":
+			bx0 = min(bx0, s.x)
+			bx1 = max(bx1, s.x + s.w)
+			by0 = min(by0, s.y)
+			by1 = max(by1, s.y + s.h)
+	if bx1 < bx0 or bx1 < x0 or bx0 > x1:
+		return
+	var top: float = float(L.get("under", 640))
+	Spr.rect(bx0, top, bx1 - bx0, by1 - top, Color("#23272e"))
+	var xx: float = bx0
+	while xx < bx1:
+		Spr.rect(xx, top, 2, by1 - top, Color(0, 0, 0, .25))
+		xx += 80
+	# canos
+	Spr.rect(bx0, top + 30, bx1 - bx0, 10, Color("#5d6672"))
+	Spr.rect(bx0, top + 31, bx1 - bx0, 2, Color(1, 1, 1, .15))
+	Spr.rect(bx0, top + 52, bx1 - bx0, 6, Color("#7a4a2a"))
+	# esteira de bagagens com malas paradas
+	Spr.rect(bx0, top + 76, bx1 - bx0, 12, Color("#15171b"))
+	var mx: float = bx0 + 30
+	var k := 0
+	while mx < bx1 - 30:
+		var cs := [Color("#7a2f2a"), Color("#2f4f7a"), Color("#6a5a2a")]
+		Spr.rr(mx, top + 52, 34, 24, 3, cs[k % 3])
+		mx += 110
+		k += 1
+	# luzes de emergência
+	var lx: float = bx0 + 60
+	while lx < bx1:
+		Spr.circle(lx, top + 110, 4, Color(1, .4, .2, .8))
+		lx += 220

@@ -162,12 +162,12 @@
    "t": "peca",
    "x": 2160,
    "y": -40,
-   "w": 360,
+   "w": 328,
    "h": 40,
    "sprite": "p_pc_passarela_topo",
    "ox": 0,
-   "oy": 38,
-   "ob": -7,
+   "oy": 35,
+   "ob": -10,
    "dx": 0
   },
   {
@@ -489,7 +489,8 @@
    "x": 7000,
    "y": 280,
    "w": 120,
-   "h": 220
+   "h": 220,
+   "esc": 2
   },
   {
    "t": "ground",
@@ -1094,66 +1095,69 @@
  "enemies": [
   {
    "k": "janitor",
-   "x": 13300,
+   "x": 11150,
    "y": 500,
    "r": [
-    13100,
-    13560
+    10950,
+    11350
    ]
   },
   {
    "k": "boar",
-   "x": 1300,
+   "x": 1330,
    "y": 500,
    "r": [
-    1150,
+    1255,
+    1405
+   ],
+   "arena": [
+    1130,
     1450
    ]
   },
   {
    "k": "frog",
-   "x": 1790,
-   "y": 500,
+   "x": 1600,
+   "y": 456,
    "r": [
-    1720,
-    1860
+    1530,
+    1670
    ]
   },
   {
    "k": "boar",
-   "x": 4100,
+   "x": 4610,
    "y": 500,
    "r": [
-    3760,
-    4180
-   ]
-  },
-  {
-   "k": "frog",
-   "x": 5420,
-   "y": 500,
-   "r": [
-    5250,
-    5650
+    4480,
+    4740
+   ],
+   "arena": [
+    4350,
+    4795
    ]
   },
   {
    "k": "fly",
-   "x": 8340,
-   "y": 300,
+   "x": 5800,
+   "y": 330,
    "r": [
-    8220,
-    8460
+    5620,
+    5980
    ],
-   "cy": 300
+   "cy": 330
   },
   {
    "k": "boar",
-   "x": 9975,
+   "x": 10165,
    "y": 500,
    "r": [
-    9750,
-    10200
+    10040,
+    10290
+   ],
+   "arena": [
+    9905,
+    10340
    ]
   },
   {
@@ -1920,7 +1924,7 @@
  "clocks": [],
  "checks": [
   [
-   1460,
+   1480,
    500
   ],
   [
@@ -1942,7 +1946,7 @@
    500
   ],
   [
-   10200,
+   9860,
    500
   ],
   [
@@ -1958,52 +1962,56 @@
   {
    "a": 3150,
    "b": 3300,
-   "t": "Esteira rolante a favor: use o embalo para alcançar o vulto!"
+   "t": "Esteira rolante a favor: use o embalo para alcançar o vulto!",
+   "yl": 640
   },
   {
    "a": 7990,
-   "b": 8120,
-   "t": "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!"
+   "b": 8090,
+   "t": "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!",
+   "yl": 640
   },
   {
    "a": 13340,
    "b": 13420,
-   "t": "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas."
+   "t": "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas.",
+   "yl": 640
   },
   {
    "a": 0,
    "b": 520,
-   "t": "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo."
+   "t": "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.",
+   "yl": 640
   },
   {
    "a": 700,
    "b": 950,
-   "t": "Malas abandonadas pelo ladrão: pise em cima ou bata com o bastão para soltar as milhas."
-  },
-  {
-   "a": 1120,
-   "b": 1320,
-   "t": "Falso segurança! De frente ele defende com o escudo. Bata por trás, ou logo depois da investida, quando ele abaixa o escudo."
+   "t": "Malas abandonadas pelo ladrão: pise em cima ou bata com o bastão para soltar as milhas.",
+   "yl": 640
   },
   {
    "a": 1720,
    "b": 1900,
-   "t": "Alto demais? Pule de novo no ar: pulo duplo!"
+   "t": "Alto demais? Pule de novo no ar: pulo duplo!",
+   "yl": 640
   },
   {
    "a": 1990,
    "b": 2160,
-   "t": "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante..."
+   "t": "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...",
+   "yl": 640
   },
   {
    "a": 3420,
    "b": 3700,
-   "t": "Fila do check-in. Os balcões dão bons degraus."
+   "t": "Fila do check-in. Os balcões dão bons degraus.",
+   "yl": 640
   },
   {
    "a": 4380,
    "b": 4600,
-   "t": "A esteira de despacho sobe e desce: espere ela chegar e pule em cima."
+   "t": "A esteira de despacho sobe e desce: espere ela chegar e pule em cima.",
+   "yl": 640
   },
   {
    "a": 5000,
@@ -2014,37 +2022,44 @@
   {
    "a": 6000,
    "b": 6320,
-   "t": "A catraca da área restrita está fechada. Empurre o caixote até a placa no chão!"
+   "t": "A catraca da área restrita está fechada. Empurre o caixote até a placa no chão!",
+   "yl": 640
   },
   {
    "a": 6540,
    "b": 6700,
-   "t": "Uma escada rolante na contramão... corra contra ela: lá em cima tem alguma coisa!"
+   "t": "Uma escada rolante na contramão... corra contra ela: lá em cima tem alguma coisa!",
+   "yl": 640
   },
   {
    "a": 7200,
    "b": 7500,
-   "t": "A segurança! Alguém ligou as esteiras do raio-x na tomada errada: cuidado com os choques."
+   "t": "A segurança! Alguém ligou as esteiras do raio-x na tomada errada: cuidado com os choques.",
+   "yl": 640
   },
   {
    "a": 8100,
    "b": 8300,
-   "t": "Bandejas soltas: elas caem logo depois que você pisa!"
+   "t": "Bandejas soltas: elas caem logo depois que você pisa!",
+   "yl": 640
   },
   {
    "a": 8900,
    "b": 9150,
-   "t": "Saída de ar-condicionado: abra as asas (planar) em cima dela e o vento leva você lá para cima."
+   "t": "Saída de ar-condicionado: pule em cima dela e o vento leva você lá para cima.",
+   "yl": 640
   },
   {
    "a": 10150,
    "b": 10400,
-   "t": "A porta só abre com crachá. Junte o cartão de acesso com o cordão no compartimento do Milis."
+   "t": "A porta só abre com crachá. Junte o cartão de acesso com o cordão no compartimento do Milis.",
+   "yl": 640
   },
   {
    "a": 10820,
    "b": 10960,
-   "t": "Grade de manutenção: escale até a passarela (cima/baixo e para os lados)."
+   "t": "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).",
+   "yl": 640
   },
   {
    "a": 11550,
@@ -2055,23 +2070,27 @@
   {
    "a": 12380,
    "b": 12560,
-   "t": "Escada rolante: fique em cima que ela leva você ao mezanino. Lá do alto, um pulo duplo alcança a prateleira."
+   "t": "Escada rolante: fique em cima que ela leva você ao mezanino. Lá do alto, um pulo duplo alcança a prateleira.",
+   "yl": 640
   },
   {
    "a": 13450,
    "b": 13600,
-   "t": "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele."
+   "t": "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele.",
+   "yl": 640
   },
   {
    "a": 14600,
    "b": 15600,
    "t": "Fiscal: pule malas e lasers baixos, abaixe (↓) nos altos, saia das faixas acesas do chão. Painel piscando? Corra até ele e bata!",
-   "boss": 1
+   "boss": 1,
+   "yl": 640
   },
   {
    "a": 2380,
    "b": 2480,
-   "t": "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo."
+   "t": "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.",
+   "yl": 640
   }
  ],
  "pits": [
@@ -2125,12 +2144,12 @@
   },
   {
    "k": "roll",
-   "x": 13550,
+   "x": 12455,
    "y": 500,
-   "trig": 13200,
+   "trig": 12205,
    "dir": -1,
    "vmax": 3.6,
-   "end": 12250,
+   "end": 12215,
    "r": 30,
    "aero": true
   },
@@ -2184,13 +2203,6 @@
   {
    "k": "pc",
    "x": 5600,
-   "y": 500,
-   "n": "p_pc_coluna",
-   "w": 92
-  },
-  {
-   "k": "pc",
-   "x": 6900,
    "y": 500,
    "n": "p_pc_coluna",
    "w": 92
@@ -2362,21 +2374,7 @@
   },
   {
    "k": "pc",
-   "x": 6720,
-   "y": 500,
-   "n": "p_ob_ursinho",
-   "w": 28
-  },
-  {
-   "k": "pc",
    "x": 7300,
-   "y": 500,
-   "n": "p_ob_fila",
-   "w": 70
-  },
-  {
-   "k": "pc",
-   "x": 7480,
    "y": 500,
    "n": "p_ob_fila",
    "w": 70
@@ -2397,14 +2395,14 @@
   },
   {
    "k": "pc",
-   "x": 12520,
+   "x": 13270,
    "y": 500,
    "n": "p_ob_folhetos",
    "w": 40
   },
   {
    "k": "pc",
-   "x": 13100,
+   "x": 13460,
    "y": 500,
    "n": "p_ob_papeis",
    "w": 60
@@ -2440,7 +2438,7 @@
    "k": "path",
    "x0": 4400,
    "x1": 4680,
-   "y0": 400,
+   "y0": 330,
    "y1": 230,
    "w": 110,
    "per": 260
@@ -2448,12 +2446,8 @@
  ],
  "comics": [
   {
-   "id": "seguranca",
-   "x": 1000
-  },
-  {
    "id": "drone",
-   "x": 4330
+   "x": 11480
   },
   {
    "id": "vento",
@@ -2466,10 +2460,10 @@
  "endTitle": "FIM DO TERMINAL",
  "introImg": "res://assets/ui/intro_1.jpg",
  "periods": [
-  "Saguão",
-  "Check-in",
-  "Segurança",
-  "Mezanino"
+  "Saguão · 14:00",
+  "Check-in · 16:00",
+  "Segurança · 18:00",
+  "Mezanino · 20:00"
  ],
  "clueIds": [
   1,
@@ -2558,30 +2552,25 @@
    "re": 1
   },
   {
-   "x": 3470,
+   "x": 3705,
    "n": "pax_menino",
    "k": "stand",
    "y": 500,
    "sc": 0.62
   },
   {
-   "x": 3420,
+   "x": 3650,
    "n": "pax_mae",
-   "k": "walk",
-   "y": 500,
-   "r": [
-    3380,
-    3580
-   ],
-   "spd": 0.6
+   "k": "stand",
+   "y": 500
   },
   {
-   "x": 10650,
+   "x": 10750,
    "n": "pax_comissaria",
    "k": "walk",
    "y": 500,
    "r": [
-    10560,
+    10670,
     10840
    ],
    "spd": 0.7,
@@ -2593,8 +2582,8 @@
    "k": "walk",
    "y": 500,
    "r": [
-    14220,
-    14520
+    14360,
+    14540
    ],
    "spd": 0.6
   },
@@ -2671,37 +2660,31 @@
    "w": 34
   },
   {
-   "x": 1110,
+   "x": 1185,
    "y": 500,
    "k": "lanche",
    "w": 64
   },
   {
-   "x": 3120,
+   "x": 2805,
    "y": 500,
    "k": "vaso",
    "w": 40
   },
   {
-   "x": 9820,
+   "x": 9960,
    "y": 500,
    "k": "carrinho",
    "w": 70
   },
   {
-   "x": 12330,
+   "x": 11250,
    "y": 500,
    "k": "lanche",
    "w": 64
   },
   {
-   "x": 14260,
-   "y": 500,
-   "k": "vaso",
-   "w": 40
-  },
-  {
-   "x": 4380,
+   "x": 4400,
    "y": 500,
    "k": "malas",
    "w": 70
@@ -2717,12 +2700,6 @@
    "y": 500,
    "k": "malas",
    "w": 72
-  },
-  {
-   "x": 14050,
-   "y": 500,
-   "k": "malas",
-   "w": 70
   },
   {
    "x": 13630,
@@ -2756,13 +2733,13 @@
  ],
  "stuck": [
   {
-   "x": 1240,
-   "y": 70,
+   "x": 1325,
+   "y": 205,
    "n": 20
   },
   {
-   "x": 3700,
-   "y": 50,
+   "x": 3785,
+   "y": 195,
    "n": 20
   }
  ],
@@ -2774,35 +2751,35 @@
  ],
  "posters": [
   {
-   "x": 3060,
-   "y": 300
-  },
-  {
-   "x": 5320,
-   "y": 250,
-   "rot": 0.05
-  },
-  {
-   "x": 7120,
-   "y": 200
-  },
-  {
-   "x": 9150,
-   "y": 330,
-   "rot": 0.04
-  },
-  {
-   "x": 11000,
+   "x": 640,
    "y": 330
   },
   {
-   "x": 13480,
+   "x": 2740,
    "y": 330,
    "rot": 0.05
   },
   {
-   "x": 14480,
-   "y": 320
+   "x": 5600,
+   "y": 380
+  },
+  {
+   "x": 6500,
+   "y": 240,
+   "rot": 0.04
+  },
+  {
+   "x": 7420,
+   "y": 170
+  },
+  {
+   "x": 10590,
+   "y": 180,
+   "rot": 0.05
+  },
+  {
+   "x": 13080,
+   "y": 390
   }
  ],
  "walks": [

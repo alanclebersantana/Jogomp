@@ -98,5 +98,42 @@ func _initialize() -> void:
 	print("investida: telegrafou=", viu, " correu=", correu, " abaixou o escudo=", abriu)
 	if not (viu and correu and abriu):
 		f += 1
+	# 8) arena de mini-chefe: com o segurança de pé, não dá para passar (nem pulando); depois que ele cai, passa
+	for ix in 3:
+		carregar(0, true)
+		g.lives = 99
+		var gs: Array = g.EN.filter(func(x): return x.k == "boar")
+		gs.sort_custom(func(a, b): return a.x < b.x)
+		var e2: Dictionary = gs[ix]
+		for o in g.EN:
+			if o != e2:
+				o.dead = 99
+		var a0: float = float(e2.arena[0])
+		var a1: float = float(e2.arena[1])
+		P.x = a0 + 20
+		P.y = 380
+		P.iframe = 99999
+		e2.ccd = 99999
+		var maxx := 0.0
+		for i in 360:
+			P.iframe = 99999
+			var d := {"R": true}
+			if i % 40 == 0:
+				press("J")
+				d["J"] = true
+			frame(d)
+			maxx = max(maxx, P.x + P.w)
+		var preso: bool = maxx <= a1 + 2
+		e2.hp = 1
+		e2.stun = 60
+		e2.hitCd = 0
+		g.kill_enemy(e2, "hit")
+		for i in 200:
+			frame({"R": true})
+		# (na 2ª arena a saída é por cima: a parede da direita é a porta do despacho, de verdade)
+		var livre: bool = P.x > a1 or (ix == 1 and g.ARN.active().is_empty() and P.x + P.w > a1 - 20)
+		print("arena %d (%d..%d): preso com ele de pé=%s · passou depois=%s" % [ix + 1, int(a0), int(a1), preso, livre])
+		if not preso or not livre:
+			f += 1
 	print("FALHAS: ", f)
 	quit()

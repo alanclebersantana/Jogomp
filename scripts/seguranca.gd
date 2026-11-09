@@ -177,6 +177,9 @@ static func tick_dead(g, e: Dictionary) -> void:
 		return
 	s.t += 1
 	if s.vy != 0.0 or s.y < e.base - 12:
+		if g.wall_at(s.x + s.vx + sign(s.vx) * 16, s.y):
+			s.vx = -s.vx * .3
+			s.vr = -s.vr * .5
 		s.x += s.vx
 		s.y += s.vy
 		s.vy += .5
