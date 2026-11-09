@@ -31,30 +31,122 @@ def surdo(v=1.0):
 
 # ----------------------------------------------------------------- menus: bossa do saguão
 def aero_tema():
-    bpm = 96
+    """Bossa do menu, ~2 min sem repetir: introdução, A (flauta), A' (xilofone respondendo),
+    B (clarinete), ponte em Fá (trompa e violinos), A final com a banda toda e um final que volta
+    para o começo. Cada parte troca o instrumento da melodia e o acompanhamento."""
+    bpm = 100
     spb = 60 / bpm
-    chs = 'Dmaj7 Bm7 Em7 A7 Dmaj7 Bm7 Em7 A7 Gmaj7 Gm7 F#m7 B7 Em7 A7 Dmaj7 A7'.split()
-    n = len(chs)
+    partes = [
+        ('intro', 'Dmaj7 Bm7 Em7 A7'),
+        ('A', 'Dmaj7 Bm7 Em7 A7 Dmaj7 Bm7 Gmaj7 A7'),
+        ('A2', 'Dmaj7 Bm7 Em7 A7 Dmaj7 Bm7 Gmaj7 A7'),
+        ('B', 'Gmaj7 Gm7 F#m7 B7 Em7 A7 Dmaj7 D7'),
+        ('C', 'Fmaj7 Dm7 Gm7 C7 Fmaj7 Bbmaj7 Em7 A7'),
+        ('D', 'Bm7 Em7 Gmaj7 F#m7 Bm7 Em7 Gmaj7 A7'),
+        ('B2', 'Gmaj7 Gm7 F#m7 B7 Em7 A7 Dmaj7 D7'),
+        ('A3', 'Dmaj7 Bm7 Em7 A7 Dmaj7 Bm7 Gmaj7 A7'),
+        ('fim', 'Dmaj7 Gmaj7 Em7 A7'),
+    ]
+    seq = [(nome, c) for nome, cs in partes for c in cs.split()]
+    n = len(seq)
     T1, T2, T3 = Track(n * 4 * spb), Track(n * 4 * spb), Track(n * 4 * spb)
-    melodia = mel('F#5:1.5 E5:.5 D5:1 C#5:1 | D5:1.5 B4:.5 A4:2 | G4:.5 B4:.5 D5:.5 F#5:1.5 E5:1 | E5:2 C#5:1 r:1 | '
-                  'A5:1.5 F#5:.5 E5:1 D5:1 | F#5:1.5 D5:.5 B4:2 | G5:.5 F#5:.5 E5:.5 D5:.5 C#5:1 B4:1 | A4:3 r:1 | '
-                  'B4:.5 D5:.5 F#5:.5 A5:1.5 G5:1 | Bb4:.5 D5:.5 F5:.5 A5:1.5 G5:1 | A5:1.5 F#5:.5 E5:1 C#5:1 | D#5:1.5 F#5:.5 A5:2 | '
-                  'G5:1 F#5:.5 E5:.5 B4:1 E5:1 | C#5:1 E5:.5 G5:.5 A5:2 | F#5:3 r:1 | E5:2 C#5:1 A4:1', 4)
-    play_mel(T3, 'flute', melodia, spb, vel=.36, legato=.95, rel=.3)
-    for i, c in enumerate(chs):
+    A = ('A4:1 D5:.5 E5:.5 F#5:1.5 A5:.5 | F#5:1 E5:.5 D5:.5 B4:2 | G4:.5 B4:.5 D5:.5 E5:.5 G5:1 F#5:1 | E5:2 r:1 A4:1 | '
+         'A4:1 D5:.5 E5:.5 F#5:1 A5:1 | B5:1.5 A5:.5 F#5:1 D5:1 | E5:.5 F#5:.5 G5:1 B5:1 A5:1 | A5:1 G5:.5 E5:.5 C#5:2')
+    A2 = ('D5:.5 F#5:.5 A5:1 r:.5 A5:.5 B5:.5 A5:.5 | F#5:.5 D5:.5 B4:1 r:1 D5:.5 E5:.5 | G5:.5 E5:.5 B4:.5 G5:.5 F#5:1 E5:1 | '
+          'C#5:1 E5:1 A5:1.5 r:.5 | D6:.5 C#6:.5 A5:1 F#5:1 A5:1 | B5:.5 A5:.5 F#5:1 D5:1 B4:1 | G5:1 B5:.5 D6:.5 C#6:1 B5:1 | '
+          'A5:2 G5:.5 E5:.5 C#5:1')
+    B = ('B4:1.5 D5:.5 F#5:2 | Bb4:1.5 D5:.5 F5:2 | A4:1 C#5:1 E5:1.5 F#5:.5 | D#5:2 B4:1 F#4:1 | '
+         'G4:1 B4:.5 D5:.5 G5:1 F#5:1 | E5:1 G5:.5 E5:.5 C#5:2 | D5:1 F#5:1 A5:1.5 B5:.5 | A5:1 F#5:.5 E5:.5 C5:2')
+    C = ('C5:1 F5:1 A5:1.5 G5:.5 | F5:1 D5:1 A4:2 | Bb4:1 D5:.5 F5:.5 G5:1.5 F5:.5 | E5:2 C5:1 G4:1 | '
+         'A4:1 C5:.5 F5:.5 A5:1 C6:1 | D6:1.5 A5:.5 F5:1 D5:1 | E5:1 G5:.5 B5:.5 D6:1 B5:1 | C#6:2 A5:1 E5:1')
+    FIM = 'F#5:2 A5:2 | B5:2 G5:1 F#5:1 | E5:2 B4:1 G5:1 | A5:3 r:1'
+    # D: piano sozinho, mais calmo (respiro no meio da música)
+    D = ('D5:1.5 F#5:.5 B5:2 | G5:1 E5:1 B4:2 | D5:.5 E5:.5 F#5:1 B5:1.5 A5:.5 | A5:1 F#5:1 C#5:2 | '
+         'B4:1 D5:1 F#5:1 A5:1 | G5:2 E5:1 B4:1 | F#5:1 A5:.5 B5:.5 D6:1 B5:1 | C#6:1 A5:1 E5:1 C#5:1')
+    B2 = ('D5:1 B4:.5 D5:.5 G5:2 | F5:1 D5:.5 Bb4:.5 G4:2 | E5:1.5 C#5:.5 A4:2 | F#5:1 D#5:1 B4:2 | '
+          'E5:1 G5:.5 B5:.5 E6:1 D6:1 | C#6:1 A5:.5 G5:.5 E5:2 | F#5:1.5 D5:.5 A5:2 | C6:1 A5:.5 F#5:.5 D5:2')
+    bar0 = {}
+    k = 0
+    for nome, cs in partes:
+        bar0[nome] = k
+        k += len(cs.split())
+    t_of = lambda nome: bar0[nome] * 4 * spb
+    # melodias: cada parte com outro instrumento (é isso que tira a sensação de repetição)
+    play_mel(T1, 'flute', mel(A, 4), spb, t0=t_of('A'), vel=.4, legato=.92, rel=.3)
+    play_mel(T1, 'xylophone', mel(A2, 4), spb, t0=t_of('A2'), vel=.34, legato=.5, rel=.4)
+    play_mel(T1, 'flute', mel(A2, 4), spb, t0=t_of('A2'), vel=.12, legato=.9, rel=.2, octave=-1)
+    play_mel(T1, 'clarinet', mel(B, 4), spb, t0=t_of('B'), vel=.38, legato=.95, rel=.25)
+    play_mel(T1, 'french-horn', mel(C, 4), spb, t0=t_of('C'), vel=.34, legato=.95, rel=.3, octave=-1)
+    play_mel(T1, 'violin', mel(C, 4), spb, t0=t_of('C') + 8 * spb, vel=.12, legato=.98, rel=.4)
+    play_mel(T1, 'piano', mel(D, 4), spb, t0=t_of('D'), vel=.32, legato=.95, rel=.7)
+    play_mel(T1, 'guitar-nylon', mel(B2, 4), spb, t0=t_of('B2'), vel=.36, legato=.9, rel=.4)
+    play_mel(T1, 'violin', mel(B2, 4), spb, t0=t_of('B2') + 16 * spb, vel=.1, legato=.98, rel=.5, octave=-1)
+    play_mel(T1, 'flute', mel(A, 4), spb, t0=t_of('A3'), vel=.38, legato=.92, rel=.3)
+    play_mel(T1, 'violin', mel(A, 4), spb, t0=t_of('A3'), vel=.16, legato=.95, rel=.4, octave=-1)
+    play_mel(T1, 'piano', mel(FIM, 4), spb, t0=t_of('fim'), vel=.34, legato=.9, rel=.6)
+    for i, (nome, c) in enumerate(seq):
         t = i * 4 * spb
         b = i * 4
+        ch3 = chord(c, 3)
         r = chord(c, 2)[0]
-        T1.note('contrabass', r, t, 1.4 * spb, .45, .2)
-        T1.note('contrabass', baixo_quinta(r), t + 2 * spb, 1.4 * spb, .4, .2)
-        for (bt, v) in [(0, .22), (1.5, .2), (2.5, .2), (3.5, .18)]:
-            strum(T1, 'guitar-nylon', chord(c, 3), t + bt * spb, spb * .6, v, .2, .012)
-        for k in (0, 2):
-            T2.note('piano', chord(c, 4)[1], t + (k + .5) * spb, spb * .4, .12, .4)
-        hits(T2, p_brush(), [b + k * .5 for k in range(8)], spb, vel=.55)
-        hits(T2, p_rim(), [b + .5, b + 1.5, b + 3], spb, pan=-.2, vel=.35)
-        if i % 4 == 3:
-            hits(T3, p_triangle(), [b + 3], spb, vel=.5, wet=True)
+        if nome == 'D':
+            # só piano e contrabaixo, acordes abertos e longos
+            for kk, m in enumerate([ch3[0], ch3[2], ch3[-1] + 12]):
+                T1.note('piano', m, t + kk * .33 * spb, 3.5 * spb, .13, .9)
+            T1.note('contrabass', r, t, 3.8 * spb, .3, .4)
+            continue
+        if nome == 'B2':
+            for (bt, v) in [(0, .14), (2, .12)]:
+                strum(T1, 'harp', chord(c, 3), t + bt * spb, spb * 1.8, v, .4, .03)
+            T1.note('contrabass', r, t, 1.8 * spb, .34, .3)
+            T1.note('contrabass', baixo_quinta(r), t + 2 * spb, 1.8 * spb, .3, .3)
+            hits(T1, p_brush(), [b + kk for kk in range(4)], spb, vel=.25)
+            continue
+        if nome in ('intro', 'fim'):
+            # piano dedilhado e baixo longo, sem bateria
+            for kk, m in enumerate([ch3[0], ch3[1] + 12, ch3[2] + 12, ch3[-1] + 12] * 2):
+                T1.note('piano', m, t + kk * .5 * spb, spb * 1.2, .2 if kk % 4 else .26, .6)
+            T1.note('contrabass', r, t, 3.6 * spb, .36, .3)
+            if nome == 'fim' and i == n - 1:
+                hits(T1, p_triangle(), [b + 3], spb, vel=.5, wet=True)
+            continue
+        # baixo: tônica e quinta da bossa, caminhando na parte B
+        if nome == 'B':
+            for bt, m in [(0, r), (1, r + 7), (2, r + 12), (3, r + 7)]:
+                T1.note('contrabass', m, t + bt * spb, .9 * spb, .38, .1)
+        else:
+            T1.note('contrabass', r, t, 1.4 * spb, .42, .2)
+            T1.note('contrabass', baixo_quinta(r), t + 2 * spb, 1.4 * spb, .38, .2)
+        if nome in ('A', 'A3', 'A2'):
+            for (bt, v) in [(0, .2), (1.5, .18), (2.5, .18), (3.5, .16)]:
+                strum(T1, 'guitar-nylon', chord(c, 3), t + bt * spb, spb * .6, v, .2, .012)
+            hits(T1, p_brush(), [b + kk * .5 for kk in range(8)], spb, vel=.45)
+            hits(T1, p_rim(), [b + .5, b + 1.5, b + 3], spb, pan=-.2, vel=.28)
+        if nome in ('A2', 'A3', 'B'):
+            for kk in (0, 2):
+                T1.note('piano', chord(c, 4)[1], t + (kk + .5) * spb, spb * .4, .12, .4)
+                T1.note('piano', chord(c, 4)[-1], t + (kk + .5) * spb, spb * .4, .1, .4)
+        if nome == 'A3':
+            hits(T1, p_shaker(), [b + kk * .5 for kk in range(8)], spb, pan=.3, vel=.3)
+            hits(T1, p_kick(), [b, b + 2.5], spb, vel=.32)
+        if nome == 'B':
+            for (bt, v) in [(0, .16), (2, .14)]:
+                strum(T1, 'guitar-nylon', chord(c, 3), t + bt * spb, spb * 1.5, v, .3, .02)
+            hits(T1, p_rim(), [b + 1, b + 2.5, b + 3.5], spb, pan=.2, vel=.3)
+            hits(T1, p_brush(), [b + kk for kk in range(4)], spb, vel=.35)
+        if nome == 'C':
+            # violinos sustentando e harpa em arpejo
+            for m in chord(c, 4)[1:]:
+                T1.note('violin', m, t, 3.9 * spb, .07, .8)
+            for kk, m in enumerate(chord(c, 3) + [chord(c, 3)[0] + 12]):
+                T1.note('harp', m, t + kk * .5 * spb, 2 * spb, .2, .8)
+                T1.note('harp', m + 12, t + (kk + 4) * .5 * spb, 2 * spb, .16, .8)
+            hits(T1, p_kick(), [b], spb, vel=.25)
+        if i % 16 == 15:
+            hits(T1, p_triangle(), [b + 3], spb, vel=.3, wet=True)
+    # camadas 2 e 3 quase vazias: no menu toca a mixagem inteira (ver ACTION no audio.gd)
+    T2.note('piano', P('D6'), 0, .1, .0001, .1)
+    T3.note('piano', P('D6'), 0, .1, .0001, .1)
     return render_stems([T1, T2, T3], .3, 2.0)
 
 

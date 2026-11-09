@@ -174,7 +174,7 @@ func fase_1_1() -> void:
 	S("porta subiu", until({}, func(): return g.M.GATES.filter(func(gt): return gt.get("id", "") == "seg1")[0].open >= 1.0, 300))
 	S("tapume 3", crawl(10675))
 	# mezanino
-	S("escada de serviço", walk_to(10915))
+	S("escada de serviço", walk_to(10895))
 	S("sobe", climb_to("U", func(): return P.ladder == null and P.onGround and P.y < 160, 500))
 	S("passarela", walk_to(11585))
 	press("J")
@@ -403,7 +403,43 @@ func luta_fiscal_lim(lim: int):
 			return true
 		var set := {}
 		var cx: float = px()
+		# malas caindo: sai de baixo da sombra; malas rolando: pula
+		var sombra := false
+		var fuga := cx
+		for o in b.get("objs", []):
+			if o.k == "cai" and int(o.t) > 0 and int(o.t) < 50 and absf(float(o.x) - cx) < 50.0:
+				sombra = true
+				fuga = float(o.x) + (70.0 if cx >= float(o.x) else -70.0)
+		var mala_perto := false
+		for o in b.get("objs", []):
+			if o.k == "rola" and int(o.wait) == 0 and float(o.x) > cx and float(o.x) - cx < 95.0:
+				mala_perto = true
 		match str(b.st):
+			"persegue", "painel_chao", "curto_chao":
+				var fx: float = float(b.x)
+				if str(b.st) == "painel_chao":
+					var pan2: float = float(b.pan_x) + 46.0
+					if absf(cx - pan2) > 6.0:
+						set = {"R": true} if pan2 > cx else {"L": true}
+					elif P.face > 0:
+						set = {"L": true}
+					elif golpeou <= 0:
+						press("G")
+						golpeou = 30
+				elif str(b.st) == "persegue":
+					# corre para o lado oposto ao Fiscal; encurralado, pula por cima dele
+					var lado: float = float(b.x0) + 60.0 if fx > (float(b.x0) + float(b.x1) - 190.0) / 2.0 else float(b.x1) - 260.0
+					set = {"R": true} if lado > cx else {"L": true}
+				# encostou: esquiva atravessando o Fiscal (a esquiva deixa invencível um instante)
+				if absf(fx - cx) < 110.0 and P.onGround and str(b.st) != "curto_chao" and g.M.dodge_t == 0:
+					# atravessa o Fiscal se houver espaço do outro lado; senão foge para o lado livre
+					var dd: String = "R" if fx > cx else "L"
+					if dd == "R" and fx > float(b.x1) - 260.0:
+						dd = "L"
+					elif dd == "L" and fx < float(b.x0) + 90.0:
+						dd = "R"
+					press("F")
+					set = {"F": true, dd: true}
 			"lasers":
 				var bt: int = int(b.get("bt", 0))
 				var warn: int = int(b.get("warn", 50))
@@ -439,6 +475,24 @@ func luta_fiscal_lim(lim: int):
 					set["J"] = true
 				if k == "alto" and bt > warn - 12 and bt < warn + on + 6:
 					set = {"S": true}
+				if k == "piso":
+					# vai para a faixa apagada mais perto
+					var alvo2 := cx
+					var melhor2 := 1e9
+					var x00: float = float(b.x0)
+					var nf: int = int((float(b.x1) - 190.0 - x00) / 120.0)
+					for i in nf:
+						var c2: float = x00 + i * 120.0 + 60.0
+						var acesa := false
+						for fl in b.floor:
+							if c2 > float(fl.x) and c2 < float(fl.x) + float(fl.w):
+								acesa = true
+						if not acesa and absf(c2 - cx) < melhor2:
+							melhor2 = absf(c2 - cx)
+							alvo2 = c2
+					set = {}
+					if absf(cx - alvo2) > 10.0:
+						set = {"R": true} if alvo2 > cx else {"L": true}
 			"painel":
 				var pan: float = float(b.pan_x) + 46.0
 				if absf(cx - pan) > 6.0:
@@ -456,10 +510,19 @@ func luta_fiscal_lim(lim: int):
 					set = {"R": true} if b.x > cx else {"L": true}
 				else:
 					set = {"J": true, ("R" if b.x > cx else "L"): true} if absf(cx - float(b.x)) > 6.0 else {"J": true}
+		if sombra and not str(b.st) in ["tonto"]:
+			set = {"R": true} if fuga > cx else {"L": true}
+		if mala_perto and P.onGround:
+			press("J")
+			set["J"] = true
+		elif mala_perto:
+			set["J"] = true
 		golpeou -= 1
+		if it % 150 == 0 and str(b.st) in ["persegue", "painel_chao", "curto_chao", "tonto"]:
+			print("  .. st=%s t=%d milis=%d fiscal=%d painel=%d set=%s hp=%d wlock=%s vx=%.1f act=%s chao=%s" % [b.st, int(b.t), int(cx), int(b.x), int(b.get("pan_x", 0)), str(set), int(b.hp), str(P.get("wlock")), P.vx, str(P.act), str(P.onGround)])
 		frame(set)
 		if P.hp < hp_ant:
-			print("  machucou: st=%s k=%s bt=%s x=%d y=%d h=%d crouch=%s" % [g.X.BOSS.st, g.X.BOSS.get("beam_k", ""), g.X.BOSS.get("bt", 0), int(px()), int(P.y), int(P.h), P.crouch])
+			print("  machucou: st=%s k=%s bt=%s x=%d y=%d h=%d crouch=%s fiscal=%d objs=%s dodge=%d" % [g.X.BOSS.st, g.X.BOSS.get("beam_k", ""), g.X.BOSS.get("bt", 0), int(px()), int(P.y), int(P.h), P.crouch, int(g.X.BOSS.x), str(g.X.BOSS.get("objs", []).map(func(o): return [o.k, int(o.x), int(o.get("t", 0))])), g.M.dodge_t])
 		hp_ant = P.hp
 	return "hp=%d st=%s" % [g.X.BOSS.hp, g.X.BOSS.st]
 
@@ -504,6 +567,21 @@ func fase_chefe() -> void:
 	var r = until({"R": true}, func(): return not g.running, 300)
 	S("saída", r is String and r == "state")
 
+## nenhum capanga patrulha a menos de 300 px de uma passagem de rolar/se arrastar (abaixado o Milis
+## não ataca nem se defende)
+func capangas_longe_dos_vaos():
+	var ruins := []
+	for e in g.EN:
+		var r0: float = e.x
+		var r1: float = e.x
+		if e.has("r") and e.r is Array and e.r.size() == 2:
+			r0 = float(e.r[0])
+			r1 = float(e.r[1])
+		for c in g.X.CRAWL:
+			if r0 - 300.0 < float(c.x) + float(c.w) and r1 + 300.0 > float(c.x):
+				ruins.append("%s@%d perto do vão %d" % [e.k, int(e.x), int(c.x)])
+	return true if ruins.is_empty() else ", ".join(ruins)
+
 func _initialize() -> void:
 	var args := OS.get_cmdline_user_args()
 	var com := args.has("inimigos")
@@ -516,6 +594,7 @@ func _initialize() -> void:
 	for f in fases:
 		carregar(f - 1, com)
 		log_lines.append("== " + nome_fase)
+		S("capangas longe das passagens baixas", capangas_longe_dos_vaos())
 		match f:
 			1:
 				fase_1_1()

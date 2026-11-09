@@ -14,6 +14,7 @@ assets/data/milhas.json), que o Spr carrega por cima dos nomes antigos.
 Rodar:  python3 tools/make_arte.py   (depois: python3 tools/make_sil.py e godot --import)
 """
 import json, os, sys
+from PIL import ImageEnhance
 from PIL import Image, ImageOps
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from recortar import abrir_sem_verde, componentes, quadros
@@ -525,11 +526,14 @@ def passageiros():
     nomes = ["exec", "cel", "turista", "pai", "mae", "idosa", "dorme", "menino", "teen", "susto", "comissaria", "piloto"]
     for i, n in enumerate(nomes):
         solta("p_pax_" + n, p[i], 200)
-        # versão "de cenário": duas cores azuladas (azul-marinho nas sombras, azul-claro nas luzes),
-        # para os passageiros nunca serem confundidos com personagens ou capangas
+        # versão "de cenário": as mesmas cores, só mais apagadas (menos saturação, um pouco mais claras
+        # e com menos contraste) — continuam coloridos, mas nunca chamam mais atenção que os capangas
         q = NOVO["p_pax_" + n][0]
-        lum = ImageOps.autocontrast(q.convert("L"), cutoff=1)
-        duo = ImageOps.colorize(lum, "#26375c", "#d6e2f5", mid="#7d93bd").convert("RGBA")
+        rgb = q.convert("RGB")
+        rgb = ImageEnhance.Color(rgb).enhance(.45)
+        rgb = ImageEnhance.Contrast(rgb).enhance(.82)
+        rgb = Image.blend(rgb, Image.new("RGB", rgb.size, (205, 212, 225)), .18)
+        duo = rgb.convert("RGBA")
         duo.putalpha(q.getchannel("A"))
         NOVO["p_paxbg_" + n] = (duo, NOVO["p_pax_" + n][1], NOVO["p_pax_" + n][2])
 

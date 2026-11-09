@@ -70,7 +70,7 @@ func load_level() -> void:
 			continue
 		var bot: float = so.y + so.h
 		var surf: float = g._rest_y(so.x + so.w / 2, bot, 40)
-		var stand_h: float = 26.0 if (L.get("isis") or (L.has("isisPart") and so.x >= float(L.isisPart.x0))) else 34.0
+		var stand_h: float = 26.0 if (L.get("isis") or (L.has("isisPart") and so.x >= float(L.isisPart.x0))) else (44.0 if L.get("theme", "") == "aeroporto" else 34.0)
 		if surf > 0 and surf - bot >= 16 and surf - bot < stand_h:
 			CRAWL.append({"x": so.x, "w": so.w, "top": bot, "y": surf})
 	GHOST = []

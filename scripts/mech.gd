@@ -11,6 +11,16 @@ var drawing_tome := false
 var swing_t := 0
 var swing_hit := {}
 var hold_g := 0
+# luta do aeroporto: combo do bastão (3 golpes, o 3º é um giro), chute (rasteira no chão, voadora no
+# ar) e defesa (segurar = escudo de energia; apertar na hora certa = aparo; com direção = esquiva)
+var combo_n := 0
+var combo_wait := 0
+var kick_t := 0
+var kick_kind := ""
+var kick_hit := {}
+var parry_t := 0
+var dodge_t := 0
+var combo_q := false   # golpe apertado cedo demais: guarda e solta assim que der
 var PLATES: Array = []
 var GATES: Array = []
 var CRUMB: Array = []
@@ -167,6 +177,9 @@ func pre() -> void:
 		return
 	if swing_t > 0:
 		swing_t -= 1
+	if g.L.get("theme", "") == "aeroporto":
+		_fight(p)
+		return
 	if g.TR.pick_out() and g.pressed("G"):
 		g.TR.recall_pick()
 	elif g.TR.want_throw() and swing_t == 0 and g.pressed("G"):
@@ -187,6 +200,165 @@ func pre() -> void:
 	p.guard = hold_g > 14 and swing_t == 0 and not p.ladder and not p.vine and not p.swim and p.dyingT == 0
 	if swing_t >= 8 and swing_t <= 16:
 		_swing_hits()
+
+## botões de luta do aeroporto (G golpe, K chute, F defesa)
+func _fight(p: Dictionary) -> void:
+	if combo_wait > 0:
+		combo_wait -= 1
+		if combo_wait == 0:
+			combo_n = 0
+	if parry_t > 0:
+		parry_t -= 1
+	var busy: bool = p.ladder or p.vine or p.get("bar") or p.swim or p.dyingT > 0
+	# --- defesa / esquiva
+	if g.pressed("F") and not busy:
+		var dir: int = 1 if g.kd("R") else (-1 if g.kd("L") else 0)
+		if dir != 0 and p.onGround and dodge_t == 0:
+			dodge_t = 14
+			p.face = dir
+			p.vx = dir * 3.0
+			p.iframe = max(int(p.iframe), 18)
+			p.wlock = 12
+			p.act = "dodge"
+			p.actT = 14
+			Audio.play("slide", -6, 1.15)
+			for k in 6:
+				g.PARTS.append({"x": p.x + p.w / 2 - dir * 10, "y": p.y + p.h - 3, "vx": -dir * randf_range(1, 2.5), "vy": -randf_range(.2, 1), "life": 16, "col": Color(.82, .84, .88, .7)})
+		else:
+			parry_t = 9
+	if dodge_t > 0:
+		dodge_t -= 1
+		# a física limita a velocidade de andar: a esquiva empurra o corpo direto (rápida e curta)
+		g.move_x(p.face * (6.5 if dodge_t > 4 else 2.0))
+		p.vx = p.face * 3.0
+	p.guard = g.kd("F") and dodge_t == 0 and swing_t == 0 and kick_t == 0 and not busy
+	# --- golpe: combo de 3 (o 3º gira e arremessa)
+	if g.pressed("G"):
+		combo_q = true
+	if combo_q and swing_t > 9 and combo_n in [1, 2]:
+		pass   # espera o golpe atual chegar no ponto de emendar
+	elif combo_q and not busy and not p.crouch and kick_t == 0 and dodge_t == 0:
+		combo_q = false
+		if swing_t == 0 or (swing_t <= 9 and combo_n in [1, 2]):
+			combo_n = combo_n + 1 if (combo_wait > 0 and combo_n < 3) else 1
+			swing_hit = {}
+			if combo_n == 3:
+				swing_t = 26
+				p.act = "spin"
+				p.actT = 26
+				p.vx += p.face * 2.0
+				Audio.play("slide", -5, 1.0)
+			else:
+				swing_t = 18
+				p.act = "swing" if combo_n == 1 else "swing2"
+				p.actT = 18
+				p.vx += p.face * 1.2
+				Audio.play("slide", -8, randf_range(1.3, 1.45) + combo_n * .08)
+			combo_wait = swing_t + 16
+	if swing_t > 0:
+		if p.act == "spin":
+			if swing_t >= 4 and swing_t <= 22:
+				_attack_hits(_spin_box(), "spin")
+		elif swing_t >= 6 and swing_t <= 14:
+			_attack_hits(swing_box(), "hit")
+			if swing_t == 10:
+				_swing_world(swing_box())
+	# --- chute: rasteira no chão, voadora no ar
+	if g.pressed("K") and not busy and kick_t == 0 and swing_t == 0 and dodge_t == 0:
+		kick_hit = {}
+		if p.onGround:
+			kick_kind = "sweep"
+			kick_t = 20
+			p.vx = p.face * 6.0
+			p.wlock = 14
+			p.act = "sweep"
+			p.actT = 20
+			Audio.play("slide", -6, .95)
+		else:
+			kick_kind = "fly"
+			kick_t = 60
+			p.vx = p.face * 7.5
+			p.vy = max(float(p.vy), 2.0)
+			p.wlock = 60
+			p.act = "flykick"
+			p.actT = 60
+			Audio.play("slide", -5, .8)
+	if kick_t > 0:
+		kick_t -= 1
+		var cx: float = p.x + p.w / 2
+		var hb: Dictionary
+		# (empurrão direto: a física limitaria a velocidade de andar)
+		if kick_kind == "sweep" and kick_t > 6:
+			g.move_x(p.face * 2.6)
+		elif kick_kind == "fly" and not p.onGround:
+			g.move_x(p.face * 3.2)
+		if kick_kind == "sweep":
+			hb = g.R(cx + (2.0 if p.face > 0 else -66.0), p.y + p.h - 24, 64, 24)
+			if kick_t <= 16 and kick_t >= 4:
+				_attack_hits(hb, "kick")
+		else:
+			hb = g.R(cx + (0.0 if p.face > 0 else -56.0), p.y + p.h * .35, 56, p.h * .65 + 8)
+			_attack_hits(hb, "kick")
+			if p.onGround and kick_t < 58:
+				# pousou: acaba a voadora
+				kick_t = 0
+				p.wlock = 0
+				p.actT = 0
+		if kick_t == 0:
+			p.wlock = min(int(p.wlock), 0) if kick_kind == "fly" else p.wlock
+
+func _spin_box() -> Dictionary:
+	var p: Dictionary = g.player
+	var cx: float = p.x + p.w / 2
+	return g.R(cx - 70, p.y - 10, 140, p.h + 16)
+
+## acerta capangas numa caixa; "spin" e "kick" arremessam longe
+func _attack_hits(hb: Dictionary, how: String) -> void:
+	var p: Dictionary = g.player
+	var book: Dictionary = kick_hit if how == "kick" else swing_hit
+	for i in g.EN.size():
+		var e: Dictionary = g.EN[i]
+		if e.dead or book.has(i):
+			continue
+		if Game.hit(hb, g.ebox(e)):
+			book[i] = 1
+			var dir: float = 1.0 if e.x > p.x + p.w / 2 else -1.0
+			g.kill_enemy(e, "hit")
+			# empurrão com peso: o capanga é jogado para trás (no giro e no chute, bem mais longe)
+			var push: float = 70.0 if how in ["spin", "kick"] else 30.0
+			if not e.dead:
+				e.x += dir * push * .5
+			else:
+				# derrubado: voa girando para longe (no giro e no chute, bem mais longe)
+				e.dk = "flip"
+				e.dvx = dir * (9.0 if how in ["spin", "kick"] else 5.0)
+				e.dvy = -7.0 if how != "kick" else -5.0
+				e.ddx = float(e.get("ddx", 0.0))
+				e.ddy = float(e.get("ddy", 0.0))
+			Polish.impact(e.x, e.y - 60)
+			g.hit_stop = max(int(g.hit_stop), 5 if how in ["spin", "kick"] else 3)
+			g.shake = max(g.shake, 5 if how in ["spin", "kick"] else 3)
+			if how == "kick" and kick_kind == "fly":
+				# voadora acertou: quica para trás
+				p.vy = -6.5
+				p.vx = -p.face * 3.0
+				kick_t = 0
+				p.wlock = 0
+				p.actT = 0
+	FiscalBoss.swing(g, g.X, hb)
+	for c in g.CR:
+		if not c.dead and c.t == "break" and not book.has(c) and Game.hit(hb, c):
+			book[c] = 1
+			g.break_crate(c)
+
+## o resto do mundo que o bastão alcança (pedras, armadilhas, objetos)
+func _swing_world(hb: Dictionary) -> void:
+	g.PR.swing_hits(hb)
+	g.TR.swing_hits(hb)
+	g.K.swing_hits(hb)
+	for c in g.X.CRACKS:
+		if not g.X.broken.has(c.id) and Game.hit(hb, c):
+			g.X.break_crack(c, true)
 
 func swing_box() -> Dictionary:
 	var p: Dictionary = g.player
@@ -262,9 +434,21 @@ func on_block(from_x: float) -> void:
 	Audio.play("unlock", -6)
 	Audio.vib(25)
 	g.burst(p.x + p.w / 2 + p.face * 16, p.y + 12, 10, Color("#ffe9a0"))
+	var parry: bool = parry_t > 0
 	for e in g.EN:
-		if not e.dead and abs(e.x - from_x) < 40:
-			e.stun = 70
+		if not e.dead and abs(e.x - from_x) < (90 if parry else 40):
+			e.stun = 110 if parry else 70
+			if parry:
+				# aparo: o capanga fica tonto e é jogado para trás
+				e.dizzyT = 110
+				e.charge = false
+				e.x += (1.0 if e.x > p.x else -1.0) * 40.0
+	if parry:
+		parry_t = 0
+		g.hit_stop = max(int(g.hit_stop), 7)
+		Audio.play("clue", -6, 1.6)
+		Polish.impact(p.x + p.w / 2 + p.face * 24, p.y + p.h * .4)
+		g.burst(p.x + p.w / 2 + p.face * 22, p.y + p.h * .4, 16, Color(.6, .95, 1))
 
 # ---------- ações do Pipoca (✦) ----------
 func dog_action() -> void:

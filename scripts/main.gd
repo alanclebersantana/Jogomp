@@ -42,7 +42,7 @@ var last_touch_ms := -9999   # último toque na tela (o gesto de "voltar" da bor
 const KEYMAP := {
 	KEY_LEFT: "L", KEY_A: "L", KEY_RIGHT: "R", KEY_D: "R", KEY_UP: "U", KEY_W: "U", KEY_DOWN: "S", KEY_S: "S",
 	KEY_SPACE: "J", KEY_Z: "J", KEY_K: "J", KEY_C: "P", KEY_F: "A", KEY_E: "A", KEY_X: "A", KEY_V: "A", KEY_R: "B",
-	KEY_G: "G", KEY_J: "G", KEY_Q: "D",
+	KEY_G: "G", KEY_J: "G", KEY_Q: "D", KEY_H: "K", KEY_L: "K", KEY_Y: "F", KEY_SHIFT: "F",
 }
 const GOLD := Color("#ffd84a")
 const INK := Color("#f0e4c8")
@@ -69,7 +69,7 @@ func _ready() -> void:
 	# chegar nela recomeça do padrão novo uma vez só (senão o arrasto antigo empurraria ainda mais)
 	if not Save.getv("opt", "btnpos2", false):
 		Save.setv("opt", "btnpos2", true)
-		for k in ["J", "A", "G", "bag", "dog", "stick"]:
+		for k in ["J", "A", "G", "K", "F", "bag", "dog", "stick"]:
 			Save.setv("opt", "pos_" + k, [0, 0])
 	# o analógico de madeira passa a ser o controle padrão (uma vez só; depois vale a escolha nas opções)
 	if not Save.getv("opt", "stick_an1", false):
@@ -385,6 +385,8 @@ func _process(_d: float) -> void:
 				tb.texture_normal = want_t
 			# a Isis não tem picareta (e o botão some junto com os outros na pausa e nas cenas)
 			tb.visible = top_buttons.visible and not (game.player and game.player.get("isis"))
+		elif tb.get_meta("k") in ["K", "F"]:
+			tb.visible = top_buttons.visible and _fight_btns()
 	_touch_squash(_d)
 	if hint_btn:
 		hint_btn.visible = top_buttons.visible and hud.can_replay()
@@ -408,7 +410,12 @@ func _process(_d: float) -> void:
 		# câmera chega mais perto nas cenas calmas e abre nas de ação
 		# celular em pé: a câmera mostra uns 520 px de largura do mundo
 		var retrato: float = clampf(vs.x / 520.0, .72, 1.1) if vs.y > vs.x else 1.0
-		var zt: float = _zoom_target() * retrato * (1.12 if game.slowmo > 0 else 1.0)
+		# aeroporto: câmera 1,25x mais perto (o Milis e a ação aparecem maiores)
+		var az: float = 1.25 if game.L.get("theme", "") == "aeroporto" else 1.0
+		var zt: float = _zoom_target() * retrato * az * (1.12 if game.slowmo > 0 else 1.0)
+		# luta com o Fiscal: abre o bastante para a arena inteira caber à esquerda dos botões
+		if az > 1.0 and game.X and game.X.boss_active() and game.X.BOSS.get("skin", "") == "fiscal":
+			zt = vs.x / 1400.0
 		# abrir é mais rápido que fechar (nada fica cortado por muito tempo)
 		cam_zoom = lerpf(cam_zoom, zt, .04 if zt < cam_zoom else .02)
 		game.camera.zoom = Vector2(cam_zoom, cam_zoom)
@@ -467,7 +474,7 @@ func _process(_d: float) -> void:
 			top_buttons.visible = not in_cine
 			stick.visible = not in_cine
 			for b in touch:
-				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis"))
+				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis")) and (_fight_btns() or not b.get_meta("k") in ["K", "F"])
 			if in_cine:
 				stick._release()
 	# desenho liso entre passos: chefes, Pipoca, plataformas... (volta ao normal no frame_pre_draw)
@@ -660,7 +667,7 @@ func _input(e: InputEvent) -> void:
 		if _joy_menu_button(e):
 			get_viewport().set_input_as_handled()
 			return
-		var m := {JOY_BUTTON_A: "J", JOY_BUTTON_X: "A", JOY_BUTTON_B: "P", JOY_BUTTON_DPAD_LEFT: "L", JOY_BUTTON_DPAD_RIGHT: "R", JOY_BUTTON_DPAD_UP: "U", JOY_BUTTON_DPAD_DOWN: "S", JOY_BUTTON_BACK: "B", JOY_BUTTON_RIGHT_SHOULDER: "G", JOY_BUTTON_LEFT_SHOULDER: "D"}
+		var m := {JOY_BUTTON_A: "J", JOY_BUTTON_X: "A", JOY_BUTTON_B: "P", JOY_BUTTON_DPAD_LEFT: "L", JOY_BUTTON_DPAD_RIGHT: "R", JOY_BUTTON_DPAD_UP: "U", JOY_BUTTON_DPAD_DOWN: "S", JOY_BUTTON_BACK: "B", JOY_BUTTON_RIGHT_SHOULDER: "G", JOY_BUTTON_LEFT_SHOULDER: "D", JOY_BUTTON_Y: "K", JOY_BUTTON_LEFT_STICK: "F"}
 		if e.button_index == JOY_BUTTON_Y and e.pressed:
 			if state == S.PLAY:
 				open_bag()
@@ -896,7 +903,8 @@ func _make_touch() -> void:
 	stick.mode = Save.getv("opt", "stick", "analog")
 	stick.changed.connect(_on_stick)
 	hud_layer.add_child(stick)
-	var defs = [["J", "btn_jump", 112], ["A", "btn_use", 90], ["G", "btn_golpe", 86]]
+	# (K chute e F defesa: botões de luta do aeroporto)
+	var defs = [["J", "btn_jump", 112], ["A", "btn_use", 90], ["G", "btn_golpe", 86], ["K", "btn_chute", 80], ["F", "btn_defesa", 80]]
 	for d in defs:
 		var b := TouchScreenButton.new()
 		var t: Texture2D = load("res://assets/ui/%s.png" % d[1])
@@ -965,13 +973,20 @@ func apply_controls() -> void:
 		b.modulate = Color(1, 1, 1, op)
 	_layout()
 
+## botões de chute e defesa: só nas fases do aeroporto
+func _fight_btns() -> bool:
+	return game != null and game.L != null and game.L.get("theme", "") == "aeroporto"
+
 func _layout() -> void:
 	var vs := get_viewport().get_visible_rect().size
 	var left: bool = Save.getv("opt", "left", false)
 	var js := 112.0
+	var fsz := 80.0
 	for b in touch:
 		if b.get_meta("k") == "J":
 			js = float(b.get_meta("base_sc", b.scale.x)) * b.texture_normal.get_width()
+		if b.get_meta("k") == "F":
+			fsz = float(b.get_meta("base_sc", b.scale.x)) * b.texture_normal.get_width()
 	for b in touch:
 		var k: String = b.get_meta("k")
 		var sz: float = float(b.get_meta("base_sc", b.scale.x)) * b.texture_normal.get_width()
@@ -979,8 +994,11 @@ func _layout() -> void:
 		match k:
 			# (distância da borda medida na tela que o Alan aprovou: os botões mais para dentro)
 			"J": pos = Vector2(vs.x - 52 - sz, vs.y - 37 - sz)
-			"A": pos = Vector2(vs.x - 52 - js - 30 - sz, vs.y - 55 - sz)
+			"A": pos = Vector2(vs.x - 52 - js - 30 - sz - (fsz + 22.0 if _fight_btns() else 0.0), vs.y - 55 - sz)
 			"G": pos = Vector2(vs.x - 58 - (js + sz) / 2, vs.y - 39 - js - 18 - sz)
+			# luta: DEFESA à esquerda do pulo, CHUTE à esquerda do golpe (o ✋ vai para a esquerda da defesa)
+			"F": pos = Vector2(vs.x - 52 - js - 24 - sz, vs.y - 40 - sz)
+			"K": pos = Vector2(vs.x - 58 - (js + sz) / 2 - sz - 26, vs.y - 39 - js - 18 - sz + sz * .55)
 		if left:
 			pos.x = vs.x - pos.x - sz
 		var off: Array = Save.getv("opt", "pos_" + k, [0, 0])
@@ -1609,6 +1627,7 @@ func start_level(cont: bool, lvl: int = 0) -> void:
 		Save.clear_run()
 		game.load_level(lvl)
 		Save.run_secs = 0.0
+	_layout()   # botões de luta (chute e defesa) aparecem no aeroporto
 	# gráficos sempre no máximo (a opção "Leves" e a redução automática saíram)
 	game.low_fx = false
 	hud.reset_run()

@@ -31,7 +31,7 @@ func _go(com: bool, smart: bool) -> String:
 					press("J")
 					d["J"] = true
 					jh = 14
-				if o.k == "low" and ahead > -float(o.w) - 10 and ahead < 46:
+				if o.k == "low" and ahead > -float(o.w) - P.w - 8 and ahead < 46:
 					d["S"] = true
 		frame(d)
 		if not g.CART.on:

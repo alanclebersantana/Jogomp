@@ -11,7 +11,7 @@ var fails := 0
 var rests: Array = []
 
 func frame(set: Dictionary = {}) -> void:
-	for k in ["L", "R", "J", "P", "S", "U", "A"]:
+	for k in ["L", "R", "J", "P", "S", "U", "A", "G", "K", "F"]:
 		g.keys[k] = false
 	for k in set:
 		g.keys[k] = set[k]

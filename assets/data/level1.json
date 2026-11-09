@@ -565,21 +565,21 @@
    "x": 2490,
    "y": -620,
    "w": 120,
-   "h": 1094
+   "h": 1086
   },
   {
    "t": "tapume",
    "x": 7360,
    "y": -620,
    "w": 120,
-   "h": 1094
+   "h": 1086
   },
   {
    "t": "tapume",
    "x": 10530,
    "y": -620,
    "w": 120,
-   "h": 1094
+   "h": 1086
   }
  ],
  "swamp": [],
@@ -594,7 +594,7 @@
    "kind": "ladder"
   },
   {
-   "x": 10900,
+   "x": 10880,
    "y": 160,
    "w": 30,
    "h": 340,
@@ -730,11 +730,11 @@
  "enemies": [
   {
    "k": "janitor",
-   "x": 6900,
+   "x": 6775,
    "y": 500,
    "r": [
-    6650,
-    7150
+    6550,
+    7000
    ]
   },
   {
@@ -757,11 +757,11 @@
   },
   {
    "k": "frog",
-   "x": 2670,
+   "x": 2065,
    "y": 500,
    "r": [
-    2580,
-    2760
+    1950,
+    2180
    ]
   },
   {
@@ -794,11 +794,11 @@
   },
   {
    "k": "boar",
-   "x": 10000,
+   "x": 9975,
    "y": 500,
    "r": [
-    9800,
-    10300
+    9750,
+    10200
    ]
   },
   {
@@ -1619,7 +1619,7 @@
   {
    "a": 14600,
    "b": 15600,
-   "t": "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique num vão da grade. Painel piscando? Bastão nele!",
+   "t": "Fiscal: pule malas e lasers baixos, abaixe (↓) nos altos, saia das faixas acesas do chão. Painel piscando? Corra até ele e bata!",
    "boss": 1
   },
   {
@@ -2093,7 +2093,7 @@
    "x": 14280,
    "y": 500,
    "id": "barros2",
-   "pose": "cochicha",
+   "pose": "parado",
    "lines": [
     [
      "SEU BARROS",

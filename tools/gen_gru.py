@@ -319,7 +319,7 @@ atendente(1040, 410, "barros1", [
 atendente(14280, GY, "barros2", [
     ["SEU BARROS", "Psiu! Você de novo? A segurança está estranha hoje. Aquele fiscal da cabine não é daqui, não...", "barros"],
     ["MILIS", "Seu Barros? Como o senhor chegou aqui antes de mim?", "tome"],
-    ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]], "cochicha")
+    ["SEU BARROS", "Atalhos de quem trabalha no aeroporto há muitos anos. Boa sorte, robozinho!", "barros"]])   # (pose "cochicha" saiu: a arte tinha um braço a mais)
 
 # ---------- vida do aeroporto na 1-1 (só cenário) ----------
 # saguão
@@ -533,7 +533,7 @@ totem(10200)
 L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
 chao(10600, 11400)
 # parede de grade de manutenção para escalar até a passarela (longe de qualquer saída de vento)
-escada(10900, 160, kind="net")
+escada(10880, 160, kind="net")
 dica(10820, 10960, "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).")
 passarela(10930, 11600, 160, 200)   # passarela de serviço
 milhas(10960, 11560, 130, 50)
@@ -580,19 +580,25 @@ L["boss"] = {"x0": FZ0, "x1": FZ1, "trig": FZ0 + 160, "spawn": FZ1 - 120, "hp": 
              "item": [(FZ0 + FZ1) // 2, 470], "skin": "fiscal", "open": "fiscal_porta"}
 L["boss_song"] = "fiscal"
 S.append({"t": "pgate", "x": FZ1 - 50, "y": 210, "w": 80, "h": 120, "id": "fiscal_porta"})
-dica(FZ0, FZ1, "Lasers do Fiscal: pule os baixos, abaixe (↓) nos altos, fique num vão da grade. Painel piscando? Bastão nele!", boss=1)
+dica(FZ0, FZ1, "Fiscal: pule malas e lasers baixos, abaixe (↓) nos altos, saia das faixas acesas do chão. Painel piscando? Corra até ele e bata!", boss=1)
 milhas(15700, 15880, 470, 45)
 fim(15900)
 L["spanX"] = 16000
 # tapumes de obra: parede de tábuas até o teto com um vão embaixo — só passa rolando (corra e abaixe)
 # ou se arrastando abaixado
 for tx in (2490, 7360, 10530):
-    bloco(tx, tx + 120, -620, GY - 26, t="tapume")
+    bloco(tx, tx + 120, -620, GY - 34, t="tapume")
 dica(2380, 2480, "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.")
 # um capanga por vez na tela: só estes ficam na 1-1 (os patrulhamentos ficam a ~1 tela de distância
 # um do outro), e a variedade continua: cambista, robô, faxineiro, mala voadora e drone
 _FICA_1_1 = {1300, 2450, 4100, 5420, 6900, 8340, 10000, 11900, 13300}
 L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
+# longe dos tapumes (vão de rolar): ninguém patrulha a menos de 300 px de uma passagem baixa
+_NOVA_FAIXA = {2450: [1950, 2180], 6900: [6550, 7000], 10000: [9750, 10200]}
+for e in L["enemies"]:
+    if int(e["x"]) in _NOVA_FAIXA:
+        e["r"] = _NOVA_FAIXA[int(e["x"])]
+        e["x"] = sum(e["r"]) // 2
 for e in L["enemies"]:
     if e.get("r") and not (e["r"][0] <= e["x"] <= e["r"][1]):
         e["x"] = (e["r"][0] + e["r"][1]) // 2

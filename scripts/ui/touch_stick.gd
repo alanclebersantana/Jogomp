@@ -1,7 +1,8 @@
 extends Control
 ## Controle de movimento pelo toque, com um dedo só:
 ## - "dpad": direcional de 8 direções (inclui diagonais: ↘ anda abaixado, ↗ sobe andando)
-## - "analog": analógico fixo no canto (inclinar pouco = andar devagar); a base não sai do lugar
+## - "analog": analógico flutuante — aparece onde o polegar encostar na metade esquerda da tela e
+##   some quando solta (antes ficava fixo no canto e tampava o Milis e o cenário)
 
 signal changed(keys: Dictionary)
 
@@ -47,8 +48,9 @@ func _in_zone(p: Vector2) -> bool:
 	var vs := get_viewport_rect().size
 	if mode == "dpad":
 		return p.distance_to(_home()) < radius * ui_scale * 1.9
-	# analógico: em volta da base (um pouco maior que ela, para o polegar não escapar)
-	return p.distance_to(_home()) < radius * ui_scale * 2.1 and p.y > vs.y * .3
+	# analógico flutuante: qualquer ponto da metade do lado do polegar (abaixo do placar do topo)
+	var lado: bool = p.x > vs.x * .55 if left_handed else p.x < vs.x * .45
+	return lado and p.y > vs.y * .22
 
 func _input(e: InputEvent) -> void:
 	if mode == "gamepad" or not is_visible_in_tree():
@@ -58,6 +60,11 @@ func _input(e: InputEvent) -> void:
 		if e.pressed and finger == -1 and _in_zone(p):
 			finger = e.index
 			center = _home()
+			if mode == "analog":
+				# a base nasce embaixo do polegar (sem encostar nas bordas, que são gestos do Android)
+				var vs := get_viewport_rect().size
+				var m: float = radius * ui_scale * 1.15
+				center = Vector2(clamp(p.x, m + 24, vs.x - m - 24), clamp(p.y, m + 10, vs.y - m - 30))
 			_update(p)
 		elif not e.pressed and e.index == finger:
 			_release()
@@ -135,10 +142,13 @@ func _draw() -> void:
 		if finger != -1:
 			draw_circle(c + knob, 12 * ui_scale, Color(1, .95, .8, .4 * al))
 	else:
-		var c2 := _home()
-		var a := (.7 if finger != -1 else .38) * al
+		var c2 := center if finger != -1 else _home()
+		var a := (.6 if finger != -1 else .1) * al
 		if tex.has("base") and tex.has("knob"):
-			var ab: float = min(1.0, (.95 if finger != -1 else .7) * al + .15)
+			# tocando: semitransparente; solto: só um fantasminha no canto, quase invisível
+			var ab: float = (.55 if finger != -1 else .12) * al
+			if finger == -1:
+				r *= .8
 			var br: float = r * 1.12
 			draw_texture_rect(tex.base, Rect2(c2 - Vector2(br, br), Vector2(br, br) * 2), false, Color(1, 1, 1, ab))
 			var kr: float = 34 * ui_scale

@@ -436,6 +436,17 @@ func _reset_player(x: float, y: float, adjust: bool = true) -> void:
 			player.y += 8
 		player.spawnX = player.x
 		player.spawnY = player.y
+	elif L and L.get("theme", "") == "aeroporto":
+		# Milis maior: caixa 30x44 (abaixado 26); os pontos de volta guardados com a caixa antiga
+		# (24x34) são ajustados para os pés continuarem no mesmo lugar
+		player.big = true
+		player.w = 30.0
+		player.h = 44.0
+		if adjust:
+			player.x -= 3
+			player.y -= 10
+		player.spawnX = player.x
+		player.spawnY = player.y
 	if M:
 		M.ctrl = false
 
@@ -716,11 +727,21 @@ func touching_wall(dir: int) -> bool:
 			return true
 	return false
 
-## altura em pé / abaixado (a Isis é menor: cabe nos buracos)
+## altura em pé / abaixado (a Isis é menor: cabe nos buracos; o Milis do aeroporto é maior)
 func body_h() -> float:
-	return 26.0 if player.get("isis") else 34.0
+	if player.get("isis"):
+		return 26.0
+	return 44.0 if player.get("big") else 34.0
 func crouch_h() -> float:
-	return 16.0 if player.get("isis") else 20.0
+	if player.get("isis"):
+		return 16.0
+	return 26.0 if player.get("big") else 20.0
+
+## escala do desenho do herói: no aeroporto o Milis é ~1,28x maior (com a câmera 1,25x mais perto,
+## fica ~1,6x maior na tela)
+const HERO_BIG := 1.28
+func hero_k() -> float:
+	return HERO_BIG if player.get("big") else 1.0
 
 func can_stand() -> bool:
 	var dh: float = body_h() - crouch_h()
@@ -1910,7 +1931,8 @@ func _camera() -> void:
 		ty = cam_ty(px, cam_focus) + look_y
 		# luta com o Fiscal Falso: a câmera enquadra a arena inteira (cabine, painel e lasers)
 		if X and X.BOSS.get("skin", "") == "fiscal" and not X.BOSS.get("done", false) and X.BOSS.get("st", "wait") != "wait":
-			tx = (float(X.BOSS.x0) + float(X.BOSS.x1)) / 2.0 - W / 2.0 + 120.0
+			# (a arena começa logo na borda esquerda; à direita sobra espaço para os botões não taparem a cabine)
+			tx = float(X.BOSS.x0) - 20.0 if L.get("theme", "") == "aeroporto" else (float(X.BOSS.x0) + float(X.BOSS.x1)) / 2.0 - W / 2.0 + 120.0
 	var cb := cam_bounds()
 	tx = clamp(tx, cb.position.x, max(cb.position.x, cb.end.x - W))
 	ty = clamp(ty, cb.position.y, max(cb.position.y, cb.end.y - H))
@@ -3970,7 +3992,6 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 			e.x += kd_ * 58.0   # empurrado: o Milis não cai de novo em cima dele no mesmo pulo
 			burst(e.x, e.y - 60, 10, Color("#ffd76a"))
 			Polish.impact(e.x, e.y - (120.0 if how == "stomp" else 70.0))
-			Polish.part("txt", e.x, e.y - 170, 0, -1.0, 40, Color(1, .85, .4), {"txt": "%d/3" % (3 - e.hp), "g": .02, "size": 20.0})
 			shake = max(shake, 4)
 			hit_stop = 4
 			Audio.play("stomp", -2, .8)

@@ -397,8 +397,10 @@ func _layer(k: String, ox: float, oy: float, w: float, bh: float, al: float) -> 
 	var tw := t.get_width() * sc
 	var x := fposmod(ox, tw * 2) - tw * 2
 	var i := 0
+	# no aeroporto as pinturas têm letreiros (DUTY FREE, CLOSED): espelhar deixava o texto ao contrário
+	var mirror: bool = game.L.get("theme", "") != "aeroporto"
 	while x < w:
-		if i % 2 == 0:
+		if i % 2 == 0 or not mirror:
 			Spr.img(t, x, oy, tw, bh, Rect2(), al)
 		else:
 			var cc := Color(1, 1, 1, Spr.alpha * al)

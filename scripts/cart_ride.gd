@@ -12,6 +12,7 @@ var on := false
 var done := false
 var spd := 0.0
 var bump := 0      # quadros do tranco depois de bater (o carrinho balança parado)
+var rt := 0        # quadros desde que subiu (as placas baixas descem do teto no começo)
 
 func _init(game) -> void:
 	g = game
@@ -45,6 +46,7 @@ func near() -> bool:
 func start() -> void:
 	on = true
 	spd = 0.0
+	rt = 0
 	var p: Dictionary = g.player
 	p.vx = 0.0
 	p.x = x - p.w / 2
@@ -63,6 +65,7 @@ func step() -> void:
 	if p.dyingT > 0:
 		on = false
 		return
+	rt += 1
 	spd = min(spd + .14, 5.4)
 	x += spd
 	# o Milis vai junto (no ar também: pula e cai de volta no carrinho)
@@ -132,7 +135,7 @@ func draw_back(T: int) -> void:
 	# a pé, as placas e malas ficam atrás do Milis (ele passa por trás delas); andando no carrinho
 	# elas vêm para a frente (é nelas que ele bate)
 	if not on:
-		_obstacles(T)
+		_obstacles(T, true)   # a pé: só as pilhas de malas (as placas baixas descem na hora da descida)
 	var y: float = float(C.y)
 	var sw: float = sin(T * .9) * 1.2 * (spd / 5.4) + (sin(bump * .9) * 2.0 if bump > 0 else 0.0)
 	Spr.save()
@@ -169,9 +172,11 @@ func draw_front(T: int) -> void:
 	if near():
 		Spr.text("✋ subir", x, y - 96, 12, Color("#ffe9b0"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
 
-func _obstacles(T: int) -> void:
+func _obstacles(T: int, only_piles := false) -> void:
 	var y: float = float(C.y)
 	for o in C.get("obs", []):
+		if only_piles and o.k != "pile":
+			continue
 		var ox: float = float(o.x)
 		var ow: float = float(o.w)
 		if ox > g.cam + g.W + 100 or ox + ow < g.cam - 100:
@@ -184,7 +189,7 @@ func _obstacles(T: int) -> void:
 		else:
 			# placa pendurada baixa (corrente do teto)
 			# (a borda de baixo fica acima do desenho do Milis abaixado e abaixo dele em pé)
-			var by: float = y - 52
+			var by: float = y - 52.0 * g.hero_k() - (1.0 - min(rt / 18.0, 1.0)) * 260.0
 			Spr.seg(ox + 10, by - 34, ox + 10, by - 260, Color("#3a414c"), 2)
 			Spr.seg(ox + ow - 10, by - 34, ox + ow - 10, by - 260, Color("#3a414c"), 2)
 			Spr.rr(ox, by - 34, ow, 34, 4, Color("#1b2a44"))

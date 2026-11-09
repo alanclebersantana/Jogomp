@@ -1636,7 +1636,18 @@ func _player(g: Game) -> void:
 		# aqui só deitado no fundo (rastejando): a cabeça fica na frente, perto do chão
 		if g.NT and g.NT.helmet and p.swim and p.crouch and not p.get("dog") and p.dyingT == 0 and not (p.iframe > 0 and (T / 4) % 2 == 0):
 			WorldNature.prop("capacete", p.x + p.w / 2 + p.face * 20, p.y + p.h - 2, 46, p.face < 0)
-		WorldExtras.tool_fx(g, T)
+		var hk: float = g.hero_k()
+		if hk != 1.0:
+			var tcx: float = p.x + p.w / 2
+			var tby: float = p.y + p.h
+			Spr.save()
+			Spr.translate(tcx, tby)
+			Spr.scale(hk, hk)
+			Spr.translate(-tcx, -tby)
+			WorldExtras.tool_fx(g, T)
+			Spr.restore()
+		else:
+			WorldExtras.tool_fx(g, T)
 	Spr.alpha = a0
 	Spr.restore()
 
@@ -1792,12 +1803,53 @@ func _warp_pose(p: Dictionary) -> void:
 			Spr.ci.draw_texture(t3, Vector2(-t3.get_width() / 2.0, -t3.get_height()), Color(1, 1, 1, Spr.alpha))
 			Spr.restore()
 
+## efeitos da luta do aeroporto: escudo de energia na defesa, rastro do giro e da voadora
+func _fight_fx(g, p: Dictionary, cx: float, by: float) -> void:
+	if g.L.get("theme", "") != "aeroporto":
+		return
+	var f: float = p.face
+	if p.get("guard", false):
+		var sx: float = cx + f * 26
+		var sy: float = by - 34
+		var pul: float = .5 + .5 * sin(T * .3)
+		var pts := PackedVector2Array()
+		for k in 6:
+			var a: float = k * PI / 3 + PI / 6
+			pts.append(Vector2(sx + cos(a) * 14 * f, sy + sin(a) * 30))
+		Spr.poly(pts, Color(.45, .9, 1, .22 + .1 * pul))
+		for k in 6:
+			Spr.seg(pts[k].x, pts[k].y, pts[(k + 1) % 6].x, pts[(k + 1) % 6].y, Color(.7, .97, 1, .8), 2.5)
+	if p.actT > 0 and p.act == "spin":
+		var u: float = 1.0 - p.actT / 26.0
+		for k in 3:
+			var a0: float = u * TAU * 2.0 + k * 2.1
+			Spr.ring(cx, by - 30, 44, Color(1, .7, .25, .55 - k * .12), 5, a0, a0 + 1.4)
+	if p.actT > 0 and p.act == "flykick" and not p.onGround:
+		for k in 3:
+			Spr.seg(cx - f * (20 + k * 12), by - 18 - k * 8, cx - f * (46 + k * 14), by - 24 - k * 8, Color(1, 1, 1, .5 - k * .12), 3)
+
+## o herói desenhado na escala dele (o Milis do aeroporto é maior): escala em volta dos pés
 func _player_draw(g: Game) -> void:
+	var k: float = g.hero_k()
+	if k == 1.0:
+		_player_draw_raw(g)
+		return
+	var p: Dictionary = g.player
+	var cx: float = p.x + p.w / 2
+	var by: float = p.y + p.h
+	Spr.save()
+	Spr.translate(cx, by)
+	Spr.scale(k, k)
+	Spr.translate(-cx, -by)
+	_player_draw_raw(g)
+	Spr.restore()
+
+func _player_draw_raw(g: Game) -> void:
 	var p: Dictionary = g.player
 	# teto baixo logo acima: o desenho (bem mais alto que a caixa) se encolhe para o chapéu não entrar
 	# no teto; subindo, já antecipa um pouco. Só o desenho muda (a caixa de colisão é a mesma).
 	var cg: float = float(p.get("ceil", 99.0)) + min(0.0, float(p.vy)) * 1.5
-	var art_h: float = 58.0 if p.get("isis") else 66.0
+	var art_h: float = (58.0 if p.get("isis") else 66.0) * g.hero_k()
 	var dk_t: float = 1.0 if p.crouch or p.ladder or p.vine else clamp((p.h + max(cg, 0.0) + 6.0) / art_h, .7, 1.0)
 	if FRESH or not p.has("duck"):
 		var d0: float = float(p.get("duck", 1.0))
@@ -1926,7 +1978,20 @@ func _player_draw(g: Game) -> void:
 		var cyk := ""
 		var cyn: Array = []
 		var cyf := 0.0
-		if p.crouch:
+		var fneg: bool = p.face < 0
+		# golpes do aeroporto: combo (2º golpe de volta, 3º girando), rasteira, voadora, esquiva e defesa
+		if p.actT > 0 and p.act in ["swing2", "spin", "sweep", "flykick", "dodge"]:
+			match str(p.act):
+				"swing2": n = "pai_throw2" if p.actT > 9 else "pai_throw1"
+				"spin":
+					n = "pai_throw2" if (p.actT / 3) % 2 == 0 else "pai_throw1"
+					if (p.actT / 6) % 2 == 1:
+						fneg = not fneg
+				"sweep", "flykick": n = "pai_slide"
+				"dodge": n = "pai_crouch"
+		elif p.get("guard", false) and g.L.get("theme", "") == "aeroporto":
+			n = "pai_push1"
+		elif p.crouch:
 			if p.slideT:
 				n = "pai_slide"
 			elif abs(p.vx) > .3:
@@ -1953,15 +2018,16 @@ func _player_draw(g: Game) -> void:
 			var cm: Dictionary = Spr.x4("A:" + cyk) if cyk != "" else {}
 			var ar = Spr.AR.get(n)
 			if not cm.is_empty():
-				_pose(cyk, cm.tex, Spr.x4_src(cm, Spr.x4_pos(cm, cyf)[0]), Rect2(-float(cm.ax), -float(cm.ay), float(cm.cw), float(cm.ch)), cx, by, 0.0, -.56 if p.face < 0 else .56, .56)
+				_pose(cyk, cm.tex, Spr.x4_src(cm, Spr.x4_pos(cm, cyf)[0]), Rect2(-float(cm.ax), -float(cm.ay), float(cm.cw), float(cm.ch)), cx, by, 0.0, -.56 if fneg else .56, .56)
 			elif ar != null:
-				_pose(n, Spr.atlas_tex(ar), Rect2(ar[0], ar[1], ar[2], ar[3]), Rect2(-ar[4], -ar[5], ar[2], ar[3]), cx, by, 0.0, -.56 if p.face < 0 else .56, .56)
+				_pose(n, Spr.atlas_tex(ar), Rect2(ar[0], ar[1], ar[2], ar[3]), Rect2(-ar[4], -ar[5], ar[2], ar[3]), cx, by, 0.0, -.56 if fneg else .56, .56)
 			if FRESH:
 				p.lean = lerp(float(p.get("lean", 0.0)), 0.0, .3)
 			if not cm.is_empty():
-				Spr.A_cycle(cyk, cyn, cyf, cx, by, .56, p.face < 0)
+				Spr.A_cycle(cyk, cyn, cyf, cx, by, .56, fneg)
 			else:
-				Spr.A(n, cx, by, .56, p.face < 0)
+				Spr.A(n, cx, by, .56, fneg)
+			_fight_fx(g, p, cx, by)
 			_armor(p, cx, by)
 			return
 	# nadando: o corpo deita na direção do nado (braçada), sobe e desce devagar; parado, fica de pé
