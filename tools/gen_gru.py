@@ -428,15 +428,12 @@ porta_auto("auto1", 8900, 240)
 L["traps"].append({"k": "icicle", "x": 9900, "y": 40, "len": 30, "floor": GY, "reach": 60})
 L["traps"].append({"k": "icicle", "x": 10180, "y": 40, "len": 30, "floor": GY, "reach": 60})
 # (a grade de escalar que ficava ao lado do vento saiu: ela tirava a graça da saída de ar)
-# fio de manutenção solto, para balançar (cuidado com a ponta soltando faísca)
-L["vines"].append({"x": 11880, "y": -260, "len": 250, "aim": [12260, 120]})
 # mezanino à noite: neon do duty free
 neon(12400, "#ff4fb4")
 neon(12950, "#4fd8ff")
 neon(13500, "#ffd84a")
 neon(13950, "#9b6bff")
 milhas(12260, 12540, 470, 40)
-# carrinho de bagagem pilotável: desce o corredor do duty free embalado (pular malas, abaixar nas placas)
 # mini-perseguições do vulto de capuz: alcançou, ele larga a mala (milhas extras + uma pista a mais)
 L["chases"] = [
     {"trig": 230, "x0": 390, "x1": 990, "y": GY, "spd": 4.8, "bonus": 15,
@@ -446,13 +443,6 @@ L["chases"] = [
 # objetos em primeiro plano (escuros e desfocados, passando na frente da câmera): poucos, longe da ação
 L["fg"] = [{"x": 760, "k": "coluna"}, {"x": 3500, "k": "fila"}, {"x": 6350, "k": "lixeira"},
            {"x": 8020, "k": "coluna"}, {"x": 10720, "k": "bancos"}, {"x": 12380, "k": "coluna"}, {"x": 14300, "k": "fila", "flip": True}]
-L["cartRide"] = {"x0": 13375, "x1": 14560, "y": GY, "obs": [
-    {"k": "low", "x": 13530, "w": 80, "txt": "PORTÃO 7"},
-    {"k": "pile", "x": 13770, "w": 44},
-    {"k": "low", "x": 13990, "w": 80, "txt": "SAÍDA"},
-    {"k": "pile", "x": 14190, "w": 44},
-    {"k": "low", "x": 14450, "w": 80, "txt": "EMBARQUE"}]}
-dica(13340, 13420, "Carrinho de bagagem! Toque em ✋ para subir. Lá em cima: PULE as malas e ABAIXE nas placas.")
 pax(14380, "piloto", r=[14360, 14540], spd=.6)
 pax(14470, "teen", k="stand", re=1, bal="oi!")
 painel(12700, 190)
@@ -510,7 +500,7 @@ caixa(3810, n=3)
 totem(4270, 410)                     # em cima do último balcão: volta aqui se perder a vida na arena
 cambista(4100, [3760, 4180])
 drone(4560, 300, [4420, 4700])
-L["comics"].append({"id": "drone", "x": 11480})   # o drone espião fica em cima do vão do cabo
+L["comics"].append({"id": "drone", "x": 1640})    # o 1º drone fica logo depois da arena do 1º segurança
 cambista(4950, [4820, 5080], y=230)
 dica(3420, 3700, "Fila do check-in. Os balcões dão bons degraus.")
 # esteira de despacho que sobe (plataforma que anda)
@@ -606,16 +596,18 @@ chao(10600, 11400)
 # parede de grade de manutenção para escalar até a passarela (longe de qualquer saída de vento)
 escada(10880, 160, kind="net")
 dica(10820, 10960, "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).")
-passarela(10930, 11600, 160, 200)   # passarela de serviço
-milhas(10960, 11560, 130, 50)
+passarela(10930, 11450, 160, 200)   # passarela de serviço
+milhas(10960, 11420, 130, 50)
 robo_falso(11300, [11000, 11550], y=160)
-pombo(11900, 20, [11650, 12150])
 L["pits"].append([11400, 12200])
-# corrimão (pendurar e ir mão por mão)
-L["bars"].append({"x0": 11640, "x1": 12160, "y": 120})
-milhas(11660, 12140, 210, 52)
-dica(11550, 11700, "Um cabo esticado: pule e segure-se nele para atravessar.", yl=220)
-passarela(12160, 12500, 160, 200)
+# vão das bagagens: só atravessa balançando de fio em fio (3 fios de manutenção soltos do teto).
+# As passarelas ficam longe demais uma da outra para pular (nem com as botas-foguete).
+for vx, aim in ((11590, [11840, 120]), (11840, [12090, 120]), (12090, [12290, 160])):
+    L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "nosh": 1})
+milhas(11690, 11750, 150, 30)
+milhas(11940, 12000, 150, 30)
+dica(11300, 11450, "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.", yl=220)
+passarela(12230, 12500, 160, 200)
 chao(12200, 13580)
 chao(13640, 14200)
 mala_monstro(12900, 260, [12600, 13200])
@@ -659,7 +651,7 @@ for tx in (2490, 7360, 10530):
 dica(2380, 2480, "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.")
 # um capanga por vez na tela: só estes ficam na 1-1 (os patrulhamentos ficam a ~1 tela de distância
 # um do outro), e a variedade continua: cambista, robô, faxineiro, mala voadora e drone
-_FICA_1_1 = {1300, 2450, 4100, 5700, 10000, 11900, 13300}
+_FICA_1_1 = {1300, 2450, 4100, 5700, 10000, 13300}
 L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
 # onde cada um fica de verdade (longe de balcões, blocos, tapumes e passagens baixas). Os falsos
 # seguranças são mini-chefes: cada um tem uma ARENA — as grades descem quando o Milis entra e só sobem
@@ -680,6 +672,9 @@ for e in L["enemies"]:
 for e in L["enemies"]:
     if e.get("r") and not (e["r"][0] <= e["x"] <= e["r"][1]):
         e["x"] = (e["r"][0] + e["r"][1]) // 2
+# drones em lugares abertos, com espaço para lutar (nunca em cima de vão, fio ou corrimão)
+drone(1790, 330, [1720, 1860])        # bancos do saguão, depois da arena do 1º segurança
+drone(9560, -200, [9380, 9740])       # em cima da passarela do mezanino da segurança
 # dicas só aparecem em cima do piso do terminal (no subsolo das bagagens elas não valem)
 for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))

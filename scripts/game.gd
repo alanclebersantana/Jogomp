@@ -250,6 +250,8 @@ func load_level(i: int) -> void:
 		var vo := {"x": v.x, "y": v.y, "len": v.len, "th": 0.0, "om": 0.0, "bend": 0.0}
 		if v.has("aim"):
 			vo.aim = v.aim
+		if v.get("nosh", false):
+			vo.nosh = true   # fio de travessia sobre vão: sem faísca (um choque ali derrubava no buraco)
 		VINES.append(vo)
 	OIL = []
 	for c in L.get("oil", []):
@@ -3530,7 +3532,7 @@ func _dust_col() -> Color:
 
 ## fio de manutenção: faísca de tempos em tempos na ponta
 static func wire_spark(v: Dictionary, t: int) -> bool:
-	return (t + int(v.x)) % 160 < 26
+	return not v.get("nosh", false) and (t + int(v.x)) % 160 < 26
 
 ## choque leve: encostar na ponta do fio quando ela está soltando faíscas (sem estar segurando o fio)
 func _wire_shock() -> void:

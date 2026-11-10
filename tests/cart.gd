@@ -41,6 +41,12 @@ func _go(com: bool, smart: bool) -> String:
 	return "bateu em x=%d" % int(px())
 
 func _initialize() -> void:
+	carregar(0, false)
+	if not g.L.has("cartRide"):
+		print("sem carrinho pilotável na 1-1 (saiu da fase)")
+		print("FALHAS: 0")
+		quit()
+		return
 	var r1 := _go(false, true)
 	print("esperto: ", r1)
 	var r2 := _go(false, false)

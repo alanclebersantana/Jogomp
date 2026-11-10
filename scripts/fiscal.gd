@@ -206,7 +206,7 @@ static func step(g, X) -> void:
 					var fx: float = p.x + p.w / 2
 					for fl in b.floor:
 						if fx > float(fl.x) and fx < float(fl.x) + float(fl.w) and absf(p.y + p.h - GY) < 6.0:
-							g.hurt(1, fx + 1)
+							g.hurt(1, fx - float(p.face) * 10.0)   # vem de baixo: escudo não segura, só pulando
 							break
 			if b.bt > b.warn + b.on + 14:
 				b.beams = []
@@ -287,10 +287,13 @@ static func step(g, X) -> void:
 	if int(b.get("cool", 0)) > 0:
 		b.cool -= 1
 	elif b.st in ["lasers", "painel", "curto", "persegue", "painel_chao"] and p.dyingT == 0 and Game.hit(p, box(g, b)):
-		g.hurt(1, b.x)
-		if b.st in ["persegue", "painel_chao"]:
-			# depois do encontrão ele recua um pouco (não prende o Milis num canto)
-			b.cool = 70
+		if p.iframe == 0 and g.M.blocks(b.x):
+			_bloqueio(g, b)
+		else:
+			g.hurt(1, b.x)
+			if b.st in ["persegue", "painel_chao"]:
+				# depois do encontrão ele recua um pouco (não prende o Milis num canto)
+				b.cool = 70
 	# pisão no Fiscal tonto
 	if b.st == "tonto" and p.dyingT == 0:
 		var bb := box(g, b)
@@ -382,6 +385,31 @@ static func _chase(g, b: Dictionary, spd: float) -> void:
 	b.y = GY
 
 
+## o escudo segurou o encontrão: ele quica para trás; com a defesa na hora certa (aparo) fica tonto
+static func _bloqueio(g, b: Dictionary) -> void:
+	var p: Dictionary = g.player
+	var aparo: bool = int(g.M.parry_t) > 0
+	g.M.on_block(b.x)
+	p.iframe = 20
+	b.cool = 90
+	var lado: float = 1.0 if b.x > p.x + p.w / 2 else -1.0
+	if b.st in ["persegue", "painel_chao"]:
+		b.x = clampf(b.x + lado * 60.0, float(b.x0) + 30.0, float(b.x1) - 60.0)
+		if aparo:
+			b.st = "tonto"
+			b.t = 120
+			g.shake = 8
+			Audio.play("stomp")
+			g.flash("Defesa na hora certa! Ele ficou tonto: pule na cabeça dele ou bata!", 140)
+		elif not b.get("dica_esc", false):
+			b.dica_esc = true
+			g.flash("O escudo segurou o encontrão! Aperte a defesa bem na hora e ele fica tonto.", 150)
+
+static func _quebra_mala(g, x: float, y: float) -> void:
+	Audio.play("stomp", -8, 1.4)
+	g.burst(x, y, 14, Color("#c9a26a"))
+	g.burst(x, y, 6, Color("#ffe9a0"))
+
 ## malas rolando e malas caindo
 static func _objs(g, b: Dictionary) -> void:
 	var p: Dictionary = g.player
@@ -395,6 +423,12 @@ static func _objs(g, b: Dictionary) -> void:
 			o.x += o.vx
 			o.rot += o.vx * .05
 			if p.dyingT == 0 and Game.hit(p, g.R(o.x - 18, GY - 30, 36, 30)):
+				if p.iframe == 0 and g.M.blocks(o.x):
+					# o escudo segura a mala rolando: ela arrebenta no escudo
+					g.M.on_block(o.x)
+					p.iframe = 20
+					_quebra_mala(g, o.x, GY - 16)
+					continue
 				g.hurt(1, o.x)
 			if o.x > float(b.x0) - 40.0:
 				keep.append(o)
@@ -407,7 +441,15 @@ static func _objs(g, b: Dictionary) -> void:
 					Audio.play("stomp", -6, 1.2)
 					g.burst(o.x, GY - 6, 10, Color("#c9a26a"))
 					if p.dyingT == 0 and Game.hit(p, g.R(o.x - 26, GY - 46, 52, 46)):
-						g.hurt(1, o.x)
+						if p.iframe == 0 and p.get("guard", false):
+							# escudo levantado: a mala que cai arrebenta em cima dele
+							var fx2: float = p.x + p.w / 2 + float(p.face) * 4.0
+							g.M.on_block(fx2)
+							p.iframe = 20
+							_quebra_mala(g, o.x, GY - 40)
+							o.t = -40
+						else:
+							g.hurt(1, o.x)
 				if o.t > -40:
 					keep.append(o)
 			else:
