@@ -271,33 +271,58 @@ def gru_saguao():
 
 
 # ----------------------------------------------------------------- 1-1 (segurança): hip hop tenso
+# (menos repetitiva: introdução, refrão A, parte B com outros acordes, contracanto, pausa só com
+# baixo e piano, refrão de novo e final — antes era o mesmo laço de 4 acordes 8 vezes)
 def gru_seguranca():
     bpm = 86
     spb = 60 / bpm
-    loop = 'Em9 Cmaj7 Am7 B7'.split()
-    chs = loop * 8
-    n = len(chs)
+    A = 'Em9 Cmaj7 Am7 B7'.split()
+    B = 'Am7 D7 Gmaj7 Cmaj7 Am7 B7 Em9 Em9'.split()
+    plano = ([('intro', c) for c in A] + [('A', c) for c in A * 2] + [('B', c) for c in B] +
+             [('A2', c) for c in A * 2] + [('pausa', c) for c in A] + [('A3', c) for c in A * 2] +
+             [('fim', c) for c in A])
+    n = len(plano)
     T1, T2, T3 = Track(n * 4 * spb), Track(n * 4 * spb), Track(n * 4 * spb)
     gancho = mel('B4:.75 G4:.25 E4:.5 F#4:.5 G4:1 r:1 | E5:.5 D5:.5 B4:.5 G4:.5 B4:1 r:1 | '
                  'C5:.75 B4:.25 A4:.5 E4:.5 A4:1 C5:1 | B4:1 D#5:1 F#5:1 r:1', 4)
-    for blk in range(8):
-        t0 = blk * 16 * spb
-        if blk in (1, 2, 5, 6, 7):
-            play_mel(T2, 'cello', gancho, spb, t0=t0, vel=.36, legato=.8, rel=.12)
-        if blk in (3, 4, 7):
-            play_mel(T2, 'xylophone', gancho, spb, t0=t0, vel=.24, legato=.4, rel=.2, octave=1)
-    for i, c in enumerate(chs):
+    parteB = mel('A5:.5 C6:.5 E6:1 C6:1 A5:1 | F#5:.5 A5:.5 C6:1 D6:1 r:1 | B5:.5 D6:.5 G6:1 F#6:.5 D6:.5 B5:1 | '
+                 'E6:1 C6:1 G5:1 E5:1 | A5:.75 C6:.25 E6:.5 D6:.5 C6:1 A5:1 | B5:.5 D#6:.5 F#6:1 D#6:.5 B5:.5 F#5:1 | '
+                 'G5:1 B5:1 E6:2 | D6:1 B5:1 G5:1 E5:1', 4)
+    contra = mel('E5:2 G5:2 | G5:2 E5:2 | E5:2 C5:2 | D#5:2 F#5:2', 4)
+    pos = {}
+    for i, (sec, c) in enumerate(plano):
+        pos.setdefault(sec, i)
+    def em(sec, k=0):
+        return (pos[sec] + k) * 4 * spb
+    for k in (0, 4):
+        play_mel(T2, 'cello', gancho, spb, t0=em('A', k), vel=.36, legato=.8, rel=.12)
+        play_mel(T2, 'cello', gancho, spb, t0=em('A2', k), vel=.32, legato=.8, rel=.12)
+        play_mel(T2, 'violin', contra, spb, t0=em('A2', k), vel=.16, legato=.95, rel=.3)
+        play_mel(T2, 'cello', gancho, spb, t0=em('A3', k), vel=.34, legato=.8, rel=.12)
+        play_mel(T2, 'xylophone', gancho, spb, t0=em('A3', k), vel=.22, legato=.4, rel=.2, octave=1)
+    play_mel(T2, 'xylophone', parteB, spb, t0=em('B'), vel=.3, legato=.5, rel=.2)
+    play_mel(T2, 'flute', parteB, spb, t0=em('B'), vel=.12, legato=.8, rel=.12, octave=-1)
+    for i, (sec, c) in enumerate(plano):
         t = i * 4 * spb
         b = i * 4
-        hits(T1, kick_hh(), [b, b + 2.5 + .07], spb, vel=.7)
-        hits(T1, snare_hh(.6), [b + 1, b + 3], spb, vel=.4, wet=True)
+        # camada 1: baixo e piano sempre; batida leve (na pausa, só o chimbal)
+        if sec != 'pausa':
+            hits(T1, kick_hh(), [b, b + 2.5 + .07], spb, vel=.7)
+            hits(T1, snare_hh(.6), [b + 1, b + 3], spb, vel=.4, wet=True)
         for k in range(0, 16, 2):
-            hits(T1, p_shaker(), [b + swing(k)], spb, pan=.25, vel=.3)
-        baixo_hh(T1, c, t, spb, .5, ((0, .5), (1.5, .25), (2.5 + .07, .5), (3.5, .25)))
-        piano_lofi(T1, c, t, spb, (0, 2.0 + .07), .15)
-        beat_boombap(T2, b, spb, cheio=False)
+            hits(T1, p_shaker(), [b + swing(k)], spb, pan=.25, vel=.3 if sec != 'pausa' else .2)
+        if sec == 'B':
+            baixo_hh(T1, c, t, spb, .5, ((0, .5), (.75, .25), (2.0, .5), (3.0, .25), (3.5, .25)))
+        else:
+            baixo_hh(T1, c, t, spb, .5, ((0, .5), (1.5, .25), (2.5 + .07, .5), (3.5, .25)))
+        piano_lofi(T1, c, t, spb, (0, 2.0 + .07) if sec != 'B' else (0, 1.5 + .07, 3.0), .15)
+        if sec in ('intro', 'pausa', 'fim'):
+            if sec == 'pausa' and i == pos['pausa'] + 3:
+                hits(T2, snare_hh(.5), [b + 2 + k * .25 for k in range(8)], spb, vel=.3)
+            continue
+        beat_boombap(T2, b, spb, cheio=(sec in ('B', 'A3')))
         beat_boombap(T3, b, spb, cheio=True)
-        for bt in (1.5 + .07, 3.5 + .07):
+        for bt in ((1.5 + .07, 3.5 + .07) if sec != 'B' else (.5 + .07, 2.0, 3.5 + .07)):
             for m in chord(c, 4)[:3]:
                 T3.note('violin', m, t + bt * spb, spb * .2, .13, .05)
     return render_stems([T1, T2, T3], .16, 1.2)
@@ -325,22 +350,59 @@ def fiscal():
 
 
 # ----------------------------------------------------------------- mini-chefe: falso segurança (trap)
+# (menos repetitiva: riff, parte B, pausa de tensão, riff na oitava, refrão heroico e riff final;
+# antes eram 4 compassos repetidos 4 vezes em 27 s)
 def seg_luta():
     bpm = 140
     spb = 60 / bpm
-    chs = 'Em Em C B7 Em Em Am B7 Em Em C B7 Am B7 Em Em'.split()
-    T = Track(len(chs) * 4 * spb)
+    A = 'Em Em C B7 Em Em Am B7'.split()
+    B = 'Am Am Em Em C D B7 B7'.split()
+    C = 'Em C Am B7 Em C Am B7'.split()
+    D = 'G D Em C Am B7 Em Em'.split()
+    plano = ([('A', c) for c in A] + [('B', c) for c in B] + [('C', c) for c in C] +
+             [('A2', c) for c in A] + [('D', c) for c in D] + [('A3', c) for c in A])
+    T = Track(len(plano) * 4 * spb)
     riff = mel('E5:.5 E5:.25 G5:.25 r:.5 B5:.5 A5:.5 G5:.5 F#5:1 | E5:.5 E5:.25 G5:.25 r:.5 B5:.5 D6:1 B5:1 | '
                'C6:.5 B5:.5 A5:.5 G5:.5 E5:1 r:1 | D#5:.5 F#5:.5 A5:.5 B5:.5 F#5:2', 4)
-    play_mel(T, 'violin', riff, spb, vel=.3, legato=.5, rel=.05)
-    play_mel(T, 'xylophone', riff, spb, t0=8 * 4 * spb, vel=.26, legato=.4, rel=.15)
-    play_mel(T, 'violin', riff, spb, t0=8 * 4 * spb, vel=.26, legato=.5, rel=.05, octave=-1)
-    for i, c in enumerate(chs):
+    mB = mel('A5:.5 C6:.5 E6:1 D6:.5 C6:.5 B5:1 | A5:.5 B5:.5 C6:.5 E6:.5 D6:2 | E5:.5 G5:.5 B5:1 A5:.5 G5:.5 F#5:1 | '
+             'E5:1 G5:1 B5:2 | C6:.5 B5:.5 A5:.5 G5:.5 E5:1 G5:1 | F#5:.5 A5:.5 D6:1 C6:.5 A5:.5 F#5:1 | '
+             'D#5:.5 F#5:.5 B5:1 A5:.5 F#5:.5 D#5:1 | F#5:2 B5:2', 4)
+    mD = mel('B5:1 D6:.5 B5:.5 G5:1 B5:1 | A5:1 F#5:.5 A5:.5 D6:2 | E6:.5 D6:.5 B5:.5 G5:.5 E5:1 G5:1 | '
+             'E6:1 C6:1 G5:1 E5:1 | A5:.5 C6:.5 E6:1 D6:.5 C6:.5 A5:1 | B5:.5 D#6:.5 F#6:1 E6:.5 D#6:.5 B5:1 | '
+             'E6:2 B5:1 G5:1 | E5:2 r:2', 4)
+    pos = {}
+    for i, (sec, c) in enumerate(plano):
+        pos.setdefault(sec, i)
+    def em(sec, k=0):
+        return (pos[sec] + k) * 4 * spb
+    for k in (0, 4):
+        play_mel(T, 'violin', riff, spb, t0=em('A', k), vel=.3, legato=.5, rel=.05)
+        play_mel(T, 'violin', riff, spb, t0=em('A2', k), vel=.28, legato=.5, rel=.05, octave=1)
+        play_mel(T, 'cello', riff, spb, t0=em('A2', k), vel=.22, legato=.5, rel=.05, octave=-1)
+        play_mel(T, 'violin', riff, spb, t0=em('A3', k), vel=.3, legato=.5, rel=.05)
+        play_mel(T, 'xylophone', riff, spb, t0=em('A3', k), vel=.24, legato=.4, rel=.15)
+    play_mel(T, 'xylophone', mB, spb, t0=em('B'), vel=.3, legato=.45, rel=.15)
+    play_mel(T, 'piano', mB, spb, t0=em('B'), vel=.14, legato=.3, rel=.1, octave=-1)
+    play_mel(T, 'violin', mD, spb, t0=em('D'), vel=.32, legato=.85, rel=.12)
+    play_mel(T, 'cello', mD, spb, t0=em('D'), vel=.2, legato=.85, rel=.12, octave=-2)
+    for i, (sec, c) in enumerate(plano):
         t = i * 4 * spb
         b = i * 4
+        if sec == 'C':
+            # pausa de tensão: só bumbo no tempo, chimbal e cordas longas; rufada no fim
+            hits(T, kick_hh(.8), [b, b + 2], spb, vel=.6)
+            for k in range(0, 16, 2):
+                hits(T, p_shaker(), [b + k * .25], spb, pan=.25, vel=.25)
+            for m in chord(c, 4)[:3]:
+                T.note('violin', m, t, 4 * spb, .1, .5)
+            T.note('cello', chord(c, 3)[0], t, 4 * spb, .14, .5)
+            if i == pos['C'] + 7:
+                hits(T, snare_hh(.6), [b + k * .25 for k in range(16)], spb, vel=.32)
+            continue
         beat_trap(T, b, spb, rufada=(i % 4 == 3))
-        baixo_hh(T, c, t, spb, .55, ((0, .5), (.75, .25), (1.75, .25), (3.25, .5)))
-        piano_lofi(T, c, t, spb, (0, 2.0), .12)
+        baixo_hh(T, c, t, spb, .55, ((0, .5), (.75, .25), (1.75, .25), (3.25, .5)) if sec != 'B' else
+                 ((0, .5), (1.0, .25), (2.0, .5), (3.0, .25), (3.5, .25)))
+        piano_lofi(T, c, t, spb, (0, 2.0) if sec not in ('B', 'D') else (0, 1.5, 3.0), .12)
     return T.render(.14, 1.1)
 
 

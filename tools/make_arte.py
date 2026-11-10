@@ -120,7 +120,7 @@ def troca(nome, q, w=None, h=None, ax=None, ay=None):
         r = PNT.get(nome[2:])
     else:
         r = ATL["atlas1"].get(nome) or ATL["atlas2"].get(nome) or PNT.get(nome)
-    if r is not None:
+    if r is not None and w is None:
         w, h, ax, ay = r[2], r[3], r[4], r[5]
     NOVO[nome] = (caber(q, int(w), int(h), ax, ay), float(ax), float(ay))
 
@@ -196,6 +196,13 @@ def milis():
          "pai_gear": A[0], "pai_harpoon": golpe, "pai_beam": defesa, "pai_blow": A[7]}
     for n, q in P.items():
         troca(n, q)
+    # o 1º quadro do bastão vinha numa caixa mais larga e baixa (encolhia o Milis no golpe): mesma
+    # altura das outras poses
+    for n in ("pai_throw1", "pai_throw"):
+        q = B[5]
+        k1 = 120.0 / q.height
+        w1, h1 = int(q.width * k1) + 2, int(q.height * k1) + 2
+        troca(n, q, w1, h1, w1 / 2.0, float(h1))
     # poses de luta do aeroporto (art_src/gemini/milis_luta.jpg): rasteira, voadora, base, defesa, esquiva
     lu = [clareia_casaco(q) for q in componentes(abrir_sem_verde(os.path.join(G, "milis_luta.jpg")), dil=4, area_min=1500)]
     kl = 118.0 / lu[3].height

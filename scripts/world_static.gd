@@ -1085,6 +1085,9 @@ static func plat(s: Dictionary) -> void:
 	# tábuas separadas (cada uma com veio e prego), pontas arredondadas e um pouco irregulares
 	var bx: float = s.x
 	var bi := 0
+	# a pintura da viga tem 20 de 33 linhas vazias em cima: sem subir, a parte visível ficava ~10 px
+	# abaixo do topo de verdade e o Milis parecia flutuar (antes a sombra disfarçava)
+	var oy: float = -11.0 if (Polish.g != null and Polish.g.L.get("theme", "") == "aeroporto") else 0.0
 	while bx < s.x + s.w - 2:
 		var bw: float = min(36.0 + hh(s.x + bi, 61) * 26.0, s.x + s.w - bx)
 		if s.x + s.w - (bx + bw) < 14:
@@ -1093,9 +1096,9 @@ static func plat(s: Dictionary) -> void:
 		# tábua pintada (veios, nós e pregos): um pedaço diferente da madeira para cada tábua
 		var u0: float = hh(s.x + bi * 7, 64) * .6
 		var m: float = .9 + hh(s.x + bi * 3, 63) * .15
-		Spr.PRs("seesaw_plank", bx, s.y - 1 + jy, bw, 18, u0, u0 + min(.4, bw / 180.0), Color(m, m, m))
-		Spr.circle(bx + 5, s.y + 8 + jy, 1.4, Color(.25, .22, .2))
-		Spr.circle(bx + bw - 5, s.y + 8 + jy, 1.4, Color(.25, .22, .2))
+		Spr.PRs("seesaw_plank", bx, s.y - 1 + jy + oy, bw, 18, u0, u0 + min(.4, bw / 180.0), Color(m, m, m))
+		Spr.circle(bx + 5, s.y + 8 + jy + oy * .3, 1.4, Color(.25, .22, .2))
+		Spr.circle(bx + bw - 5, s.y + 8 + jy + oy * .3, 1.4, Color(.25, .22, .2))
 		bx += bw
 		bi += 1
 	if s.get("hatch"):

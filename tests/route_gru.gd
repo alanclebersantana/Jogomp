@@ -171,10 +171,9 @@ func fase_1_1() -> void:
 	S("descansou 1", until({}, func(): return rests.has(1), 40))
 	S("caixa", jump_to(7300))
 	S("tapume 2", crawl(7505))
-	# parede de contêineres: só com as botas-foguete; de lá, por cima do 1º choque
-	S("parede (botas-foguete)", foguete_ate(7570, 230))
-	S("plataforma do raio-x", jump_to(7705))
-	S("desce entre os choques", jump_to(7765))
+	# segurança (espera antes da esteira que leva para o choque)
+	walk_to(7470)
+	S("choque 1", cross_spikes(trap_at("spikes", 7600), 7760))
 	S("choque 2", cross_spikes(trap_at("spikes", 7820), 7990))
 	walk_to(8180)
 	S("bandeja 1", jump_to(8300))

@@ -373,10 +373,6 @@ caixa(290, y=210, n=8)   # começa com a vida cheia: lá em cima é caixa de mil
 plat(3930, 130, 120)                 # em cima dos balcões do check-in (do balcão: 280 px)
 milhas(3950, 4030, 100, 40)
 caixa(4010, y=130, item="heart")
-# parede de contêineres logo depois do tapume 2: 270 px de altura — só com as botas-foguete
-# (pulo, pulo duplo e o impulso das botas); lá de cima, a plataforma do raio-x passa por cima do choque
-bloco(7540, 7600, 230, GY, t="tapume")
-dica(7470, 7540, "Parede alta demais! Pule, pule de novo e, no alto, aperte PULAR mais uma vez: as botas-foguete dão o impulso.")
 plat(7650, 215, 110)                 # em cima do raio-x, por cima dos espetos
 milhas(7665, 7745, 185, 40)
 plat(14560, 215, 120)                # reta final

@@ -1533,7 +1533,7 @@ func step() -> void:
 		player.run = 0
 	player.landV = prev_vy if (player.onGround and not was_ground) else 0.0
 	if player.onGround and not was_ground and prev_vy > 3:
-		Audio.step(ground_kind(), -10.0 if prev_vy > 8 else -14.0)
+		Audio.step(ground_kind(), -16.0 if prev_vy > 8 else -20.0)
 		# queda alta: um baque grave por baixo do passo (o pouso tem peso)
 		if prev_vy > 11 and not player.slam:
 			Audio.play("stomp", -13.0 + min(5.0, (prev_vy - 11.0) * .8), .72)
@@ -1622,7 +1622,7 @@ func step() -> void:
 	if player.onGround and abs(player.vx) > .8 and not player.crouch and not player.swim:
 		var ph: int = int(player.gait * 2.0) % 4
 		if ph != player.get("stepPh", -1) and ph == 3:
-			Audio.step(ground_kind(), -15.0 if player.run else -18.0)
+			Audio.step(ground_kind(), -22.0 if player.run else -25.0)
 			var fx0: float = player.x + player.w / 2 + player.face * 12
 			var fy0: float = player.y + player.h - 1
 			var gk2 := ground_kind()
@@ -4200,7 +4200,7 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 func gain_coin(x: float, y: float, silent: bool = false) -> void:
 	coins += 1
 	coin_life += 1
-	Audio.play("pen", -8)
+	Audio.play("pen", -21)   # (bem baixinho: são centenas de milhas pelo caminho)
 	if not silent:
 		burst(x, y, 8, Color("#f0cd72"))
 		fx("fx_sparkle", x, y, 14, .14)
