@@ -2,10 +2,10 @@
 (mesmo motor de tools/make_music.py). Guarulhos: samba-rock e MPB.
 
   aero_tema     bossa do saguão para os menus (3 camadas)
-  gru_saguao    samba-rock do terminal (3 camadas: violão e baixo / bateria / melodia e metais)
-  gru_seguranca samba-funk tenso da área de segurança (3 camadas)
-  fiscal        batucada da luta com o Fiscal Falso
-  seg_luta      samba-funk de luta com os falsos seguranças (mini-chefes: grades fechadas)
+  gru_saguao    ação no terminal (3 camadas: baixo pulsando / cordas em semicolcheias e bateria / piano e cordas agudas)
+  gru_seguranca tensão na área de segurança (3 camadas)
+  fiscal        luta com o Fiscal Falso (cordas, baixo e bateria de ação)
+  seg_luta      luta com os falsos seguranças (mini-chefes: grades fechadas)
   vitoria       samba curto de festa para o placar
 
 Uso: python3 tools/musica_aero.py /tmp/tj [nomes...]
@@ -151,112 +151,129 @@ def aero_tema():
     return render_stems([T1, T2, T3], .3, 2.0)
 
 
-# ----------------------------------------------------------------- 1-1: samba-rock do terminal
+# ----------------------------------------------------------------- ação (sem surdo nem metais graves)
+# O Alan pediu música dinâmica e de AÇÃO (nada festivo) e sem o "buuum" que tocava toda hora (o surdo
+# de tímpano grave e os metais dobrando uma oitava abaixo). Agora: cordas em ostinato (spiccato),
+# baixo pulsando em colcheias, bateria seca (bumbo, caixa, chimbal) e piano em ataques curtos.
+
+def baixo8(T, c, t, spb, vel=.5, padrao=(0, 0, 12, 0, 0, 10, 0, 7), inst='contrabass'):
+    """baixo pulsando em colcheias (raiz, oitava, sétima, quinta)"""
+    r = chord(c, 2)[0]
+    for k, iv in enumerate(padrao):
+        T.note(inst, r + iv, t + k * .5 * spb, .42 * spb, vel * (1.0 if k % 2 == 0 else .8), .04)
+
+
+def arpejo16(T, c, t, spb, vel=.16, oit=4, inst='violin'):
+    """cordas em semicolcheias (spiccato): raiz, quinta, oitava, quinta..."""
+    ch = chord(c, oit)
+    seq = [ch[0], ch[2], ch[0] + 12, ch[2], ch[1], ch[2], ch[0] + 12, ch[1] + 12]
+    for k in range(16):
+        T.note(inst, seq[k % 8], t + k * .25 * spb, .2 * spb, vel * (1.25 if k % 4 == 0 else 1.0), .03)
+
+
+def bateria(T, b, spb, nivel=1):
+    """bateria de ação: bumbo sincopado, caixa no 2 e no 4, chimbal em semicolcheias"""
+    if nivel == 0:
+        hits(T, p_kick(), [b, b + 2], spb, vel=.55)
+        hits(T, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.3, vel=.4)
+        return
+    hits(T, p_kick(), [b, b + .75, b + 2, b + 2.5], spb, vel=.68)
+    hits(T, p_snare(), [b + 1, b + 3], spb, vel=.55, wet=True)
+    for k in range(16):
+        hits(T, p_shaker(), [b + k * .25], spb, pan=.3, vel=.3 + (.25 if k % 2 == 1 else 0), hum=.002)
+    if nivel >= 2:
+        hits(T, p_snare(.4), [b + 1.75, b + 3.75], spb, vel=.28)
+
+
+def virada(T, b, spb, vel=.42):
+    """virada de caixa no fim da frase (sem tímpano)"""
+    hits(T, p_snare(.6), [b + 2 + k * .25 for k in range(8)], spb, vel=vel, hum=.002)
+
+
+def stabs(T, c, t, spb, beats=(1.5, 3.5), vel=.16):
+    """piano em ataques curtos (oitavas)"""
+    for bt in beats:
+        for m in chord(c, 4) + [chord(c, 3)[0]]:
+            T.note('piano', m, t + bt * spb, spb * .22, vel, .08)
+
+
+# ----------------------------------------------------------------- 1-1: terminal (ação)
 def gru_saguao():
-    bpm = 130
+    bpm = 144
     spb = 60 / bpm
-    chs = ('D Bm G A D Bm Em A G A F#m Bm Em A D D '
-           'G Gm D Bm Em A D D7 G Gm F#m B7 Em A D D').split()
+    chs = ('Dm Dm Bb C Dm Dm Gm A Bb C Dm Bb Gm A Dm A '
+           'F C Dm Bb F C Bb A Gm Bb C Dm Bb C A A').split()
     n = len(chs)
     T1, T2, T3 = Track(n * 4 * spb), Track(n * 4 * spb), Track(n * 4 * spb)
-    a = mel('A4:.5 D5:.5 F#5:.5 A5:1 F#5:.5 E5:.5 D5:.5 | B4:.5 D5:.5 F#5:1 E5:.5 D5:.5 B4:1 | '
-            'G4:.5 B4:.5 D5:.5 G5:1 F#5:.5 E5:.5 D5:.5 | E5:1.5 C#5:.5 A4:2 | '
-            'A4:.5 D5:.5 F#5:.5 A5:1 B5:.5 A5:.5 F#5:.5 | D6:1 B5:.5 A5:.5 F#5:1 D5:1 | '
-            'E5:.5 G5:.5 B5:.5 E6:1 D6:.5 B5:.5 G5:.5 | A5:2 r:1 C#5:.5 E5:.5 | '
-            'D6:.5 B5:.5 G5:.5 B5:.5 D6:1 B5:1 | C#6:.5 A5:.5 E5:.5 A5:.5 C#6:1 E6:1 | '
-            'C#6:.5 A5:.5 F#5:.5 A5:.5 C#6:1 A5:1 | B5:1.5 A5:.5 F#5:1 D5:1 | '
-            'G5:.5 F#5:.5 E5:.5 G5:.5 B5:1 A5:1 | E5:.5 F#5:.5 G5:.5 A5:.5 C#6:1 E6:1 | '
-            'D6:1 A5:.5 F#5:.5 D6:1 F#6:1 | D6:2 r:2', 4)
-    bb = mel('B5:1 A5:.5 G5:.5 D5:1 B4:1 | Bb5:1 A5:.5 G5:.5 D5:2 | F#5:.5 E5:.5 D5:.5 A4:.5 D5:1 F#5:1 | B5:2 A5:1 F#5:1 | '
-             'G5:.5 F#5:.5 E5:.5 B4:.5 E5:1 G5:1 | A5:1 G5:.5 F#5:.5 E5:1 C#5:1 | D5:.5 F#5:.5 A5:.5 D6:.5 C#6:1 A5:1 | C6:2 r:1 A5:.5 C6:.5 | '
-             'B5:1 D6:.5 B5:.5 G5:1 D5:1 | Bb5:1 D6:.5 Bb5:.5 G5:2 | A5:.5 G#5:.5 F#5:.5 C#5:.5 F#5:1 A5:1 | D#6:1 C#6:.5 B5:.5 A5:1 F#5:1 | '
-             'G5:.5 B5:.5 E6:.5 B5:.5 G5:1 E5:1 | C#6:1 B5:.5 A5:.5 G5:1 E5:1 | F#5:1 A5:.5 D6:.5 F#6:1 D6:1 | D6:2 r:1 A4:.5 C#5:.5', 4)
-    # a melodia fica na camada 2 (que toca sempre): a música já começa animada
-    play_mel(T2, 'xylophone', a, spb, vel=.4, legato=.6, rel=.25)
-    play_mel(T2, 'flute', a, spb, vel=.18, legato=.85, rel=.15, octave=-1)
-    play_mel(T2, 'flute', bb, spb, t0=16 * 4 * spb, vel=.34, legato=.9, rel=.2)
-    play_mel(T2, 'clarinet', bb, spb, t0=16 * 4 * spb, vel=.16, legato=.9, rel=.2, octave=-1)
-    # camada 3 (capanga por perto): metais dobrando a melodia uma oitava abaixo
-    play_mel(T3, 'trumpet', a, spb, vel=.2, legato=.7, rel=.1, octave=-1)
-    play_mel(T3, 'trumpet', bb, spb, t0=16 * 4 * spb, vel=.22, legato=.7, rel=.1, octave=-1)
+    a = mel('D5:.5 A4:.5 D5:.5 E5:.5 F5:1 E5:.5 D5:.5 | A5:1.5 G5:.5 F5:1 E5:1 | D5:.5 F5:.5 Bb5:1 A5:.5 G5:.5 F5:1 | '
+            'E5:.5 G5:.5 C6:1.5 Bb5:.5 G5:1 | D5:.5 A4:.5 D5:.5 E5:.5 F5:1 G5:1 | A5:.5 D6:.5 C6:.5 A5:.5 F5:1 D5:1 | '
+            'G5:.5 Bb5:.5 D6:1 C6:.5 Bb5:.5 A5:1 | E5:1 C#5:1 A4:1 r:1 | F5:.5 Bb5:.5 D6:1 C6:1 Bb5:1 | '
+            'G5:.5 C6:.5 E6:1 D6:1 C6:1 | A5:.5 F5:.5 D5:.5 F5:.5 A5:1 D6:1 | C6:.5 Bb5:.5 A5:.5 G5:.5 F5:1 D5:1 | '
+            'D5:.5 G5:.5 Bb5:1 A5:.5 G5:.5 D5:1 | C#5:.5 E5:.5 A5:1 G5:.5 E5:.5 C#5:1 | D5:1 F5:1 A5:1 D6:1 | C#6:2 A5:1 E5:1', 4)
+    bb = mel('C6:1 A5:.5 F5:.5 C6:1 D6:1 | E6:1.5 D6:.5 C6:1 G5:1 | F5:.5 A5:.5 D6:1 C6:.5 A5:.5 F5:1 | D6:1.5 C6:.5 Bb5:1 F5:1 | '
+             'A5:.5 C6:.5 F6:1 E6:.5 D6:.5 C6:1 | G5:.5 C6:.5 E6:1 D6:1 C6:1 | Bb5:1 D6:1 F6:1 D6:1 | E6:2 C#6:1 A5:1 | '
+             'G5:.5 Bb5:.5 D6:1 G6:1 F6:1 | F6:.5 D6:.5 Bb5:1 D6:1 F6:1 | E6:.5 C6:.5 G5:1 C6:1 E6:1 | F6:1.5 E6:.5 D6:1 A5:1 | '
+             'D6:1 F6:1 Bb5:1 D6:1 | E6:1 G6:1 C6:1 E6:1 | C#6:1 E6:1 A6:1 G6:1 | E6:2 C#6:1 A5:1', 4)
+    # melodia nas cordas (camada 2, que toca sempre no aeroporto): começa já em movimento
+    play_mel(T2, 'violin', a, spb, vel=.34, legato=.85, rel=.12)
+    play_mel(T2, 'flute', a, spb, vel=.1, legato=.85, rel=.1)
+    play_mel(T2, 'violin', bb, spb, t0=16 * 4 * spb, vel=.34, legato=.85, rel=.12)
+    play_mel(T2, 'cello', bb, spb, t0=16 * 4 * spb, vel=.18, legato=.85, rel=.12, octave=-2)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
-        r = chord(c, 2)[0]
-        q = baixo_quinta(r)
-        for (bt, m, d, v) in [(0, r, .7, .55), (.75, r, .2, .35), (1.5, q, .4, .45), (2, r + 12, .45, .4),
-                              (2.75, r, .2, .35), (3, q, .45, .45), (3.5, r, .4, .4)]:
-            T1.note('contrabass', m, t + bt * spb, d * spb, v, .06)
-        for (bt, v) in [(0, .26), (.75, .2), (1.5, .24), (2.5, .22), (3, .2), (3.5, .24)]:
-            strum(T1, 'guitar-nylon', chord(c, 4), t + bt * spb, spb * .3, v, .08, .006)
-        hits(T1, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.35, vel=.45)
-        # pulso já na base: bumbo nos tempos e palma no contratempo
-        hits(T1, p_kick(), [b, b + 2, b + 2.75], spb, vel=.5)
-        hits(T1, p_clap(), [b + 1, b + 3], spb, vel=.35, wet=True)
-        # camada 2: bateria e surdo
-        hits(T2, p_kick(), [b, b + 1.75, b + 2, b + 3.5], spb, vel=.6)
-        hits(T2, p_clap(), [b + 1, b + 3], spb, vel=.5, wet=True)
-        hits(T2, surdo(), [b + 1], spb, vel=.55)
-        hits(T2, p_rim(), [b, b + .75, b + 1.5, b + 2, b + 2.75, b + 3.5], spb, pan=-.3, vel=.5)
-        for k in range(16):
-            hits(T2, p_shaker(), [b + k * .25], spb, pan=.35, vel=.35 + (.3 if k % 4 == 2 else 0), hum=.002)
-        if i % 4 == 0:
-            for m in chord(c, 3):
-                T2.note('harmonium', m, t, 4 * spb, .06, .5)
-        # camada 3: agogô, pandeiro e metais na parte B
-        hits(T3, p_block(880), [b + .5, b + 2.5], spb, pan=.4, vel=.5)
-        hits(T3, p_block(1180), [b + 1, b + 1.5, b + 3], spb, pan=.4, vel=.45)
+        # camada 1: baixo pulsando e bumbo/chimbal
+        baixo8(T1, c, t, spb, .5)
+        T1.note('cello', chord(c, 2)[0] + 12, t, 4 * spb, .1, .4)
+        bateria(T1, b, spb, 0)
+        # camada 2: cordas em semicolcheias e bateria completa
+        arpejo16(T2, c, t, spb, .13, 3, 'violin')
+        bateria(T2, b, spb, 1)
         if i % 4 == 3:
-            hits(T3, p_tamb(), [b + 3, b + 3.25, b + 3.5, b + 3.75], spb, pan=.2, vel=.7)
-        # metais em ataques curtos (todo compasso) e virada de caixa a cada 4
-        for bt in (1.5, 3.5):
-            for m in chord(c, 4):
-                T3.note('trumpet', m, t + bt * spb, spb * .3, .13, .08)
-        if i % 4 == 3:
-            hits(T3, p_snare(.6), [b + 2 + k * .25 for k in range(8)], spb, vel=.4, hum=.002)
+            virada(T2, b, spb, .35)
+        # camada 3 (capanga perto): piano em ataques, cordas agudas e bateria mais cheia
+        stabs(T3, c, t, spb, (1.5, 3.5) if i % 2 == 0 else (.75, 2.5, 3.5), .15)
+        arpejo16(T3, c, t, spb, .1, 5, 'violin')
+        bateria(T3, b, spb, 2)
+        hits(T3, p_clap(), [b + 3], spb, vel=.3, wet=True)
     return render_stems([T1, T2, T3], .2, 1.5)
 
 
-# ----------------------------------------------------------------- 1-1 (segurança): samba-funk tenso
+# ----------------------------------------------------------------- 1-1 (segurança): tensão
 def gru_seguranca():
-    bpm = 122
+    bpm = 138
     spb = 60 / bpm
-    parte = 'Em7 A7 Em7 A7 Cmaj7 B7 Em7 Em7 Am7 D7 Gmaj7 Cmaj7 F#m7b5 B7 Em7 B7'.split()
+    parte = 'Em Em C D Em Em Am B C D Em C Am B Em B'.split()
     chs = parte * 2
     n = len(chs)
     T1, T2, T3 = Track(n * 4 * spb), Track(n * 4 * spb), Track(n * 4 * spb)
-    m = mel('E5:.75 G5:.25 B5:1 A5:.5 G5:.5 E5:1 | C#5:.5 E5:.5 G5:1 F#5:1 E5:1 | E5:.75 G5:.25 B5:1 D6:1 B5:1 | A5:2 G5:1 E5:1 | '
-            'E5:.5 G5:.5 B5:1 C6:1 B5:1 | A5:.5 F#5:.5 D#5:1 F#5:1 B4:1 | G5:1.5 F#5:.5 E5:2 | r:2 B4:.5 D5:.5 E5:.5 G5:.5 | '
-            'C6:1 B5:.5 A5:.5 E5:1 G5:1 | F#5:1 A5:.5 C6:.5 A5:2 | B5:.5 A5:.5 G5:.5 F#5:.5 D5:2 | E5:1 G5:1 B5:1 C6:1 | '
-            'A5:1 C6:.5 A5:.5 F#5:1 E5:1 | D#5:1 F#5:1 A5:1 B5:1 | G5:.5 F#5:.5 E5:1 B4:1 E5:1 | F#5:2 D#5:1 B4:1', 4)
-    play_mel(T2, 'clarinet', m, spb, vel=.34, legato=.8, rel=.12, octave=-1)
-    play_mel(T2, 'xylophone', m[::2], spb, t0=16 * 4 * spb, vel=.18, legato=.4, rel=.2)
-    play_mel(T3, 'trumpet', m, spb, vel=.26, legato=.75, rel=.1, octave=-1)
-    play_mel(T3, 'french-horn', m, spb, t0=16 * 4 * spb, vel=.2, legato=.8, rel=.1, octave=-1)
+    m = mel('E4:.5 B3:.5 E4:.5 F#4:.5 G4:1 F#4:.5 E4:.5 | B4:1.5 A4:.5 G4:1 F#4:1 | E4:.5 G4:.5 C5:1 B4:.5 A4:.5 G4:1 | '
+            'F#4:.5 A4:.5 D5:1.5 C5:.5 A4:1 | E4:.5 B3:.5 E4:.5 F#4:.5 G4:1 A4:1 | B4:.5 E5:.5 D5:.5 B4:.5 G4:1 E4:1 | '
+            'A4:.5 C5:.5 E5:1 D5:.5 C5:.5 B4:1 | F#4:1 D#4:1 B3:1 r:1 | G4:.5 C5:.5 E5:1 D5:1 C5:1 | '
+            'A4:.5 D5:.5 F#5:1 E5:1 D5:1 | B4:.5 G4:.5 E4:.5 G4:.5 B4:1 E5:1 | D5:.5 C5:.5 B4:.5 A4:.5 G4:1 E4:1 | '
+            'E4:.5 A4:.5 C5:1 B4:.5 A4:.5 E4:1 | D#4:.5 F#4:.5 B4:1 A4:.5 F#4:.5 D#4:1 | E4:1 G4:1 B4:1 E5:1 | D#5:2 B4:1 F#4:1', 4)
+    play_mel(T2, 'cello', m, spb, vel=.4, legato=.8, rel=.1)
+    play_mel(T2, 'cello', m, spb, t0=16 * 4 * spb, vel=.34, legato=.8, rel=.1)
+    play_mel(T2, 'violin', m, spb, t0=16 * 4 * spb, vel=.26, legato=.8, rel=.1, octave=1)
+    play_mel(T3, 'violin', m, spb, vel=.2, legato=.6, rel=.08, octave=1)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
-        r = chord(c, 2)[0]
-        for (bt, mm_, d, v) in [(0, r, .6, .55), (1.5, r + 12, .3, .4), (2, r, .4, .45), (2.75, baixo_quinta(r), .25, .4), (3.5, r + 10, .4, .4)]:
-            T1.note('contrabass', mm_, t + bt * spb, d * spb, v, .05)
-        for (bt, v) in [(.5, .14), (1.5, .12), (2.5, .14), (3.25, .12)]:
-            for mm_ in chord(c, 4):
-                T1.note('piano', mm_, t + bt * spb, spb * .25, v, .1)
-        hits(T1, p_kick(), [b, b + 2.5], spb, vel=.5)
-        hits(T1, p_shaker(), [b + k * .25 for k in range(16)], spb, pan=.3, vel=.3, hum=.002)
-        hits(T2, p_kick(), [b, b + 1.75, b + 2.5], spb, vel=.62)
-        hits(T2, p_snare(), [b + 1, b + 3], spb, vel=.48, wet=True)
-        hits(T2, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.3, vel=.55)
-        hits(T2, p_rim(), [b + .75, b + 2.25, b + 3.75], spb, pan=-.3, vel=.35)
+        baixo8(T1, c, t, spb, .5, (0, 0, 12, 0, 0, 12, 7, 10))
+        bateria(T1, b, spb, 0)
+        hits(T1, p_rim(), [b + .75, b + 2.25, b + 3.75], spb, pan=-.3, vel=.35)
+        arpejo16(T2, c, t, spb, .12, 3, 'violin')
+        bateria(T2, b, spb, 1)
         if i % 8 == 7:
-            for k in range(4):
-                T3.raw(p_timp(P('E2') + [7, 5, 3, 0][k]) * .5, t + (2 + k * .5) * spb)
+            virada(T2, b, spb, .4)
+        stabs(T3, c, t, spb, (.5, 2.0, 2.75), .14)
+        bateria(T3, b, spb, 2)
     return render_stems([T1, T2, T3], .2, 1.6)
 
 
-# ----------------------------------------------------------------- luta com o Fiscal Falso: batucada
+# ----------------------------------------------------------------- luta com o Fiscal Falso
 def fiscal():
-    bpm = 138
+    bpm = 156
     spb = 60 / bpm
     chs = 'Dm Dm Bb A Dm Dm Gm A Dm Dm Bb A Gm A Dm Dm'.split()
     T = Track(len(chs) * 4 * spb)
@@ -264,57 +281,42 @@ def fiscal():
                'F5:.5 F5:.5 Bb5:.5 F5:.5 D6:1 C6:.5 Bb5:.5 | A5:1 C#5:1 E5:1 A5:1 | '
                'D5:.5 D5:.5 F5:.5 D5:.5 A5:1 G5:.5 F5:.5 | E5:.5 F5:.5 G5:.5 F5:.5 E5:1 D5:1 | '
                'G5:.5 Bb5:.5 D6:.5 Bb5:.5 G5:1 D5:1 | E5:1 G5:1 A5:1 C#6:1', 4)
-    play_mel(T, 'trumpet', riff, spb, vel=.4, legato=.7, rel=.08)
-    play_mel(T, 'french-horn', riff, spb, vel=.22, legato=.8, rel=.1, octave=-1)
-    play_mel(T, 'trumpet', riff, spb, t0=8 * 4 * spb, vel=.36, legato=.7, rel=.08, octave=1)
-    play_mel(T, 'french-horn', riff, spb, t0=8 * 4 * spb, vel=.22, legato=.8, rel=.1)
+    play_mel(T, 'violin', riff, spb, vel=.36, legato=.6, rel=.06)
+    play_mel(T, 'cello', riff, spb, vel=.22, legato=.6, rel=.06, octave=-1)
+    play_mel(T, 'violin', riff, spb, t0=8 * 4 * spb, vel=.34, legato=.6, rel=.06, octave=1)
+    play_mel(T, 'piano', riff, spb, t0=8 * 4 * spb, vel=.16, legato=.3, rel=.06)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
-        r = chord(c, 2)[0]
-        for k in range(4):
-            T.note('contrabass', r if k % 2 == 0 else baixo_quinta(r), t + k * spb, spb * .5, .55, .05)
-        hits(T, surdo(), [b + 1, b + 3], spb, vel=.8)
-        hits(T, surdo(.6), [b + 2.5], spb, vel=.5)
-        for k in range(16):
-            hits(T, p_snare(.5), [b + k * .25], spb, vel=.28 + (.3 if k % 4 in (0, 3) else 0), hum=.002)
-        hits(T, p_rim(), [b + .5, b + 1.25, b + 2, b + 2.75, b + 3.5], spb, pan=-.35, vel=.6)
-        hits(T, p_block(900), [b, b + 1.5, b + 3], spb, pan=.4, vel=.55)
-        hits(T, p_block(1250), [b + .5, b + 2, b + 2.5], spb, pan=.4, vel=.5)
-        hits(T, p_kick(), [b, b + 2], spb, vel=.6)
+        baixo8(T, c, t, spb, .55, (0, 0, 0, 12, 0, 0, 10, 12))
+        arpejo16(T, c, t, spb, .12, 3, 'cello')
+        bateria(T, b, spb, 2)
+        stabs(T, c, t, spb, (0, 1.5, 3), .14)
         if i % 4 == 3:
-            hits(T, p_tamb(), [b + 3, b + 3.25, b + 3.5, b + 3.75], spb, pan=.2, vel=.8)
+            virada(T, b, spb, .45)
     return T.render(.16, 1.3)
 
 
 # ----------------------------------------------------------------- mini-chefe: falso segurança
 def seg_luta():
-    bpm = 132
+    bpm = 152
     spb = 60 / bpm
-    chs = 'Em Em C B7 Em Em Am B7 Em Em C B7 Am B7 Em Em'.split()
+    chs = 'Em Em C B Em Em Am B Em Em C B Am B Em Em'.split()
     T = Track(len(chs) * 4 * spb)
     riff = mel('E4:.5 E4:.25 G4:.25 r:.5 B4:.5 A4:.5 G4:.5 F#4:1 | E4:.5 E4:.25 G4:.25 r:.5 B4:.5 D5:1 B4:1 | '
                'C5:.5 B4:.5 A4:.5 G4:.5 E4:1 r:1 | D#4:.5 F#4:.5 A4:.5 B4:.5 F#4:2', 4)
-    play_mel(T, 'clarinet', riff, spb, vel=.3, legato=.6, rel=.08)
-    play_mel(T, 'clarinet', riff, spb, t0=8 * 4 * spb, vel=.3, legato=.6, rel=.08)
-    stab = mel('r:1 E5:.25 r:.75 G5:.25 r:.75 B5:.5 r:.5 | r:4', 4)
-    for k in range(8):
-        play_mel(T, 'trumpet', stab, spb, t0=k * 8 * spb, vel=.3, legato=.5, rel=.06)
+    play_mel(T, 'cello', riff, spb, vel=.36, legato=.55, rel=.06)
+    play_mel(T, 'violin', riff, spb, t0=8 * 4 * spb, vel=.3, legato=.55, rel=.06, octave=1)
+    play_mel(T, 'cello', riff, spb, t0=8 * 4 * spb, vel=.3, legato=.55, rel=.06)
     for i, c in enumerate(chs):
         t = i * 4 * spb
         b = i * 4
-        r = chord(c, 2)[0]
-        for (bt, mm_, d, v) in [(0, r, .4, .6), (.75, r, .2, .45), (1.5, r + 12, .3, .45), (2.5, baixo_quinta(r), .3, .5), (3.25, r + 10, .25, .45)]:
-            T.note('contrabass', mm_, t + bt * spb, d * spb, v, .05)
-        hits(T, p_kick(), [b, b + .75, b + 2.5], spb, vel=.65)
-        hits(T, p_snare(), [b + 1, b + 3], spb, vel=.5, wet=True)
-        hits(T, p_clap(), [b + 3], spb, vel=.3)
-        hits(T, p_shaker(), [b + k * .25 for k in range(16)], spb, pan=.3, vel=.35, hum=.002)
-        hits(T, p_rim(), [b + .5, b + 1.75, b + 2.25, b + 3.5], spb, pan=-.3, vel=.45)
-        hits(T, surdo(.7), [b + 2], spb, vel=.6)
+        baixo8(T, c, t, spb, .55, (0, 0, 12, 0, 0, 10, 0, 7))
+        arpejo16(T, c, t, spb, .11, 4, 'violin')
+        bateria(T, b, spb, 2)
+        stabs(T, c, t, spb, (1.5, 3.5), .13)
         if i % 4 == 3:
-            for k in range(4):
-                T.raw(p_timp(P('E2') + [0, 3, 5, 7][k]) * .45, t + (2 + k * .5) * spb)
+            virada(T, b, spb, .42)
     return T.render(.18, 1.4)
 
 
@@ -337,7 +339,7 @@ def vitoria():
         hits(T, p_kick(), [b, b + 2], spb, vel=.55)
         hits(T, p_clap(), [b + 1, b + 3], spb, vel=.45, wet=True)
         hits(T, p_shaker(), [b + k * .5 for k in range(8)], spb, pan=.3, vel=.6)
-        hits(T, surdo(), [b + 1], spb, vel=.45)
+        hits(T, p_snare(.5), [b + 3.5], spb, vel=.25)
     trompete = mel('D5:1 F#5:1 A5:2 | B5:1 A5:1 G5:2 | A5:1 B5:1 C#6:1 E6:1 | D6:4 | '
                    'D5:1 F#5:1 A5:2 | B5:1 D6:1 B5:2 | A5:1 G5:1 E5:1 C#5:1 | D5:4', 4)
     play_mel(T, 'trumpet', trompete, spb, vel=.32, legato=.85, rel=.15)
