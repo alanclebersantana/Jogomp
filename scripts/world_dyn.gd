@@ -1673,6 +1673,7 @@ func _player(g: Game) -> void:
 		_warp_pose(p)
 	else:
 		_player_draw(g)
+		_luvas_no_fio(g, p)
 		# com o capacete de mergulho: nadando, ele é desenhado junto do corpo (_player_draw, preso na cabeça);
 		# aqui só deitado no fundo (rastejando): a cabeça fica na frente, perto do chão
 		if g.NT and g.NT.helmet and p.swim and p.crouch and not p.get("dog") and p.dyingT == 0 and not (p.iframe > 0 and (T / 4) % 2 == 0):
@@ -2952,6 +2953,28 @@ func _vault(cx: float, gy: float) -> void:
 		Spr.seg(wx - cos(a2) * 20, cy + 10 - sin(a2) * 20, wx + cos(a2) * 20, cy + 10 + sin(a2) * 20, Color("#2a2c30"), 4)
 	Spr.circle(wx, cy + 10, 5, Color("#8a8e96"))
 
+## pendurado num fio eletrificado com as luvas isolantes: as luvas amarelas aparecem nas mãos (no fio)
+## e faíscas azuis estalam e morrem nelas — dá para ver que são elas que seguram o choque
+func _luvas_no_fio(g, p: Dictionary) -> void:
+	var v = p.get("vine")
+	if v == null or not v.get("eletro", false) or not g.has_item("luvas"):
+		return
+	var th: float = float(v.get("th", 0.0))
+	var r: float = float(p.get("vr", v.len))
+	# ponto do fio na altura das mãos (um pouco acima de onde o corpo pendura)
+	var hx: float = v.x + sin(th) * (r - 10.0)
+	var hy: float = v.y + cos(th) * (r - 10.0)
+	for k in [-1.0, 1.0]:
+		var gx: float = hx + k * 5.0
+		var gy: float = hy + k * 4.0
+		Spr.circle(gx, gy, 6.2, Color("#1e160c"))
+		Spr.circle(gx, gy, 5.0, Color("#f5c428"))
+		Spr.rect(gx - 5, gy + 4, 10, 3.5, Color("#e2611e"))
+	if (T / 7 + int(v.x)) % 5 == 0:
+		for k in 3:
+			var a: float = randf() * TAU
+			Spr.seg(hx, hy, hx + cos(a) * 9.0, hy + sin(a) * 9.0, Color(.6, .85, 1, .9), 1.6)
+
 ## Seu Barros, o atendente: parado, vira para o Milis; depois da conversa, quando o Milis já foi
 ## embora, dá um sorrisinho maroto (pista para quem presta atenção)
 func _npcs(g) -> void:
@@ -2972,8 +2995,9 @@ func _npcs(g) -> void:
 		var y: float = float(n.y)
 		Spr.ellipse(x, y + 1, 24, 5, Color(0, 0, 0, .25))
 		var br: float = sin(T * .05 + x) * 1.2
-		# a arte olha para a esquerda: vira quando o Milis está à direita
-		Spr.P(nm.substr(2), x, y + 2 + br * .2, w, px > x)
+		# a arte olha para a esquerda (menos a do cochicho, que olha para a direita): vira para o Milis
+		var olha_dir: bool = pose == "cochicha"
+		Spr.P(nm.substr(2), x, y + 2 + br * .2, w, (px < x) if olha_dir else (px > x))
 
 ## piso molhado: brilho azulado no chão (some aos poucos) e placa amarela nas poças fixas
 ## esteira rolante do piso: corrimão de vidro atrás, lona de borracha com sulcos andando e setas

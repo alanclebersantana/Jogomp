@@ -147,9 +147,10 @@ static func _next_beam(g, b: Dictionary) -> void:
 			var pcx2: float = g.player.x + g.player.w / 2
 			for dx in [0.0, -150.0, 150.0]:
 				var xx: float = clampf(pcx2 + dx, float(b.x0) + 30.0, float(b.x1) - 220.0)
-				b.objs.append({"k": "cai", "x": xx, "y": GY, "t": int(62.0 / sp) + (0 if dx == 0.0 else 12), "hy": -260.0})
+				# (dá tempo de sair: ~2 s de sombra crescendo antes de cair; as dos lados caem depois)
+				b.objs.append({"k": "cai", "x": xx, "y": GY, "t": int(115.0 / sp) + (0 if dx == 0.0 else 22), "hy": -260.0})
 			warn = 20
-			on = 90
+			on = 150
 		"grade":
 			# feixes verticais a cada ~110 px, com dois vãos sorteados
 			var x: float = float(b.x0) + 70.0
@@ -558,7 +559,7 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		else:
 			var tt: int = int(o.t)
 			if tt > 0:
-				var u: float = clampf(1.0 - tt / 70.0, 0.0, 1.0)
+				var u: float = clampf(1.0 - tt / 110.0, 0.0, 1.0)
 				Spr.ellipse(o.x, GY + 1, 10 + 22 * u, 4 + 3 * u, Color(0, 0, 0, .2 + .35 * u))
 				if tt < 14:
 					var yy: float = GY - 22.0 - tt * 18.0

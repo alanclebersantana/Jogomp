@@ -109,6 +109,13 @@
    "w": 120
   },
   {
+   "t": "tapume",
+   "x": 7540,
+   "y": 230,
+   "w": 60,
+   "h": 270
+  },
+  {
    "t": "plat",
    "x": 7650,
    "y": 215,
@@ -1673,11 +1680,11 @@
   ],
   [
    7560,
-   430
+   200
   ],
   [
    7600,
-   430
+   200
   ],
   [
    7640,
@@ -2074,6 +2081,12 @@
   ]
  ],
  "hints": [
+  {
+   "a": 7470,
+   "b": 7540,
+   "t": "Parede alta demais! Pule, pule de novo e, no alto, aperte PULAR mais uma vez: as botas-foguete dão o impulso.",
+   "yl": 640
+  },
   {
    "a": 3150,
    "b": 3300,
@@ -3011,7 +3024,7 @@
  "gadgets": [
   {
    "x": 2300,
-   "y": -40,
+   "y": 476,
    "id": "botas_foguete"
   },
   {

@@ -113,6 +113,7 @@ func fase_1_1() -> void:
 	S("coluna do painel (pulo duplo)", jump_to(1960, true))
 	walk_to(2030)
 	S("desce", jump_to(2200))
+	S("botas-foguete (no caminho)", walk_to(2300) and pegou("botas_foguete"))
 	# elevador panorâmico até o mirante (pista 1)
 	walk_to(2110)
 	S("entra no elevador", g.MV.on_plat(g.MV.MV[0]))
@@ -120,8 +121,6 @@ func fase_1_1() -> void:
 	S("elevador subiu", until({}, func(): return float(g.MV.MV[0].pos) <= 0.001, 700))
 	S("mirante", walk_to(2440))
 	S("pista 1", n_clues() == 1)
-	walk_to(2300)
-	S("botas-foguete", pegou("botas_foguete"))
 	walk_to(2110)
 	use()
 	S("elevador desceu", until({}, func(): return float(g.MV.MV[0].pos) >= .999, 700))
@@ -172,9 +171,10 @@ func fase_1_1() -> void:
 	S("descansou 1", until({}, func(): return rests.has(1), 40))
 	S("caixa", jump_to(7300))
 	S("tapume 2", crawl(7505))
-	# segurança (espera antes da esteira que leva para o choque)
-	walk_to(7470)
-	S("choque 1", cross_spikes(trap_at("spikes", 7600), 7760))
+	# parede de contêineres: só com as botas-foguete; de lá, por cima do 1º choque
+	S("parede (botas-foguete)", foguete_ate(7570, 230))
+	S("plataforma do raio-x", jump_to(7705))
+	S("desce entre os choques", jump_to(7765))
 	S("choque 2", cross_spikes(trap_at("spikes", 7820), 7990))
 	walk_to(8180)
 	S("bandeja 1", jump_to(8300))
@@ -235,6 +235,29 @@ func fase_1_1() -> void:
 	walk_to(15912)
 	var r = until({}, func(): return not g.running, 300)
 	S("saída", r is String and r == "state")
+
+## pulo + pulo duplo + impulso das botas-foguete, e vai de lado até x_alvo no alto (y_top = chão de lá)
+func foguete_ate(x_alvo: float, y_top: float):
+	press("J")
+	frame({"J": true})
+	var st := 0
+	for i in 220:
+		P = g.player
+		if not ok():
+			return "state"
+		var d := {"J": true}
+		if st == 0 and P.vy > -1:
+			press("J")
+			st = 1
+		elif st == 1 and P.vy > -1 and i > 10:
+			press("J")
+			st = 2
+		if st == 2 and P.y + P.h < y_top - 2 and absf(x_alvo - px()) > 6:
+			d["R" if x_alvo > px() else "L"] = true
+		frame(d)
+		if P.onGround and i > 5:
+			break
+	return P.onGround and absf(P.y + P.h - y_top) < 4
 
 ## espera a tábua idx chegar perto de x e pula nela
 func pula_na_tabua(idx: int, x: float, mx: int = 900):

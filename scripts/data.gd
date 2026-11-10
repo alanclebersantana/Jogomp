@@ -16,7 +16,7 @@ const RECIPES := [
 const CLUE_INFO := {
 	1: ["Recibo de venda", "Um recibo de milhas vendidas por fora, com um carimbo de cifrão dourado no canto. Quem anda por aí com um cifrão desses?"],
 	2: ["Capuz esquecido", "O capuz escuro do vulto, largado na sala secreta. Dentro, um fio de bigode fino e grisalho. O vulto é só um capanga... ou é o chefe?"],
-	3: ["Lista de capangas", "\"Seguranças falsos no saguão, robôs falsos na segurança, pombos no mezanino. Ninguém passa!\" — assinado só com um B cheio de floreios."],
+	3: ["Lista de capangas", "\"Seguranças falsos no saguão, robôs falsos na segurança, drones espiões no mezanino. Ninguém passa!\" — assinado só com um B cheio de floreios."],
 	4: ["Etiqueta de mala adulterada", "Uma etiqueta de bagagem com o código trocado. As milhas estão sendo despachadas escondidas nas malas!"],
 	5: ["Planilha do Barão", "Uma planilha com milhares de milhas LATAM desviadas, anotadas com uma letra cheia de floreios."],
 	6: ["Plano de voo", "\"Motoboy leva o malote até a pista. Eu sigo para Maringá no voo das 23h59.\" — Barão."],

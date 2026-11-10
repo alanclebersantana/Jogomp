@@ -1662,6 +1662,9 @@ func step() -> void:
 				flash("Choque! O fio está eletrificado: sem luvas isolantes não dá para segurar.", 170)
 				continue
 			if t > 24 and t < v.len + 22 and perp < 30:
+				if v.get("eletro", false) and not has_meta("luvas_dica"):
+					set_meta("luvas_dica", true)
+					flash("As luvas isolantes seguram o choque do fio!", 130)
 				player.vine = v
 				player.erase("voff")
 				player.vr = clamp(t, 40.0, v.len)
