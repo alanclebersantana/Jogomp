@@ -468,6 +468,7 @@ chao(2150, 3400)
 peca(1880, 2040, 300, 500, "p_pc_cabine", -4, 0, 4)   # cabine de informações (de vidro)
 milhas(1890, 2030, 270, 35)
 dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
+dica(2160, 2300, "Parado, segure ↑ para olhar para cima: tem coisa lá no mezanino!")
 arco(2050, 2300, 470, 90, 6)
 robo_falso(2450, [2580, 2760])
 # elevador panorâmico de vidro até o mirante (o único jeito de chegar lá): uma pista do ladrão
@@ -629,7 +630,7 @@ cambista(13900, [13750, 14050])
 pista(14000, GY, 3)
 totem(13450)
 # --- E · Controle de segurança do portão (14200 .. 15900): o mini-chefe FISCAL FALSO
-chao(14200, 16000)
+chao(14200, 16300)
 milhas(14250, 14450, 470, 50)
 totem(14380)
 FZ0, FZ1 = 14600, 15600
@@ -643,7 +644,7 @@ S.append({"t": "pgate", "x": FZ1 - 50, "y": 210, "w": 80, "h": 120, "id": "fisca
 dica(FZ0, FZ1, "Fiscal: pule malas e lasers baixos, abaixe (↓) nos altos, saia das faixas acesas do chão. Painel piscando? Corra até ele e bata!", boss=1)
 milhas(15700, 15880, 470, 45)
 fim(15900)
-L["spanX"] = 16000
+L["spanX"] = 16300   # a porta (15900) não fica atrás dos botões da direita
 # tapumes de obra: parede de tábuas até o teto com um vão embaixo — só passa rolando (corra e abaixe)
 # ou se arrastando abaixado
 for tx in (2490, 7360, 10530):

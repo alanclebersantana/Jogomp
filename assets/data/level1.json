@@ -912,7 +912,7 @@
    "t": "ground",
    "x": 14200,
    "y": 500,
-   "w": 1800,
+   "w": 2100,
    "h": 140
   },
   {
@@ -2063,6 +2063,12 @@
    "yl": 640
   },
   {
+   "a": 2160,
+   "b": 2300,
+   "t": "Parado, segure ↑ para olhar para cima: tem coisa lá no mezanino!",
+   "yl": 640
+  },
+  {
    "a": 1990,
    "b": 2160,
    "t": "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...",
@@ -3000,5 +3006,5 @@
   "y": 410,
   "kind": "exit"
  },
- "spanX": 16000
+ "spanX": 16300
 }

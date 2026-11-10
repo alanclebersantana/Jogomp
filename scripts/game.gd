@@ -1995,6 +1995,9 @@ func _camera() -> void:
 		# perseguição do urso: o Tomé fica mais à direita da tela e o urso aparece atrás dele
 		if K and K.bear_chase():
 			want = (-1.0 if K.BEAR.x < px else 1.0) * W * .16
+		# pendurado num fio de travessia: a câmera mostra também o próximo fio (ou a passarela de chegada)
+		if player.vine and player.vine.has("aim"):
+			want = clamp((float(player.vine.aim[0]) - px) * .5, -260.0, 260.0)
 		var r := damp(look_x, want, look_vx, .7)
 		look_x = r[0]
 		look_vx = r[1]
@@ -2205,12 +2208,18 @@ func cam_ty(px: float, focus: float) -> float:
 		gy = base
 	var t: float = cam_focus_ty(focus)
 	if gy < 90000.0 and gy - feet < H * .78:
-		t = gy - H * chao_frac
+		var cf: float = chao_frac
+		# aeroporto, olhando para o alto (a câmera abriu): o chão desce um pouco na tela para sobrar céu
+		if L.get("theme", "") == "aeroporto" and aero_up_zoom(540.0) < 1.2:
+			cf = .94
+		t = gy - H * cf
 		# algo interessante mais embaixo que o chão (canal, poço, água funda entre pilares): mostra
 		var low: float = low_interest(px, gy)
 		if low > 0.0:
 			t = max(t, low + 30.0 - H)
-	return min(t, focus - H * .12)
+	# o Milis nunca passa por cima da barra de cima (vidas, milhas, fase): pelo menos ~20% da tela
+	# acima da cabeça, contando a altura DE AGORA (o foco anda atrasado nos pulos e no vento)
+	return min(t, focus - H * .12, player.y - max(H * .2, 86.0))
 
 ## o ponto (px, y) está no fundo de água/brejo e o Tomé está por cima da superfície (não nadando)
 func _submerged(px: float, y: float, feet: float) -> bool:
@@ -2287,6 +2296,47 @@ func base_ground(px: float, feet: float) -> float:
 ## paredão alto ao lado (barranco, muro de pedra, torre): quanto a câmera precisa abrir para mostrar o
 ## topo dele e um pouco acima, com o chão ainda embaixo (1 = não precisa)
 var _tall_cache := {}
+## aeroporto: olhando do chão, a câmera abre o bastante para mostrar o que tem no alto perto do Milis
+## (mezanino, topo do elevador, passarelas, plataformas altas, itens e equipamentos lá em cima).
+## Devolve o zoom TOTAL máximo (99 = sem limite extra); nunca abre além de 0,82.
+var _aero_up_cache := {}
+func aero_up_zoom(vs_h: float) -> float:
+	var p: Dictionary = player
+	if not p.onGround or p.ladder or p.vine:
+		return 99.0
+	var px: float = p.x + p.w / 2
+	var feet: float = p.y + p.h
+	var key := Vector2i(int(floor(px / 32.0)), int(floor(feet / 24.0)))
+	if _aero_up_cache.has(key):
+		return _aero_up_cache[key]
+	var top := feet
+	var x0: float = px - 300.0
+	var x1: float = px + 300.0
+	for s in near_solids(x0, x1):
+		if s.get("deco") or not str(s.get("t", "")) in ["peca", "plat"]:
+			continue
+		var sx: float = float(s.x)
+		if sx > x1 or sx + float(s.get("w", 0)) < x0:
+			continue
+		var sy: float = float(s.y)
+		if sy < feet - 150.0:
+			top = min(top, sy - 40.0)   # o que fica em cima dela (Milis, item) também aparece
+	for m in L.get("movers", []):
+		if str(m.get("k", "")) == "lift" and absf(float(m.x) - px) < 300.0:
+			top = min(top, min(float(m.y0), float(m.y1)) - 40.0)
+	for arr in [L.get("items", []), L.get("gadgets", [])]:
+		for it in arr:
+			if absf(float(it.x) - px) < 300.0 and float(it.y) < feet - 150.0:
+				top = min(top, float(it.y) - 40.0)
+	var z := 99.0
+	if top < feet - 150.0:
+		# o chão fica a 90% da altura da tela: o que está acima precisa caber nos 90% de cima,
+		# descontando a barra de cima (~50 px da tela)
+		var need: float = (feet - top) / .9 + 50.0
+		z = clampf(vs_h / need, .82, 99.0)
+	_aero_up_cache[key] = z
+	return z
+
 func tall_zoom(base_h: float) -> float:
 	var p: Dictionary = player
 	var px: float = p.x + p.w / 2

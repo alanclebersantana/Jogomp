@@ -414,11 +414,18 @@ func _process(_d: float) -> void:
 		# aeroporto: câmera 1,25x mais perto (o Milis e a ação aparecem maiores)
 		var az: float = 1.25 if game.L.get("theme", "") == "aeroporto" else 1.0
 		var zt: float = _zoom_target() * retrato * az * (1.12 if game.slowmo > 0 else 1.0)
+		if az > 1.0:
+			# olhando do chão para o alto (mezanino, elevador, passarelas): abre até mostrar lá em cima
+			zt = min(zt, game.aero_up_zoom(vs.y))
+			# arena do falso segurança: abre um pouco (as duas grades e a luta inteira na tela)
+			if game.ARN and not game.ARN.active().is_empty():
+				zt = min(zt, 1.08)
 		# luta com o Fiscal: abre o bastante para a arena inteira caber à esquerda dos botões
+		# (sem abrir demais: o Milis não encolhe tanto de uma vez)
 		if az > 1.0 and game.X and game.X.boss_active() and game.X.BOSS.get("skin", "") == "fiscal":
-			zt = vs.x / 1400.0
+			zt = vs.x / 1280.0
 		# abrir é mais rápido que fechar (nada fica cortado por muito tempo)
-		cam_zoom = lerpf(cam_zoom, zt, .04 if zt < cam_zoom else .02)
+		cam_zoom = lerpf(cam_zoom, zt, .03 if zt < cam_zoom else .02)
 		game.camera.zoom = Vector2(cam_zoom, cam_zoom)
 		game.W = vs.x / cam_zoom
 		game.H = vs.y / cam_zoom
@@ -557,8 +564,8 @@ func _zoom_target() -> float:
 	var tz: float = g.tall_zoom(get_viewport().get_visible_rect().size.y)
 	if tz < 1.0:
 		return tz
-	# calma: perto de uma fogueira, parado
-	if abs(p.vx) < .5 and p.onGround:
+	# calma: perto de uma fogueira, parado (no aeroporto não: os totens ficam colados nas arenas)
+	if abs(p.vx) < .5 and p.onGround and g.L.get("theme", "") != "aeroporto":
 		for c in g.CHK:
 			if abs(c.x - (p.x + p.w / 2)) < 220 and abs(c.y - (p.y + p.h)) < 80:
 				return 1.1
