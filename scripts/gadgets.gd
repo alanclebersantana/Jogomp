@@ -244,7 +244,7 @@ func draw(T: int) -> void:
 		if not tg.is_empty() and tg.get("tgt") == a:
 			Spr.ring(a.x, a.y + 4, 22 + sin(T * .3) * 3, Color(1, .9, .4, .8), 2.0, 0, TAU)
 	for s in STUCK:
-		if s.x < x0 or s.x > x1 or (s.st == 2 and false):
+		if s.x < x0 or s.x > x1 or s.st == 2:   # caiu e abriu: as milhas saem e a mala some
 			continue
 		Spr.save()
 		Spr.translate(s.x, s.y)

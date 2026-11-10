@@ -10,10 +10,10 @@ const R2 := 101
 const FUNCS := [
 	["pulo", "Pular", "J", JOY_BUTTON_A],
 	["golpe", "Bastão (golpe)", "G", JOY_BUTTON_RIGHT_SHOULDER],
-	["chute", "Chute / investida", "K", L2],
+	["chute", "Chute / investida", "K", R2],
 	["usar", "Usar / gancho", "A", JOY_BUTTON_Y],
 	["defesa", "Defesa / esquiva", "F", JOY_BUTTON_LEFT_SHOULDER],
-	["correr", "Correr (segurar)", "RUN", R2],
+	["correr", "Correr (segurar)", "RUN", L2],
 	["planar", "Planar", "P", JOY_BUTTON_X],
 	["mochila", "Mochila", "BAG", JOY_BUTTON_B],
 	["mapa", "Mapa da fase", "MAP", JOY_BUTTON_BACK],

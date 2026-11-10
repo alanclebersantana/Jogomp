@@ -593,14 +593,20 @@ totem(9860)
 
 # --- D · Mezanino e portão (10600 .. 14200): escada de serviço, corrimãos, escada rolante, sala secreta
 L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
-chao(10600, 11400)
+chao(10600, 11460)
 # parede de grade de manutenção para escalar até a passarela (longe de qualquer saída de vento)
 escada(10880, 160, kind="net")
 dica(10820, 10960, "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).")
 passarela(10930, 11450, 160, 200)   # passarela de serviço
 milhas(10960, 11420, 130, 50)
 robo_falso(11300, [11000, 11550], y=160)
-L["pits"].append([11400, 12200])
+L["pits"].append([11460, 12200])
+# por baixo da passarela: caminho alternativo com recompensa (milhas no chão, máquina de lanche que
+# solta milhas, caixa com coração no fim) — mas com o faxineiro e o piso molhado; no fim, uma escada
+# volta para a ponta da passarela (sem precisar voltar até a grade)
+milhas(10990, 11190, 470, 40)
+caixa(11320, item="heart")
+escada(11452, 160, kind="ladder")
 # vão das bagagens: só atravessa balançando de fio em fio (3 fios de manutenção soltos do teto).
 # As passarelas ficam longe demais uma da outra para pular (nem com as botas-foguete).
 for vx, aim in ((11590, [11840, 120]), (11840, [12090, 120]), (12090, [12290, 160])):

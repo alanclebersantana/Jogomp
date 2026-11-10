@@ -3,8 +3,8 @@ shader_type canvas_item;
 // cores mais saturadas e vivas, contraste um pouco maior, contornos escuros reforçados e luz de sol
 // quente nos realces. Uma leitura da tela (mais 4 vizinhos para o contorno, só na qualidade alta).
 uniform sampler2D scr : hint_screen_texture, filter_linear_mipmap;
-uniform float sat = 1.16;        // saturação geral
-uniform float vib = 0.26;        // a mais nas cores apagadas (céu, água, folhagem cinzenta)
+uniform float sat = 1.27;        // saturação geral
+uniform float vib = 0.32;        // a mais nas cores apagadas (céu, água, folhagem cinzenta)
 uniform float contrast = 1.05;
 uniform float bright = 1.02;
 uniform float lift = 0.015;     // sombras um tiquinho mais abertas (nada fica "lavado" de preto)

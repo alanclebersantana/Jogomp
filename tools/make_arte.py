@@ -32,8 +32,38 @@ _cache = {}
 
 def comps(nome, dil=6, amin=2500):
     if nome not in _cache:
-        _cache[nome] = componentes(abrir_sem_verde(os.path.join(G, nome + ".jpg")), dil=dil, area_min=amin)
+        cs = componentes(abrir_sem_verde(os.path.join(G, nome + ".jpg")), dil=dil, area_min=amin)
+        if nome.startswith("milis"):
+            cs = [clareia_casaco(q) for q in cs]
+        _cache[nome] = cs
     return _cache[nome]
+
+
+def clareia_casaco(q):
+    """casaco do Milis num verde um pouco mais claro (só os verdes escuros/médios da roupa)"""
+    import numpy as np
+    a = np.asarray(q.convert("RGBA")).astype(np.float32) / 255.0
+    rgb = a[..., :3]
+    mx = rgb.max(-1)
+    mn = rgb.min(-1)
+    d = mx - mn + 1e-6
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60.0
+    s = d / (mx + 1e-6)
+    v = mx
+    m = (h > 85) & (h < 165) & (s > .18) & (v < .78) & (a[..., 3] > .05)
+    # mais claro (valor sobe ~40%) e um tiquinho menos saturado, sem mudar o tom
+    v2 = np.where(m, np.minimum(1.0, v * 1.38 + .05), v)
+    s2 = np.where(m, s * .94, s)
+    c = v2 * s2
+    x = c * (1 - np.abs((h / 60.0) % 2 - 1))
+    z = v2 - c
+    hi = (h // 60).astype(int) % 6
+    R = np.choose(hi, [c, x, 0 * c, 0 * c, x, c]) + z
+    G2 = np.choose(hi, [x, c, c, x, 0 * c, 0 * c]) + z
+    B = np.choose(hi, [0 * c, 0 * c, x, c, c, x]) + z
+    out = np.stack([np.where(m, R, r), np.where(m, G2, g), np.where(m, B, b), a[..., 3]], -1)
+    return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8), "RGBA")
 
 
 def espelha(q):
@@ -167,7 +197,7 @@ def milis():
     for n, q in P.items():
         troca(n, q)
     # poses de luta do aeroporto (art_src/gemini/milis_luta.jpg): rasteira, voadora, base, defesa, esquiva
-    lu = componentes(abrir_sem_verde(os.path.join(G, "milis_luta.jpg")), dil=4, area_min=1500)
+    lu = [clareia_casaco(q) for q in componentes(abrir_sem_verde(os.path.join(G, "milis_luta.jpg")), dil=4, area_min=1500)]
     kl = 118.0 / lu[3].height
     for n, q in [("pai_kick_low", lu[0]), ("pai_kick_fly", lu[1]), ("pai_ready", lu[2]), ("pai_guard", lu[3]), ("pai_dodge", lu[4])]:
         w, h = int(q.width * kl) + 2, int(q.height * kl) + 2

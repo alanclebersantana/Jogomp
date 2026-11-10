@@ -3,7 +3,7 @@ class_name Capangas
 ## Capangas espertos do aeroporto (sempre avisam antes de atacar — dá para ler e reagir):
 ##  robô falsificado (frog): para, carrega (brilho azul e faíscas) e dá um CHOQUE em volta — pule!
 ##  mala voadora (fly): treme no ar com um brilho laranja (mirando) e MERGULHA no Milis; depois sobe devagar
-##  faxineiro (janitor): de vez em quando escorrega no próprio piso molhado e cai (hora de bater)
+##  faxineiro (janitor): deixa o piso molhado atrás dele (ele mesmo não escorrega; o Milis sim)
 
 const ZAP_R := 86.0
 
@@ -105,21 +105,7 @@ static func _faxineiro(g, e: Dictionary) -> bool:
 		if s > 60:
 			e.x = clamp(e.x + e.dir * (s - 60) * .25, e.r[0], e.r[1])
 		return true
-	e.scd = int(e.get("scd", 300)) - 1
-	if int(e.scd) <= 0:
-		# pisou no próprio molhado: escorrega e cai (fica no chão um tempinho)
-		var wet := false
-		for wz in g.WET:
-			if e.x > wz.x - 10 and e.x < wz.x + wz.w + 10 and abs(float(wz.y) - float(e.base)) < 10:
-				wet = true
-		if wet and randf() < .02:
-			e.slip = 90
-			e.stun = 0
-			e.scd = 420
-			Audio.play("slide", -4, 1.2)
-			Audio.play("stomp", -8, .9)
-			g.burst(e.x, e.base - 4, 10, Color(.7, .85, 1))
-			return true
+	# (ele conhece o próprio piso molhado: não escorrega nele — quem escorrega é o Milis)
 	return false
 
 ## o faxineiro caído está vulnerável (de frente também)
