@@ -360,7 +360,7 @@ quebra(2420, "malas", 74)
 obj(2960, "folhetos", 40)
 obj(3240, "etiqueta", 26)
 molhado(2860, 140)
-quebra(2840, "placa", 34)
+quebra(2875, "placa", 34)   # na beira da poça (sem encostar no vaso)
 L.setdefault("carts", []).append({"x0": 9230, "x1": 9800})   # fora da arena do 3º segurança
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
@@ -452,7 +452,7 @@ obj(13820, "cafe", 44)
 molhado(13650, 130)
 quebra(13630, "placa", 34)
 faxineiro(13300, [13100, 13560])
-L["traps"].append({"k": "roll", "x": 12390, "y": GY, "trig": 12205, "tw": 90, "dir": -1, "vmax": 3.6, "end": 12215, "r": 30, "aero": True})
+L["traps"].append({"k": "roll", "x": 12390, "y": GY, "trig": 12205, "tw": 90, "dir": -1, "vmax": 3.6, "end": 12192, "r": 30, "aero": True})
 dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
 caixa(820, n=5)
@@ -568,13 +568,13 @@ milhas(9020, 9100, 300, 40)
 coluna(9060, 260, -60)
 milhas(9220, 9880, -70, 50)
 cartao(9850, -40, "Cartão de embarque dourado 2/3: carimbado \"VOO ESPECIAL — PORTÃO 2??\". Quem será o passageiro?")
-L["items"].append({"x": 9500, "y": -24, "id": "cartao_acesso"})
+L["items"].append({"x": 9500, "y": -64, "id": "cartao_acesso"})
 dica(8900, 9150, "Saída de ar-condicionado: pule em cima dela e o vento leva você lá para cima.")
 mala_monstro(9600, -200, [9300, 9850])
-L["items"].append({"x": 8620, "y": 476, "id": "cordao"})
+L["items"].append({"x": 8560, "y": 476, "id": "cordao"})
 drone(9500, 360, [9300, 9750])
 cambista(10000, [9800, 10300])
-totem(8560)
+totem(8500)
 # a porta da área restrita: precisa do crachá (cartão de acesso + cordão)
 L["locks"].append({"x": 10350, "y": 380, "w": 80, "h": 120, "id": "porta_cracha", "kind": "gate", "gate": "seg1",
                    "short": "a porta da área restrita",
@@ -587,7 +587,7 @@ L["locks"].append({"x": 10350, "y": 380, "w": 80, "h": 120, "id": "porta_cracha"
                    "msg": "Crachá aceito! A porta da área restrita abriu."})
 portao("seg1", 10440, 380, GY)
 bloco(10420, 10480, -620, 380, t="brickw")
-dica(10150, 10400, "A porta só abre com crachá. Junte o cartão de acesso com o cordão no compartimento do Milis.")
+dica(10325, 10440, "A porta só abre com crachá. Junte o cartão de acesso com o cordão no compartimento do Milis.")
 totem(9860)
 
 # --- D · Mezanino e portão (10600 .. 14200): escada de serviço, corrimãos, escada rolante, sala secreta
@@ -655,10 +655,10 @@ L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
 # seguranças são mini-chefes: cada um tem uma ARENA — as grades descem quando o Milis entra e só sobem
 # quando ele derruba o segurança (não dá para passar sem lutar)
 _AJUSTE = {
-    1300: {"r": [1225, 1430], "arena": [1130, 1495]},
+    1300: {"r": [1225, 1430], "arena": [1130, 1488]},
     4100: {"r": [4480, 4740], "arena": [4350, 4795]},     # embaixo da esteira de despacho
     10000: {"r": [10040, 10290], "arena": [9905, 10340]},  # entre o mezanino e a porta do crachá
-    2450: {"r": [8650, 8740]},                             # robô depois das bandejas (longe de tapume e de arena)
+    2450: {"r": [8700, 8780]},                             # robô depois das bandejas (longe de tapume e de arena)
     5700: {"r": [5620, 5980], "cy": 330, "y": 330},        # drone na fila do check-in
     13300: {"r": [10950, 11350]},                          # faxineiro embaixo da passarela do mezanino
 }

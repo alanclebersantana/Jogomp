@@ -19,6 +19,13 @@ func load_level() -> void:
 		if e.has("arena"):
 			A.append({"e": e, "x0": float(e.arena[0]), "x1": float(e.arena[1]), "on": false, "done": false, "h": 0.0, "t": 0})
 
+## x dentro de uma grade fechada (ou fechando)
+func grade_at(x: float) -> bool:
+	for a in A:
+		if a.h > .5 and (abs(x - a.x0) < GW / 2 + 2 or abs(x - a.x1) < GW / 2 + 2):
+			return true
+	return false
+
 func is_on(e: Dictionary) -> bool:
 	for a in A:
 		if a.e == e and a.on:
@@ -70,8 +77,8 @@ func step() -> void:
 			g.en_seen["boar"] = true   # (a explicação vem só daqui, uma vez)
 		if a.t == 30:
 			g.want_comic("seguranca")
-			if not g.has_meta("seg_dica"):
-				g.set_meta("seg_dica", true)
+			if not Save.getv("dica", "seg_arena", false):
+				Save.setv("dica", "seg_arena", true)
 				g.flash("O falso segurança fechou a passagem! De frente ele defende com o escudo: bata por trás ou logo depois da investida.", 230)
 			else:
 				g.flash("Outro falso segurança fechou a passagem: derrube ele para seguir!", 150)

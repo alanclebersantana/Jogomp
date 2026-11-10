@@ -265,7 +265,8 @@ static func draw_shield(e: Dictionary) -> void:
 
 ## arena fechada e o Milis "acampado" lá em cima (na esteira de despacho, numa plataforma): depois de um
 ## tempo o segurança arremessa o rádio nele (aviso: para, mira e brilha antes de jogar)
-static func _radio(g, e: Dictionary) -> void:
+## o rádio voando segue sozinho (mesmo com o segurança tonto ou já caído)
+static func tick_proj(g, e: Dictionary) -> void:
 	var pr = e.get("proj")
 	if pr != null:
 		pr.x += pr.vx
@@ -280,6 +281,8 @@ static func _radio(g, e: Dictionary) -> void:
 			g.burst(pr.x, min(pr.y, e.base - 4), 6, Color(.6, .6, .65))
 			Audio.play("clanc", -12, 1.6)
 			e.erase("proj")
+
+static func _radio(g, e: Dictionary) -> void:
 	if g.ARN == null or not g.ARN.is_on(e) or e.dead:
 		e.camp = 0
 		return

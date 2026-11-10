@@ -607,6 +607,9 @@ func coins_near(x0: float, x1: float) -> Array:
 
 ## ponto dentro de parede/bloco (plataformas finas não contam)
 func wall_at(x: float, y: float, ign = null) -> bool:
+	# grades fechadas das arenas também seguram o que rola e o que voa
+	if ARN and ARN.grade_at(x):
+		return true
 	for s in blockers():
 		if s.get("oneway") or s == ign:
 			continue
@@ -1779,7 +1782,9 @@ func step() -> void:
 					e.dvy += .45
 					# X1 voa girando para longe do golpe
 					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
-				elif e.get("dk") == "seg":
+				if e.has("proj"):
+					SegGuard.tick_proj(self, e)   # o rádio que já estava no ar termina de voar
+				if e.get("dk") == "seg":
 					# o segurança derrubado escorrega de costas no piso, freando (para na parede)
 					if wall_at(e.x + float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0)) + sign(float(e.get("dvx", 0.0))) * 50, e.y - 20):
 						e.dvx = 0.0
@@ -3612,6 +3617,8 @@ func _enemy_life(e: Dictionary) -> void:
 				PARTS.append({"x": e.x - sign(vx) * (14 + k * 4), "y": e.y - 1, "vx": -sign(vx) * randf_range(.3, 1.2), "vy": -randf_range(.3, .9), "life": 14, "col": _dust_col()})
 
 func _update_enemy_core(e: Dictionary) -> void:
+	if e.has("proj"):
+		SegGuard.tick_proj(self, e)
 	if e.stun > 0:
 		e.stun -= 1
 		return

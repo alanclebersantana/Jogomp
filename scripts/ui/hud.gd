@@ -260,10 +260,13 @@ func _place_step(d: float) -> void:
 			place_seen[n] = true
 			place_pending = n
 			place_wait = 0.0
+	# o letreiro que ficou esperando não aparece mais se o Milis já saiu daquele trecho
+	if place_pending != "" and _section_name() != place_pending:
+		place_pending = ""
 	if place_pending != "" and place_t < 0:
 		place_wait += d
 		# espera o aviso e a dica saírem (no máximo uns segundos)
-		if (game.flash_t == 0 and hint_alpha < .05) or place_wait > 8.0:
+		if (game.flash_t == 0 and hint_alpha < .05) or place_wait > 3.0:
 			place_cur = place_pending
 			place_pending = ""
 			place_t = 0.0
