@@ -32,51 +32,55 @@ func _initialize() -> void:
 	var g = main.game
 	g.CINE = {}
 	main.state = main.S.PLAY
-	# padrão: A pula, X bastão, B chute, R1 defesa
+	# padrão: A pula, R1 bastão, L1 defesa, X planar, B mochila, L2 chute, R2 correr
 	btn(main, JOY_BUTTON_A, true)
 	ok("A = pular", g.keys.get("J", false))
 	btn(main, JOY_BUTTON_A, false)
-	btn(main, JOY_BUTTON_X, true)
-	ok("X = bastão", g.keys.get("G", false))
-	btn(main, JOY_BUTTON_X, false)
-	btn(main, JOY_BUTTON_B, true)
-	ok("B = chute", g.keys.get("K", false))
-	btn(main, JOY_BUTTON_B, false)
 	btn(main, JOY_BUTTON_RIGHT_SHOULDER, true)
-	ok("R1 = defesa", g.keys.get("F", false))
+	ok("R1 = bastão", g.keys.get("G", false))
 	btn(main, JOY_BUTTON_RIGHT_SHOULDER, false)
-	# gatilho R2 como eixo = planar
+	btn(main, JOY_BUTTON_LEFT_SHOULDER, true)
+	ok("L1 = defesa", g.keys.get("F", false))
+	btn(main, JOY_BUTTON_LEFT_SHOULDER, false)
+	btn(main, JOY_BUTTON_X, true)
+	ok("X = planar", g.keys.get("P", false))
+	btn(main, JOY_BUTTON_X, false)
+	# gatilho L2 como eixo = chute
 	var ax := InputEventJoypadMotion.new()
-	ax.axis = JOY_AXIS_TRIGGER_RIGHT
+	ax.axis = JOY_AXIS_TRIGGER_LEFT
 	ax.axis_value = .9
 	main._input(ax)
-	ok("R2 (eixo) = planar", g.keys.get("P", false))
+	ok("L2 (eixo) = chute", g.keys.get("K", false))
 	ax.axis_value = 0.0
 	main._input(ax)
-	ok("R2 solto", not g.keys.get("P", false))
+	ok("L2 solto", not g.keys.get("K", false))
 	# todos os 12 botões com função, nenhum repetido
 	var usados := {}
 	for fn in PadMap.FUNCS:
 		usados[PadMap.btn(fn[0])] = true
 	ok("12 funções em 12 botões diferentes", usados.size() == 12)
-	# troca: pular no X -> bastão vai para o A
-	PadMap.assign("pulo", JOY_BUTTON_X)
-	ok("troca pular<->bastão", PadMap.btn("pulo") == JOY_BUTTON_X and PadMap.btn("golpe") == JOY_BUTTON_A)
-	btn(main, JOY_BUTTON_X, true)
-	ok("X agora pula", g.keys.get("J", false) and not g.keys.get("G", false))
-	btn(main, JOY_BUTTON_X, false)
+	# troca: pular no R1 -> bastão vai para o A
+	PadMap.assign("pulo", JOY_BUTTON_RIGHT_SHOULDER)
+	ok("troca pular<->bastão", PadMap.btn("pulo") == JOY_BUTTON_RIGHT_SHOULDER and PadMap.btn("golpe") == JOY_BUTTON_A)
+	btn(main, JOY_BUTTON_RIGHT_SHOULDER, true)
+	ok("R1 agora pula", g.keys.get("J", false) and not g.keys.get("G", false))
+	btn(main, JOY_BUTTON_RIGHT_SHOULDER, false)
 	PadMap.reset()
-	# correr segurando L1 + direita
+	# correr segurando R2 (eixo) + direita
 	main.state = main.S.PLAY
-	btn(main, JOY_BUTTON_LEFT_SHOULDER, true)
+	var r2 := InputEventJoypadMotion.new()
+	r2.axis = JOY_AXIS_TRIGGER_RIGHT
+	r2.axis_value = .9
+	main._input(r2)
 	btn(main, JOY_BUTTON_DPAD_RIGHT, true)
 	for i in 6:
 		await physics_frame
-	ok("L1 + direita = corre", int(g.player.run) == 1)
-	btn(main, JOY_BUTTON_LEFT_SHOULDER, false)
+	ok("R2 + direita = corre", int(g.player.run) == 1)
+	r2.axis_value = 0.0
+	main._input(r2)
 	for i in 4:
 		await physics_frame
-	ok("soltou L1 = para de correr", int(g.player.run) == 0)
+	ok("soltou R2 = para de correr", int(g.player.run) == 0)
 	btn(main, JOY_BUTTON_DPAD_RIGHT, false)
 	# Start pausa e fecha
 	btn(main, JOY_BUTTON_START, true)
@@ -85,16 +89,23 @@ func _initialize() -> void:
 	btn(main, JOY_BUTTON_START, true)
 	btn(main, JOY_BUTTON_START, false)
 	ok("START fecha a pausa", main.state == main.S.PLAY)
-	# tela de mapeamento: escolhe "Mochila" e aperta o B
+	# B (mochila) abre e fecha a mochila
+	btn(main, JOY_BUTTON_B, true)
+	btn(main, JOY_BUTTON_B, false)
+	ok("B abre a mochila", main.state == main.S.BAG)
+	btn(main, JOY_BUTTON_B, true)
+	btn(main, JOY_BUTTON_B, false)
+	ok("B fecha a mochila", main.state == main.S.PLAY)
+	# tela de mapeamento: escolhe "Chute" e aperta o Y
 	main.state = main.S.PAUSE
 	main.show_pad_map(true)
 	await process_frame
-	main.pad_capture = "mochila"
+	main.pad_capture = "chute"
 	main.pad_capture_t = Time.get_ticks_msec()
 	main.show_pad_map(true)
-	btn(main, JOY_BUTTON_B, true)
-	btn(main, JOY_BUTTON_B, false)
-	ok("captura: mochila no B", PadMap.btn("mochila") == JOY_BUTTON_B and PadMap.btn("chute") == PadMap.L2 and main.pad_capture == "")
+	btn(main, JOY_BUTTON_Y, true)
+	btn(main, JOY_BUTTON_Y, false)
+	ok("captura: chute no Y (usar vai para L2)", PadMap.btn("chute") == JOY_BUTTON_Y and PadMap.btn("usar") == PadMap.L2 and main.pad_capture == "")
 	await process_frame
 	root.get_texture().get_image().save_png("/tmp/fh_shots/padmap.png")
 	PadMap.reset()

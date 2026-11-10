@@ -826,7 +826,7 @@ func _joy_menu_button(code: int, down: bool) -> bool:
 		return true
 	if panel == null or not is_instance_valid(panel) or state == S.PLAY:
 		return false
-	if state in [S.PAUSE, S.BAG] and (code in [PadMap.btn("pausa"), PadMap.btn("mochila")] or (code == PadMap.btn("mapa") and panel.has_meta("map"))):
+	if (state == S.PAUSE and code == PadMap.btn("pausa")) or (state == S.BAG and code == PadMap.btn("mochila")) or (state == S.PAUSE and code == PadMap.btn("mapa") and panel.has_meta("map")):
 		return false   # pausa fecha a pausa, mochila fecha a mochila, mapa fecha o mapa (tratados no mapeamento)
 	if not down:
 		return true
