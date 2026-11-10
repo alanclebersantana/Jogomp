@@ -18,6 +18,7 @@ static func _pc(g) -> float:
 ## anda / investe / ofega. true = já cuidou do movimento neste quadro
 static func update(g, e: Dictionary) -> bool:
 	e.y = e.base
+	_radio(g, e)
 	for k in ["hurtT", "blockT", "open", "ccd"]:
 		if int(e.get(k, 0)) > 0:
 			e[k] = int(e[k]) - 1
@@ -203,7 +204,7 @@ static func draw(g, e: Dictionary, dist: float, T: int) -> void:
 	var dy := 0.0
 	if e.dead:
 		n = "seg_caido"
-	elif int(e.get("blockT", 0)) > 0:
+	elif int(e.get("blockT", 0)) > 0 or int(e.get("thr", 0)) > 0:
 		n = "seg_firme"
 	elif int(e.get("hurtT", 0)) > 0:
 		n = "seg_bravo"
@@ -234,6 +235,7 @@ static func draw(g, e: Dictionary, dist: float, T: int) -> void:
 
 ## brilho de aviso (antes da investida) e reflexo no escudo quando defende — por cima do desenho
 static func draw_fx(g, e: Dictionary, T: int) -> void:
+	draw_radio(e, T)
 	if e.dead:
 		return
 	var w: int = int(e.get("wind", 0))
@@ -259,4 +261,65 @@ static func draw_shield(e: Dictionary) -> void:
 	Spr.rotate(s.r)
 	var k: float = SC * 1.0
 	Spr.trect(t, Rect2(-60 * k, -60 * k, 120 * k, 120 * k))
+	Spr.restore()
+
+## arena fechada e o Milis "acampado" lá em cima (na esteira de despacho, numa plataforma): depois de um
+## tempo o segurança arremessa o rádio nele (aviso: para, mira e brilha antes de jogar)
+static func _radio(g, e: Dictionary) -> void:
+	var pr = e.get("proj")
+	if pr != null:
+		pr.x += pr.vx
+		pr.y += pr.vy
+		pr.vy += .35
+		pr.r += .4
+		var p: Dictionary = g.player
+		if p.iframe == 0 and pr.x > p.x - 6 and pr.x < p.x + p.w + 6 and pr.y > p.y - 6 and pr.y < p.y + p.h + 6:
+			g.hurt(1, pr.x)
+			e.erase("proj")
+		elif pr.y > e.base or g.wall_at(pr.x, pr.y):
+			g.burst(pr.x, min(pr.y, e.base - 4), 6, Color(.6, .6, .65))
+			Audio.play("clanc", -12, 1.6)
+			e.erase("proj")
+	if g.ARN == null or not g.ARN.is_on(e) or e.dead:
+		e.camp = 0
+		return
+	var p2: Dictionary = g.player
+	var dy: float = p2.y + p2.h - e.base
+	var dx: float = p2.x + p2.w / 2 - e.x
+	if int(e.get("thr", 0)) > 0:
+		e.thr = int(e.thr) - 1
+		e.dir = 1 if dx > 0 else -1
+		if e.thr == 0:
+			# arremesso em arco até onde o Milis está
+			var t := 40.0
+			var sx: float = e.x + e.dir * 30.0
+			var sy: float = e.base - 140.0
+			var ty: float = p2.y + p2.h * .5
+			e.proj = {"x": sx, "y": sy, "vx": (p2.x + p2.w / 2 - sx) / t, "vy": (ty - sy - .5 * .35 * t * t) / t, "r": 0.0}
+			Audio.play("slide", -6, 1.5)
+		return
+	if dy < -60 and abs(dx) < 340 and e.get("proj") == null:
+		e.camp = int(e.get("camp", 0)) + 1
+		if e.camp > 100:
+			e.camp = 0
+			e.thr = 28
+			e.charge = false
+			e.wind = 0
+			Audio.play("robo_bip", -8, .8)
+	else:
+		e.camp = max(0, int(e.get("camp", 0)) - 2)
+
+static func draw_radio(e: Dictionary, T: int) -> void:
+	if int(e.get("thr", 0)) > 0 and not e.dead:
+		var u: float = .5 + .5 * sin(T * .9)
+		Spr.glow(e.x + e.dir * 30, e.y - 140, 26, Color(1, .3, .2, .25 + .3 * u))
+	var pr = e.get("proj")
+	if pr == null:
+		return
+	Spr.save()
+	Spr.translate(pr.x, pr.y)
+	Spr.rotate(pr.r)
+	Spr.rr(-6, -10, 12, 20, 2, Color("#1b1d22"))
+	Spr.rect(-4, -7, 8, 5, Color("#6fd06a"))
+	Spr.rect(2, -18, 2, 8, Color("#1b1d22"))
 	Spr.restore()

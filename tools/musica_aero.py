@@ -5,6 +5,7 @@
   gru_saguao    samba-rock do terminal (3 camadas: violão e baixo / bateria / melodia e metais)
   gru_seguranca samba-funk tenso da área de segurança (3 camadas)
   fiscal        batucada da luta com o Fiscal Falso
+  seg_luta      samba-funk de luta com os falsos seguranças (mini-chefes: grades fechadas)
   vitoria       samba curto de festa para o placar
 
 Uso: python3 tools/musica_aero.py /tmp/tj [nomes...]
@@ -286,6 +287,37 @@ def fiscal():
     return T.render(.16, 1.3)
 
 
+# ----------------------------------------------------------------- mini-chefe: falso segurança
+def seg_luta():
+    bpm = 132
+    spb = 60 / bpm
+    chs = 'Em Em C B7 Em Em Am B7 Em Em C B7 Am B7 Em Em'.split()
+    T = Track(len(chs) * 4 * spb)
+    riff = mel('E4:.5 E4:.25 G4:.25 r:.5 B4:.5 A4:.5 G4:.5 F#4:1 | E4:.5 E4:.25 G4:.25 r:.5 B4:.5 D5:1 B4:1 | '
+               'C5:.5 B4:.5 A4:.5 G4:.5 E4:1 r:1 | D#4:.5 F#4:.5 A4:.5 B4:.5 F#4:2', 4)
+    play_mel(T, 'clarinet', riff, spb, vel=.3, legato=.6, rel=.08)
+    play_mel(T, 'clarinet', riff, spb, t0=8 * 4 * spb, vel=.3, legato=.6, rel=.08)
+    stab = mel('r:1 E5:.25 r:.75 G5:.25 r:.75 B5:.5 r:.5 | r:4', 4)
+    for k in range(8):
+        play_mel(T, 'trumpet', stab, spb, t0=k * 8 * spb, vel=.3, legato=.5, rel=.06)
+    for i, c in enumerate(chs):
+        t = i * 4 * spb
+        b = i * 4
+        r = chord(c, 2)[0]
+        for (bt, mm_, d, v) in [(0, r, .4, .6), (.75, r, .2, .45), (1.5, r + 12, .3, .45), (2.5, baixo_quinta(r), .3, .5), (3.25, r + 10, .25, .45)]:
+            T.note('contrabass', mm_, t + bt * spb, d * spb, v, .05)
+        hits(T, p_kick(), [b, b + .75, b + 2.5], spb, vel=.65)
+        hits(T, p_snare(), [b + 1, b + 3], spb, vel=.5, wet=True)
+        hits(T, p_clap(), [b + 3], spb, vel=.3)
+        hits(T, p_shaker(), [b + k * .25 for k in range(16)], spb, pan=.3, vel=.35, hum=.002)
+        hits(T, p_rim(), [b + .5, b + 1.75, b + 2.25, b + 3.5], spb, pan=-.3, vel=.45)
+        hits(T, surdo(.7), [b + 2], spb, vel=.6)
+        if i % 4 == 3:
+            for k in range(4):
+                T.raw(p_timp(P('E2') + [0, 3, 5, 7][k]) * .45, t + (2 + k * .5) * spb)
+    return T.render(.18, 1.4)
+
+
 # ----------------------------------------------------------------- placar: samba curto
 def vitoria():
     bpm = 120
@@ -315,7 +347,7 @@ def vitoria():
 if __name__ == '__main__':
     so = sys.argv[2:]
     camadas = {'aero_tema': aero_tema, 'gru_saguao': gru_saguao, 'gru_seguranca': gru_seguranca}
-    simples = {'fiscal': fiscal, 'vitoria': vitoria}
+    simples = {'fiscal': fiscal, 'vitoria': vitoria, 'seg_luta': seg_luta}
     for nome, f in camadas.items():
         if so and nome not in so:
             continue

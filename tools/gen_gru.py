@@ -361,7 +361,7 @@ obj(2960, "folhetos", 40)
 obj(3240, "etiqueta", 26)
 molhado(2860, 140)
 quebra(2840, "placa", 34)
-L.setdefault("carts", []).append({"x0": 9950, "x1": 10500})
+L.setdefault("carts", []).append({"x0": 9230, "x1": 9800})   # fora da arena do 3º segurança
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
 # segredos para voltar depois: o duto alto do começo (só com as botas-foguete) e malas presas no alto
@@ -373,7 +373,7 @@ L.setdefault("stuck", []).extend([{"x": 1325, "y": 205, "n": 20}, {"x": 3785, "y
 # ímã no teto em cima do vão das bandejas: com o gancho, atravessa balançando
 L.setdefault("anchors", []).append({"x": 8340, "y": 230})
 # cartazes de PROCURADO do vulto (aparecem e se completam conforme as pistas)
-L["posters"] = [{"x": 640, "y": 330}, {"x": 2740, "y": 330, "rot": .05}, {"x": 5600, "y": 380}, {"x": 6500, "y": 240, "rot": .04},
+L["posters"] = [{"x": 3500, "y": 330}, {"x": 2740, "y": 330, "rot": .05}, {"x": 5600, "y": 380}, {"x": 6500, "y": 240, "rot": .04},
                 {"x": 7420, "y": 170}, {"x": 10590, "y": 180, "rot": .05}, {"x": 13080, "y": 390}]
 # cenário que reage: máquinas de lanche (soltam milhas), vasos e um carrinho de bagagem desgovernado
 quebra(1185, "lanche", 64)      # dentro da arena do 1º segurança (a investida dele bate na máquina)
@@ -381,7 +381,7 @@ quebra(2805, "vaso", 40)
 quebra(9960, "carrinho", 70)    # arena do 3º segurança: empurre o carrinho nele
 quebra(11250, "lanche", 64)
 # check-in
-pax(3705, "menino", k="stand", sc=.62)
+pax(3195, "menino", k="stand", sc=.62)
 # esteiras rolantes do piso: no check-in a favor (ajuda a correr), no mezanino contra (segura o Milis)
 # a favor: ajuda a alcançar o vulto que foge pelo check-in
 L.setdefault("walks", []).append({"x0": 3220, "x1": 3580, "y": GY, "dir": 1, "spd": 1.8})
@@ -393,7 +393,7 @@ L["walks"].append({"x0": 8010, "x1": 8196, "y": GY, "dir": 1, "spd": 2.4})
 dica(7990, 8090, "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!")
 # contra, embaixo da porta automática de vidro: passe correndo enquanto a porta está aberta
 L["walks"].append({"x0": 8760, "x1": 8996, "y": GY, "dir": -1, "spd": 1.7})
-pax(3650, "mae", k="stand")    # na fila, atrás do balcão (fora da esteira rolante)
+pax(3170, "mae", k="stand")       # esperando antes da esteira rolante (fora dela)
 painel(3700, 200, 170)
 painel(5150, 180)
 painel(6180, 210)
@@ -452,15 +452,15 @@ obj(13820, "cafe", 44)
 molhado(13650, 130)
 quebra(13630, "placa", 34)
 faxineiro(13300, [13100, 13560])
-L["traps"].append({"k": "roll", "x": 12455, "y": GY, "trig": 12205, "dir": -1, "vmax": 3.6, "end": 12215, "r": 30, "aero": True})
+L["traps"].append({"k": "roll", "x": 12390, "y": GY, "trig": 12205, "tw": 90, "dir": -1, "vmax": 3.6, "end": 12215, "r": 30, "aero": True})
 dica(0, 520, "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.")
 milhas(300, 700, 470)
 caixa(820, n=5)
 dica(700, 950, "Malas abandonadas pelo ladrão: pise em cima ou bata com o bastão para soltar as milhas.")
 plat(980, 410, 140)                 # balcão de informações (dá para subir)
 milhas(1000, 1100, 380, 40)
+totem(945)                           # check-in logo antes da arena do 1º segurança
 cambista(1300, [1150, 1450])
-totem(1480)
 # fileira de bancos e a primeira subida dupla
 peca(1500, 1700, 456, 500, "p_pc_bancos", 30, 57, 2)   # bancos do saguão (o Milis pisa no assento)
 chao(1500, 2070)
@@ -497,6 +497,7 @@ for i, bx in enumerate([3600, 3900, 4200]):
     peca(bx, bx + 140, 410, 500, "p_pc_balcao", 75, 40, 4, 58)
     milhas(bx + 20, bx + 120, 380, 50)
 caixa(3810, n=3)
+totem(4270, 410)                     # em cima do último balcão: volta aqui se perder a vida na arena
 cambista(4100, [3760, 4180])
 drone(4560, 300, [4420, 4700])
 L["comics"].append({"id": "drone", "x": 11480})   # o drone espião fica em cima do vão do cabo
@@ -507,7 +508,7 @@ L["movers"].append({"k": "path", "x0": 4400, "x1": 4680, "y0": 330, "y1": 230, "
 peca(4800, 5100, 230, 500, "p_pc_porta", 6, 2)   # parede do despacho, com a porta restrita
 milhas(4830, 5080, 200, 50)
 milhas(5030, 5080, 200, 40)
-dica(4380, 4600, "A esteira de despacho sobe e desce: espere ela chegar e pule em cima.")
+dica(4200, 4345, "A esteira de despacho sobe e desce: espere ela chegar e pule em cima (do chão, com pulo duplo).")
 totem(4880, 230)
 # lá de cima, planar com as asas por cima da fila até a ilha seguinte
 plat(5500, 300, 120)
@@ -654,10 +655,10 @@ L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
 # seguranças são mini-chefes: cada um tem uma ARENA — as grades descem quando o Milis entra e só sobem
 # quando ele derruba o segurança (não dá para passar sem lutar)
 _AJUSTE = {
-    1300: {"r": [1255, 1405], "arena": [1130, 1450]},
+    1300: {"r": [1225, 1430], "arena": [1130, 1495]},
     4100: {"r": [4480, 4740], "arena": [4350, 4795]},     # embaixo da esteira de despacho
     10000: {"r": [10040, 10290], "arena": [9905, 10340]},  # entre o mezanino e a porta do crachá
-    2450: {"r": [1530, 1670], "y": 456},                   # robô pulando em cima da fileira de bancos
+    2450: {"r": [8650, 8740]},                             # robô depois das bandejas (longe de tapume e de arena)
     5700: {"r": [5620, 5980], "cy": 330, "y": 330},        # drone na fila do check-in
     13300: {"r": [10950, 11350]},                          # faxineiro embaixo da passarela do mezanino
 }

@@ -30,7 +30,7 @@ const REST_SONGS := ["manha", "tarde", "chuva", "noite", "tunel", "tema", "aero_
 ## fases do aeroporto: música animada desde o começo (sem pausas de silêncio); a 3ª camada (metais,
 ## agogô, pandeiro) entra quando tem capanga por perto e conforme o Milis avança no trecho
 const ACTION := ["gru_saguao", "gru_seguranca"]
-const BATTLE := ["perseguicao", "gaviao", "bagre", "urso", "pedra", "fiscal"]
+const BATTLE := ["perseguicao", "gaviao", "bagre", "urso", "pedra", "fiscal", "seg_luta"]
 var rain_target := 0.0
 ## barramentos: Música (músicas e tambores), Efeitos (sons curtos e ambiente) e Mundo (chuva e sons
 ## presos no cenário: fogueiras, água). O Mundo fica mudo fora do jogo (menus, fogueira grande, placar).

@@ -2,7 +2,7 @@ extends RefCounted
 class_name Capangas
 ## Capangas espertos do aeroporto (sempre avisam antes de atacar — dá para ler e reagir):
 ##  robô falsificado (frog): para, carrega (brilho azul e faíscas) e dá um CHOQUE em volta — pule!
-##  drone (fly): a lente pisca vermelho, ele treme no ar e MERGULHA no Milis; depois sobe devagar
+##  mala voadora (fly): treme no ar com um brilho laranja (mirando) e MERGULHA no Milis; depois sobe devagar
 ##  faxineiro (janitor): de vez em quando escorrega no próprio piso molhado e cai (hora de bater)
 
 const ZAP_R := 86.0
@@ -69,7 +69,7 @@ static func _drone(g, e: Dictionary) -> bool:
 				return true
 			return false
 		"mira":
-			# trava a mira: treme no ar e a lente pisca vermelho
+			# trava a mira: a mala treme no ar e brilha
 			e.x += sin(e.dt * 1.7) * 1.2
 			if e.dt >= 30:
 				e.dst = "mergulho"
@@ -150,7 +150,8 @@ static func draw_fx(g, e: Dictionary, T: int) -> void:
 					Spr.seg(mx, my, e.x + cos(a) * r2, e.y - 10 + sin(a) * r2 * .5, Color(.8, .97, 1, k), 2.0)
 		"fly":
 			if str(e.get("dst", "")) == "mira":
+				# a mala voadora se prepara: brilho laranja em volta dela e a mira no Milis
 				var bl: float = .5 + .5 * sin(T * 1.2)
-				Spr.glow(e.x, e.y + 8, 26, Color(1, .15, .1, .3 + .4 * bl))
+				Spr.glow(e.x, e.y, 34, Color(1, .6, .2, .25 + .35 * bl))
 				var p: Dictionary = g.player
-				Spr.ring(p.x + p.w / 2, p.y + p.h * .4, 22 - bl * 5, Color(1, .2, .15, .6), 2.0, 0, TAU)
+				Spr.ring(p.x + p.w / 2, p.y + p.h * .4, 22 - bl * 5, Color(1, .6, .2, .6), 2.0, 0, TAU)

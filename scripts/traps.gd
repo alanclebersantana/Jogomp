@@ -423,7 +423,9 @@ func _roll(o: Dictionary, p: Dictionary, pcx: float) -> void:
 	var R: float = o.get("r", 40.0)
 	match o.st:
 		"idle":
-			if not p.get("dog") and pcx > o.trig and pcx < o.trig + 300 and abs(p.y + p.h - o.y) < 120:
+			# (no aeroporto só dispara para quem vem de frente para ele: voltando de costas não sai em cima)
+			if not p.get("dog") and pcx > o.trig and pcx < o.trig + float(o.get("tw", 300)) and abs(p.y + p.h - o.y) < 120 \
+					and (not o.get("aero") or float(p.face) == -float(o.dir)):
 				o.st = "go"
 				o.bx = float(o.x)
 				o.vx = 0.0

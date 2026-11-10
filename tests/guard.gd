@@ -129,11 +129,41 @@ func _initialize() -> void:
 		e2.hitCd = 0
 		g.kill_enemy(e2, "hit")
 		for i in 200:
-			frame({"R": true})
+			var d2 := {"R": true}
+			if i % 30 == 0:
+				press("J")
+				d2["J"] = true
+			frame(d2)
 		# (na 2ª arena a saída é por cima: a parede da direita é a porta do despacho, de verdade)
 		var livre: bool = P.x > a1 or (ix == 1 and g.ARN.active().is_empty() and P.x + P.w > a1 - 20)
 		print("arena %d (%d..%d): preso com ele de pé=%s · passou depois=%s" % [ix + 1, int(a0), int(a1), preso, livre])
 		if not preso or not livre:
 			f += 1
+	# 9) acampado lá em cima na arena 2 (esteira de despacho): o segurança arremessa o rádio
+	carregar(0, true)
+	g.lives = 99
+	var gs2: Array = g.EN.filter(func(x): return x.k == "boar")
+	gs2.sort_custom(func(a, b): return a.x < b.x)
+	var e3: Dictionary = gs2[1]
+	for o in g.EN:
+		if o != e3:
+			o.dead = 99
+	P.x = 4500
+	P.y = 440
+	P.iframe = 99999
+	for i in 20:
+		frame()
+	var lanc := false
+	for i in 400:
+		P.iframe = 99999
+		P.x = 4560
+		P.y = 250 - P.h
+		P.vy = 0
+		frame()
+		if e3.get("proj") != null:
+			lanc = true
+	print("acampado em cima na arena 2: arremessou o rádio=", lanc)
+	if not lanc:
+		f += 1
 	print("FALHAS: ", f)
 	quit()

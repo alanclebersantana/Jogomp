@@ -528,6 +528,11 @@ static func draw(g, b: Dictionary, T: int) -> void:
 				Spr.rr(o.x - 22, GY - 34, 44, 34, 5, Color(.24, .44, .71, fade))
 				Spr.rect(o.x - 22, GY - 20, 44, 4, Color(.95, .76, .19, fade))
 	# o Fiscal (arte provisória: o cambista de terno com quepe; vira a arte do Gemini depois)
+	# frente da salinha de vidro: por cima do Fiscal só quando ele está lá dentro
+	var dentro: bool = abs(float(b.x) - float(b.get("cab_x", 0.0))) < 80 and float(b.y) <= float(b.get("cab_y", 330.0)) + 4 \
+			and not (b.done and b.st != "down") and b.get("st", "wait") != "wait"
+	if not dentro:
+		_booth_front(b, T)
 	if b.done and b.st != "down":
 		return
 	var st: String = b.get("st", "wait")
@@ -563,7 +568,8 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		var w: float = hgt * r[2] / r[3]
 		# a arte olha para a direita
 		Spr.P("fiscal_" + pose, b.x, b.y + 2, w, face_left, 0.0, c)
-		_booth_front(b, T)
+		if dentro:
+			_booth_front(b, T)
 		if st == "tonto":
 			for i in 3:
 				var a2: float = T * .12 + i * TAU / 3.0
@@ -573,14 +579,14 @@ static func draw(g, b: Dictionary, T: int) -> void:
 		Spr.P("boar_ko" if st == "down" else "boar_wind", b.x, b.y + 2, 110, not face_left, 0.0, c)
 	else:
 		Spr.P("boar_wind", b.x, b.y + 2, 100, not face_left, 0.0, c)
+	if dentro:
+		_booth_front(b, T)
 
 ## frente da salinha de controle (por cima do Fiscal quando ele está lá dentro): vidro, moldura e o
 ## console com o botão vermelho na altura da cintura
 static func _booth_front(b: Dictionary, T: int) -> void:
 	var cx: float = b.get("cab_x", float(b.x1) - 120.0)
 	var cy: float = b.get("cab_y", 330.0)
-	if abs(float(b.x) - cx) > 80 or float(b.y) > cy + 4:
-		return
 	Spr.rect(cx - 78, cy - 200, 156, 200, Color(.7, .9, 1, .1))
 	Spr.poly(PackedVector2Array([Vector2(cx - 66, cy - 186), Vector2(cx - 40, cy - 186), Vector2(cx - 66, cy - 140)]), Color(1, 1, 1, .18))
 	for fx in [cx - 78, cx + 74]:

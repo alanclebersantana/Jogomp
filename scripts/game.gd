@@ -606,9 +606,9 @@ func coins_near(x0: float, x1: float) -> Array:
 	return out
 
 ## ponto dentro de parede/bloco (plataformas finas não contam)
-func wall_at(x: float, y: float) -> bool:
+func wall_at(x: float, y: float, ign = null) -> bool:
 	for s in blockers():
-		if s.get("oneway") or s.get("brk_of") != null:
+		if s.get("oneway") or s == ign:
 			continue
 		if x > s.x and x < s.x + s.w and y > s.y and y < s.y + float(s.get("h", 0.0)):
 			return true

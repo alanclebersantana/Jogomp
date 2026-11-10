@@ -19,6 +19,12 @@ func load_level() -> void:
 		if e.has("arena"):
 			A.append({"e": e, "x0": float(e.arena[0]), "x1": float(e.arena[1]), "on": false, "done": false, "h": 0.0, "t": 0})
 
+func is_on(e: Dictionary) -> bool:
+	for a in A:
+		if a.e == e and a.on:
+			return true
+	return false
+
 func active() -> Dictionary:
 	for a in A:
 		if a.on:
@@ -31,14 +37,20 @@ func step() -> void:
 	for a in A:
 		var e: Dictionary = a.e
 		if a.done:
-			a.h = max(0.0, a.h - .04)
+			# depois que o segurança termina de cair, as grades sobem
+			a.wait = int(a.get("wait", 0)) - 1
+			if a.wait == 0:
+				Audio.play("door", -4, .8)
+				g.flash("Caminho livre!", 90)
+			if a.wait <= 0:
+				a.on = false
+				a.h = max(0.0, a.h - .04)
+			elif a.on:
+				_clamp(a, p)   # as grades ainda estão fechadas
 			continue
 		if e.dead:
-			# derrubou: as grades sobem
 			a.done = true
-			a.on = false
-			Audio.play("door", -4, .8)
-			g.flash("Caminho livre!", 90)
+			a.wait = 70
 			continue
 		if not a.on:
 			a.h = max(0.0, a.h - .05)
@@ -58,7 +70,7 @@ func step() -> void:
 			g.en_seen["boar"] = true   # (a explicação vem só daqui, uma vez)
 		if a.t == 30:
 			g.want_comic("seguranca")
-			if A.find(a) == 0 or not g.has_meta("seg_dica"):
+			if not g.has_meta("seg_dica"):
 				g.set_meta("seg_dica", true)
 				g.flash("O falso segurança fechou a passagem! De frente ele defende com o escudo: bata por trás ou logo depois da investida.", 230)
 			else:
@@ -71,21 +83,33 @@ func step() -> void:
 			e.hurtT = 0
 			e.open = 0
 			e.disarm = 0
+			e.charge = false
+			e.wind = 0
+			e.blockT = 0
+			e.stun = 0
+			e.hitCd = 0
+			e.ccd = 60
+			e.thr = 0
+			e.camp = 0
+			e.erase("proj")
 			e.x = (float(e.r[0]) + float(e.r[1])) / 2.0
 			continue
-		# paredes invisíveis do chão até o teto
-		var lo: float = a.x0 + GW / 2
-		var hi: float = a.x1 - GW / 2 - p.w
-		if p.x < lo:
-			p.x = lo
-			p.vx = max(p.vx, 0.0)
-		elif p.x > hi:
-			p.x = hi
-			p.vx = min(p.vx, 0.0)
+		_clamp(a, p)
+
+## paredes invisíveis do chão até o teto (onde estão as grades)
+func _clamp(a: Dictionary, p: Dictionary) -> void:
+	var lo: float = a.x0 + GW / 2
+	var hi: float = a.x1 - GW / 2 - p.w
+	if p.x < lo:
+		p.x = lo
+		p.vx = max(p.vx, 0.0)
+	elif p.x > hi:
+		p.x = hi
+		p.vx = min(p.vx, 0.0)
 
 ## no aeroporto a música de luta toca enquanto a arena está fechada
 func song() -> String:
-	return "fiscal" if not active().is_empty() else ""
+	return "seg_luta" if not active().is_empty() else ""
 
 func draw(T: int) -> void:
 	for a in A:

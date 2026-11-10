@@ -9,13 +9,16 @@ class_name Quebra
 ##  lanche   máquina de lanches: cada pancada balança, racha o vidro e solta um lanche + milhas (até 3)
 ##  carrinho carrinho de bagagem: rola para longe e bate nas coisas
 ## Malas, vaso e carrinho são sólidos (dá para subir neles; o carrinho o Milis empurra andando). A máquina
-## de lanches fica encostada na parede do fundo (o Milis passa na frente dela).
+## de lanches fica encostada na parede do fundo (o Milis passa na frente dela): só o bastão e o chute
+## do Milis alcançam a máquina; capangas, carrinho e coisas voando passam na frente sem tocar nela.
 
 var g
 var O: Array = []
 
 const NOMES := {"placa": "p_ob_placa", "malas": "p_ob_malas"}
-const SOLIDO := {"malas": 56.0, "vaso": 70.0, "carrinho": 60.0}
+## altura de colisão = altura do desenho: a pilha de malas inteira; do vaso só o pote (as folhas não
+## seguram ninguém); do carrinho a base (o Milis fica em pé entre as alças)
+const SOLIDO := {"malas": 53.0, "vaso": 34.0, "carrinho": 28.0}
 
 func _init(game) -> void:
 	g = game
@@ -71,7 +74,7 @@ func hit_point(x: float, y: float, vx: float) -> void:
 	if abs(vx) < 2.0:
 		return
 	for o in O:
-		if o.cd > 0 or (o.done and o.k != "carrinho"):
+		if o.cd > 0 or (o.done and o.k != "carrinho") or o.k == "lanche":
 			continue
 		var b := box(o)
 		if x > b.x - 10 and x < b.x + b.w + 10 and y > b.y - 20 and y < b.y + b.h + 30:
@@ -143,7 +146,7 @@ func step() -> void:
 		match o.k:
 			"placa":
 				if o.done and (o.vy != 0.0 or o.y < o.base):
-					if g.wall_at(o.x + o.vx + sign(o.vx) * 10, o.y - 20):
+					if g.wall_at(o.x + o.vx + sign(o.vx) * 10, o.y - 20, o.get("sol")):
 						o.vx = -o.vx * .3
 						o.vr = -o.vr * .5
 					o.x += o.vx
@@ -164,10 +167,14 @@ func step() -> void:
 							o.rot = PI / 2 * sign(o.rot) if o.rot != 0.0 else PI / 2
 			"carrinho":
 				if abs(o.vx) > .05:
-					if g.wall_at(o.x + sign(o.vx) * (o.w / 2 + 3) + o.vx, o.base - 20):
+					if g.wall_at(o.x + sign(o.vx) * (o.w / 2 + 3) + o.vx, o.base - 14, o.get("sol")):
 						# bateu na parede: volta um pouco
 						o.vx = -o.vx * .3
 						Audio.play("clanc", -10, 1.2)
+					# o Milis em pé em cima do carrinho vai junto
+					var pl: Dictionary = g.player
+					if o.has("sol") and pl.get("_g") == o.sol and pl.onGround:
+						pl.x += o.vx
 					o.x += o.vx
 					o.vx *= .965
 					if o.has("sol"):
@@ -175,7 +182,7 @@ func step() -> void:
 					o.rot = sin(g.T * .5) * .02 * abs(o.vx)
 					# o carrinho desgovernado derruba o que encontrar
 					for o2 in O:
-						if o2 != o and not o2.done and abs(o2.x - o.x) < (o2.w + o.w) / 2:
+						if o2 != o and not o2.done and o2.k != "lanche" and abs(o2.x - o.x) < (o2.w + o.w) / 2:
 							_knock(o2, sign(o.vx), abs(o.vx) + 2.0)
 							o.vx *= -.3
 					# e o capanga também

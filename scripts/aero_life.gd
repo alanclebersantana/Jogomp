@@ -37,6 +37,8 @@ static func _pax(g, T: int) -> void:
 	var pl: Dictionary = g.player
 	var pcx: float = pl.x + pl.w / 2
 	for p in g.L.get("pax", []):
+		if p.get("behind", false):
+			continue   # do outro lado do balcão: desenhado junto do cenário, atrás dos blocos
 		var n: String = str(p.n)
 		var k: String = str(p.get("k", "walk"))
 		var fresh: bool = Polish.FRESH

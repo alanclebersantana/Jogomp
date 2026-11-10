@@ -122,14 +122,15 @@ func __draw_raw() -> void:
 		g.QB.draw(T)
 	if g.GD:
 		g.GD.draw(T)
-	if g.ARN:
-		g.ARN.draw(T)
+
 	if g.CART:
 		g.CART.draw_back(T)
 	if g.TC:
 		g.TC.draw(T)
 	_wet(g)
 	AeroLife.back(g, T)
+	if g.ARN:
+		g.ARN.draw(T)   # grades das arenas: na frente de tudo que passa no fundo
 	WorldLake.back(g, T)
 	var __d_Traps_draw := Time.get_ticks_usec()
 	WorldTraps.draw(g, T)
@@ -916,7 +917,7 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k):
 		g.en_seen[e.k] = true
 		if segk:
-			g.flash("Falso segurança: de frente ele defende com o escudo. Bata por trás ou logo depois da investida!", 190)
+			pass   # o falso segurança é explicado uma vez só, quando as grades da arena fecham
 		else:
 			g.flash("%s: capanga do ladrão (olhos e contorno vermelhos). Pule na cabeça ou use o bastão." % EN_NAME[e.k], 170)
 	var s: int = e.get("st", 0)

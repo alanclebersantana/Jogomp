@@ -109,6 +109,17 @@ func _draw_raw() -> void:
 		WorldNature.clip_x1 = 1e9
 	if L.get("theme", "") == "aeroporto":
 		_basement_wall(L)
+		# passageiros do outro lado do balcão (na fila): atrás dos blocos
+		for p in L.get("pax", []):
+			if not p.get("behind", false) or float(p.x) < x0 - 100 or float(p.x) > x1 + 100:
+				continue
+			var n: String = str(p.n)
+			var nm: String = n.replace("pax_", "paxbg_") if Spr.AR.has("p_" + n.replace("pax_", "paxbg_")) else n
+			var r2 = Spr.AR.get("p_" + nm)
+			if r2 == null:
+				continue
+			var hgt: float = AeroLife.PAX_H * float(p.get("sc", 1.0))
+			Spr.P(nm, float(p.x), float(p.get("y", 500)) + 3, hgt * r2[2] / r2[3], bool(p.get("flip", false)), 0.0, Color(.92, .92, .96, .94))
 	for s in L.solids:
 		var pad := 140.0 + float(s.get("tun", 0))
 		if s.x + s.get("w", 0) + pad < x0 or s.x - pad > x1:
@@ -2272,13 +2283,12 @@ func _mezz_block(s: Dictionary) -> void:
 	while lx < x + w - 20:
 		Spr.rect(lx - 10, y + 22, 20, 3, Color(1, .96, .8, .7))
 		lx += 80
-	# guarda-corpo de vidro em cima
-	Spr.rect(x, y - 40, w, 40, Color(.72, .9, 1, .18))
-	Spr.rect(x, y - 42, w, 4, Color("#16181c"))
-	var px: float = x
-	while px <= x + w:
-		Spr.rect(px - 1, y - 42, 3, 42, Color("#8d97a3"))
-		px += 60
+	# beirada da direita (onde o piso acaba): faixa zebrada de atenção, sem guarda-corpo atravessando o
+	# piso por onde o Milis anda
+	var k := 0
+	while k * 10 < 40:
+		Spr.rect(x + w - 40 + k * 10, y, 5, 5, Color("#1b1d22"))
+		k += 1
 
 ## subsolo das bagagens: blocos de concreto com faixa de segurança e um cano passando
 func _sub_block(s: Dictionary) -> void:
