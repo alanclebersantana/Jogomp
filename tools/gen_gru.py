@@ -503,7 +503,7 @@ caixa(3810, n=3)
 totem(4270, 410)                     # em cima do último balcão: volta aqui se perder a vida na arena
 cambista(4100, [3760, 4180])
 drone(4560, 300, [4420, 4700])
-L["comics"].append({"id": "drone", "x": 1640})    # o 1º drone fica logo depois da arena do 1º segurança
+# (o quadrinho do drone aparece sozinho quando o 1º drone surge na tela: Game._comic_check)
 cambista(4950, [4820, 5080], y=230)
 dica(3420, 3700, "Fila do check-in. Os balcões dão bons degraus.")
 # esteira de despacho que sobe (plataforma que anda)

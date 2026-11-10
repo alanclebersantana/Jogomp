@@ -2121,6 +2121,22 @@ func _comic_check() -> void:
 		if not t.done and px > t.x and px < t.x + 600:
 			t.done = true
 			want_comic(t.id)
+	# aeroporto: o quadrinho do capanga aparece assim que ele surge na tela (antes da luta começar),
+	# nunca no meio de outra luta de arena
+	if L.get("theme", "") == "aeroporto" and (ARN == null or ARN.active().is_empty()) and comic_req == "":
+		for e in EN:
+			if e.dead:
+				continue
+			var id := ""
+			if e.k == "crow":
+				id = "drone"
+			elif e.k == "boar" and SegGuard.is_seg(self, e):
+				id = "seguranca"
+			if id == "" or Save.getv("comic", id, false):
+				continue
+			if e.x > cam + 40 and e.x < cam + W - 40 and absf(float(e.y) - (player.y + player.h)) < H * .8:
+				want_comic(id)
+				break
 
 ## id: "boss", "vargas", "cao". A câmera vai até o foco, aparecem as faixas de cinema e as falas.
 func start_cine(id: String, fx: float, fy: float, dur: int, lines: Array = [], title: Array = []) -> void:

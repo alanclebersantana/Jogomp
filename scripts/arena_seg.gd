@@ -76,7 +76,6 @@ func step() -> void:
 		if a.t == 2:
 			g.en_seen["boar"] = true   # (a explicação vem só daqui, uma vez)
 		if a.t == 30:
-			g.want_comic("seguranca")
 			if not Save.getv("dica", "seg_arena", false):
 				Save.setv("dica", "seg_arena", true)
 				g.flash("O falso segurança fechou a passagem! De frente ele defende com o escudo: bata por trás ou logo depois da investida.", 230)

@@ -476,6 +476,8 @@ func _process(_d: float) -> void:
 					break
 			Audio.music_hint(_song_progress(game.amb_x(), base_song == "tunel", tun), song == base_song, calm)
 			Audio.set_song(song)
+			Audio.drums_on = game.L.get("theme", "") != "aeroporto"
+			Audio.aero_mode = not Audio.drums_on
 			Audio.set_danger(_danger_level())
 		var in_cine: bool = not game.CINE.is_empty()
 		if state == S.PLAY and top_buttons.visible == in_cine:

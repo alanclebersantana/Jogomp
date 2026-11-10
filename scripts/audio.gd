@@ -11,6 +11,12 @@ var music2: AudioStreamPlayer
 var rain: AudioStreamPlayer
 var danger: AudioStreamPlayer
 var danger_lv := 0.0
+## tambores do perigo (loop_tambores, taikos graves fora do andamento da música): no aeroporto ficam
+## mudos — era o "buuum" que tocava toda hora; o perigo lá só sobe a 3ª camada da própria música
+var drums_on := true
+## aeroporto: o som "door" (2,7 s, um tom longo que, mais grave, soava como buzina — grades das
+## arenas, elevador, caixas) vira um "clanc" metálico curto
+var aero_mode := false
 var song := ""
 var amb: AudioStreamPlayer
 var amb2: AudioStreamPlayer
@@ -165,6 +171,10 @@ var _pt0: Array[int] = []
 var _pen_n := 0
 var _pen_ms := -9999
 func play(n: String, vol_db: float = 0.0, pitch: float = 1.0) -> void:
+	if aero_mode and n == "door":
+		n = "clanc"
+		vol_db -= 4.0
+		pitch = clampf(pitch * 1.1, .7, 1.6)
 	if not sfx.has(n):
 		return
 	# o mesmo som não empilha no mesmo instante (lápis em sequência, passos)
@@ -355,6 +365,10 @@ func set_danger(v: float) -> void:
 	# (suavização pelo tempo, não por quadro: o mesmo ritmo em telas de 60, 90 ou 120 Hz)
 	var f: float = get_process_delta_time() * 60.0
 	danger_lv = lerpf(danger_lv, v, 1.0 - pow(1.0 - (.02 if v > danger_lv else .008), f))
+	if not drums_on:
+		if danger.playing:
+			danger.stop()
+		return
 	if danger_lv > .02 and not danger.playing:
 		danger.play()
 	elif danger_lv <= .02 and danger.playing:
