@@ -356,6 +356,7 @@ func _process(_d: float) -> void:
 	if not Spr.warmed:
 		Spr.warm()
 	_joy_ring_update()
+	_pad_hold_step()
 	# chuva, tambores e sons do cenário só tocam com o jogo rodando (somem nos menus e voltam depois)
 	Audio.set_world(state == S.PLAY and game.running)
 	_update_cine_bars()
@@ -637,24 +638,11 @@ func _input(e: InputEvent) -> void:
 			_toggle_pause("tecla Esc/P")
 			return
 		if e.pressed and e.keycode == KEY_N:
-			# N: mapa da fase (a dica do teclado na tela inicial já anunciava, mas a tecla não fazia nada)
-			if state == S.PLAY and game.CINE.is_empty():
-				state = S.PAUSE
-				pause_reason = ""
-				_clear_keys()
-				_show_hud(false)
-				show_map(false)
-			elif state == S.PAUSE and panel and panel.has_meta("map"):
-				panel.get_meta("back").call()
+			# N: mapa da fase
+			_map_toggle()
 			return
 		if e.pressed and e.keycode in [KEY_M, KEY_I, KEY_TAB]:
-			if state == S.PLAY:
-				open_bag()
-			elif state == S.BAG:
-				if panel and panel.has_meta("assembled"):
-					panel.get_meta("ok").call()
-				else:
-					close_panel()
+			_bag_toggle()
 			return
 		if e.pressed and e.keycode in [KEY_ENTER, KEY_KP_ENTER] and panel and panel.has_meta("ok"):
 			panel.get_meta("ok").call()
@@ -664,23 +652,18 @@ func _input(e: InputEvent) -> void:
 			_set_key(KEYMAP[e.keycode], e.pressed)
 	elif e is InputEventJoypadButton:
 		last_joy_ms = Time.get_ticks_msec()
-		if _joy_menu_button(e):
-			get_viewport().set_input_as_handled()
-			return
-		var m := {JOY_BUTTON_A: "J", JOY_BUTTON_X: "A", JOY_BUTTON_B: "P", JOY_BUTTON_DPAD_LEFT: "L", JOY_BUTTON_DPAD_RIGHT: "R", JOY_BUTTON_DPAD_UP: "U", JOY_BUTTON_DPAD_DOWN: "S", JOY_BUTTON_BACK: "B", JOY_BUTTON_RIGHT_SHOULDER: "G", JOY_BUTTON_LEFT_SHOULDER: "D", JOY_BUTTON_Y: "K", JOY_BUTTON_LEFT_STICK: "F"}
-		if e.button_index == JOY_BUTTON_Y and e.pressed:
-			if state == S.PLAY:
-				open_bag()
-			elif state == S.BAG:
-				if panel and panel.has_meta("assembled"):
-					panel.get_meta("ok").call()
-				else:
-					close_panel()
-		elif e.button_index == JOY_BUTTON_START and e.pressed:
-			_toggle_pause("botão Start do controle")
-		elif m.has(e.button_index):
-			_set_key(m[e.button_index], e.pressed)
+		_pad_button(e.button_index, e.pressed)
 	elif e is InputEventJoypadMotion:
+		# gatilhos L2/R2 que chegam como eixo: viram botões (100/101) e seguem o mapeamento
+		if e.axis == JOY_AXIS_TRIGGER_LEFT or e.axis == JOY_AXIS_TRIGGER_RIGHT:
+			var code: int = PadMap.L2 if e.axis == JOY_AXIS_TRIGGER_LEFT else PadMap.R2
+			var was: bool = trig_down.get(code, false)
+			var now: bool = e.axis_value > (.25 if was else .5)
+			if now != was:
+				trig_down[code] = now
+				last_joy_ms = Time.get_ticks_msec()
+				_pad_button(code, now)
+			return
 		if _joy_menu_axis(e):
 			get_viewport().set_input_as_handled()
 			return
@@ -691,6 +674,82 @@ func _input(e: InputEvent) -> void:
 		elif e.axis == JOY_AXIS_LEFT_Y:
 			_set_key("U", e.axis_value < -.55)
 			_set_key("S", e.axis_value > .55)
+
+## mapa da fase (tecla N / botão do mapa): abre no jogo, fecha se já estiver aberto
+func _map_toggle() -> void:
+	if state == S.PLAY and game.CINE.is_empty():
+		state = S.PAUSE
+		pause_reason = ""
+		_clear_keys()
+		_show_hud(false)
+		show_map(false)
+	elif state == S.PAUSE and panel and panel.has_meta("map"):
+		panel.get_meta("back").call()
+
+## mochila (teclas M/I/Tab / botão da mochila): abre no jogo, fecha se já estiver aberta
+func _bag_toggle() -> void:
+	if state == S.PLAY:
+		open_bag()
+	elif state == S.BAG:
+		if panel and panel.has_meta("assembled"):
+			panel.get_meta("ok").call()
+		else:
+			close_panel()
+
+## um botão do controle (ou gatilho) apertado/solto: segue o mapeamento escolhido nas opções
+var trig_down := {}
+var pad_capture := ""       # função esperando o jogador apertar o botão novo
+var pad_capture_t := 0
+var pad_from_pause := false
+var totem_ms := -1          # "voltar ao totem" só vale segurando (evita apertar sem querer)
+func _pad_button(code: int, down: bool) -> void:
+	if pad_capture != "":
+		if down and not code in PadMap.DPAD:
+			PadMap.assign(pad_capture, code)
+			pad_capture = ""
+			Audio.play("item", -4)
+			show_pad_map(pad_from_pause)
+		get_viewport().set_input_as_handled()
+		return
+	if _joy_menu_button(code, down):
+		get_viewport().set_input_as_handled()
+		return
+	var dp := {JOY_BUTTON_DPAD_LEFT: "L", JOY_BUTTON_DPAD_RIGHT: "R", JOY_BUTTON_DPAD_UP: "U", JOY_BUTTON_DPAD_DOWN: "S"}
+	if dp.has(code):
+		if code in [JOY_BUTTON_DPAD_LEFT, JOY_BUTTON_DPAD_RIGHT]:
+			game.axis_x = 1.0
+		_set_key(dp[code], down)
+		return
+	var f: String = PadMap.func_of(code)
+	match f:
+		"":
+			return
+		"mochila":
+			if down:
+				_bag_toggle()
+		"pausa":
+			if down:
+				_toggle_pause("botão de pausa do controle")
+		"mapa":
+			if down:
+				_map_toggle()
+		"cena":
+			pass   # só vale durante as cenas (tratado no menu/cena)
+		"totem":
+			totem_ms = Time.get_ticks_msec() if down else -1
+		_:
+			_set_key(PadMap.key_of(f), down)
+
+## segurando o botão do totem por 0,7 s: volta ao último totem
+func _pad_hold_step() -> void:
+	if totem_ms > 0 and Time.get_ticks_msec() - totem_ms > 700:
+		totem_ms = -1
+		if state == S.PLAY and game.CINE.is_empty():
+			game.keys["Bp"] = true
+	# esperando botão no mapeamento: desiste sozinho depois de 6 s
+	if pad_capture != "" and Time.get_ticks_msec() - pad_capture_t > 6000:
+		pad_capture = ""
+		show_pad_map(pad_from_pause)
 
 # ---------- menus pelo controle ----------
 func _joy_collect(n: Node, out: Array) -> void:
@@ -752,22 +811,22 @@ func _joy_move(bs: Array, d: Vector2) -> void:
 
 ## botão do controle com um painel aberto: direcional escolhe, A confirma, B volta.
 ## Tela com um único botão (CONTINUAR, FECHAR, ENTRAR...) confirma com qualquer botão.
-func _joy_menu_button(e: InputEventJoypadButton) -> bool:
-	# fala de personagem na tela: qualquer botão avança (Start continua sendo a pausa)
-	if state == S.PLAY and not game.CINE.is_empty() and e.button_index != JOY_BUTTON_START:
-		if e.pressed:
-			game.keys["Jp"] = true
+func _joy_menu_button(code: int, down: bool) -> bool:
+	# fala de personagem na tela: qualquer botão avança; o de "pular cena" pula tudo (a pausa continua pausa)
+	if state == S.PLAY and not game.CINE.is_empty() and code != PadMap.btn("pausa"):
+		if down:
+			game.keys["Kp" if code == PadMap.btn("cena") else "Jp"] = true
 		return true
 	if panel == null or not is_instance_valid(panel) or state == S.PLAY:
 		return false
-	if e.button_index in [JOY_BUTTON_START, JOY_BUTTON_Y] and state in [S.PAUSE, S.BAG]:
-		return false   # Start fecha a pausa, Y fecha a mochila (tratados abaixo)
-	if not e.pressed:
+	if state in [S.PAUSE, S.BAG] and (code in [PadMap.btn("pausa"), PadMap.btn("mochila")] or (code == PadMap.btn("mapa") and panel.has_meta("map"))):
+		return false   # pausa fecha a pausa, mochila fecha a mochila, mapa fecha o mapa (tratados no mapeamento)
+	if not down:
 		return true
 	var bs := _joy_buttons()
 	if bs.is_empty():
 		# painel do objeto montado: B pula na hora (os outros botões continuam depois que ele aparece)
-		if e.button_index == JOY_BUTTON_B and panel.has_meta("assembled"):
+		if code == JOY_BUTTON_B and panel.has_meta("assembled"):
 			panel.get_meta("back").call()
 		elif panel.has_meta("ok"):
 			panel.get_meta("ok").call()
@@ -776,7 +835,7 @@ func _joy_menu_button(e: InputEventJoypadButton) -> bool:
 	if bs.size() == 1:
 		_joy_press(bs[0])
 		return true
-	match e.button_index:
+	match code:
 		JOY_BUTTON_DPAD_LEFT: _joy_move(bs, Vector2.LEFT)
 		JOY_BUTTON_DPAD_RIGHT: _joy_move(bs, Vector2.RIGHT)
 		JOY_BUTTON_DPAD_UP: _joy_move(bs, Vector2.UP)
@@ -1473,6 +1532,58 @@ func show_options(from_pause: bool) -> void:
 	var eb := _button("POSICIONAR BOTÕES", func(): _edit_controls(from_pause))
 	eb.custom_minimum_size = Vector2(230, 42)
 	brow.add_child(eb)
+	var pm := _button("MAPEAR CONTROLE", func(): show_pad_map(from_pause))
+	pm.custom_minimum_size = Vector2(220, 42)
+	brow.add_child(pm)
+	var bk := _button("VOLTAR", back)
+	bk.custom_minimum_size = Vector2(160, 42)
+	brow.add_child(bk)
+	vb.add_child(brow)
+	panel.set_meta("ok", back)
+	panel.set_meta("back", back)
+
+## mapeamento do controle: cada função num botão (toque/aperte a função e depois o botão novo)
+func show_pad_map(from_pause: bool) -> void:
+	pad_from_pause = from_pause
+	var vb := _overlay(.9)
+	vb.add_theme_constant_override("separation", 6)
+	vb.add_child(_label("MAPEAR CONTROLE", 26, GOLD, Spr.font_title))
+	if pad_capture != "":
+		vb.add_child(_label("Aperte no controle o botão para: %s" % PadMap.label_of(pad_capture), 16, Color("#ffd84a"), Spr.font_b))
+	else:
+		vb.add_child(_label("Escolha a função e depois aperte o botão que você quer usar para ela.", 13, Color(.85, .8, .7), Spr.font_i))
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 4)
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vb.add_child(grid)
+	for f in PadMap.FUNCS:
+		var id: String = f[0]
+		var l := _label(f[1], 14, Color("#e8dcc0"))
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		l.custom_minimum_size = Vector2(200, 0)
+		grid.add_child(l)
+		var b := _compact_btn("..." if pad_capture == id else PadMap.name_of(PadMap.btn(id)))
+		b.custom_minimum_size = Vector2(110, 0)
+		b.pressed.connect(func():
+			pad_capture = id
+			pad_capture_t = Time.get_ticks_msec()
+			show_pad_map(from_pause))
+		grid.add_child(b)
+	vb.add_child(_label("Direcional e analógico esquerdo: andar, subir e agachar. Nos menus: A confirma, B volta.", 12, Color(.8, .75, .65), Spr.font_i))
+	var back := func():
+		pad_capture = ""
+		show_options(from_pause)
+	var brow := HBoxContainer.new()
+	brow.alignment = BoxContainer.ALIGNMENT_CENTER
+	brow.add_theme_constant_override("separation", 12)
+	var rb := _button("RESTAURAR PADRÃO", func():
+		PadMap.reset()
+		pad_capture = ""
+		show_pad_map(from_pause))
+	rb.custom_minimum_size = Vector2(230, 42)
+	brow.add_child(rb)
 	var bk := _button("VOLTAR", back)
 	bk.custom_minimum_size = Vector2(160, 42)
 	brow.add_child(bk)

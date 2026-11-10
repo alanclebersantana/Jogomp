@@ -1256,6 +1256,16 @@ func step() -> void:
 		player.tL = T
 	player.hR = kd("R")
 	player.hL = kd("L")
+	# botão "Correr" do controle: segurando junto com a direção, corre direto (sem os dois toques)
+	if kd("RUN") and kd("R") != kd("L"):
+		if not player.run:
+			burst(player.x + player.w / 2, player.y + player.h - 4, 6, Color("#e9dbb8"))
+		player.run = 1
+		player.rdir = 1 if kd("R") else -1
+		player["runH"] = true
+	elif player.get("runH", false):
+		player.run = 0
+		player["runH"] = false
 	if player.run and not (kd("R") if player.rdir > 0 else kd("L")):
 		player.run = 0
 	# cipós livres
