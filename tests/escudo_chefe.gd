@@ -1,5 +1,5 @@
 extends "res://tests/route_gru.gd"
-## Escudo contra o Fiscal Falso: segura o encontrão (aparo deixa tonto), arrebenta mala rolando; sem escudo machuca.
+## Escudo contra o Fiscal Falso: segura as malas caindo e rolando; sem escudo machuca.
 func _prep() -> Dictionary:
 	carregar(0, false)
 	g.lives = 99
@@ -20,31 +20,20 @@ func _prep() -> Dictionary:
 	return b
 func _initialize() -> void:
 	var f := 0
-	# 1) segurando o escudo: não perde vida, ele quica
+	# 1) mala caindo em cima do escudo levantado
 	var b := _prep()
+	b.st = "lasers"
+	b.beams = []
+	b.floor = []
+	b.x = 15480.0
+	b.y = 330.0
+	b.objs = [{"k": "cai", "x": px(), "y": 500.0, "t": 30, "hy": -260.0}]
 	var hp0: int = P.hp
-	for i in 120:
+	for i in 60:
 		frame({"F": true})
 		P.face = 1
-		if int(b.get("cool", 0)) > 0:
-			break
-	print("escudo segurou: hp ", hp0, "->", P.hp, " cool=", int(b.get("cool", 0)), " st=", b.st)
-	if P.hp != hp0 or int(b.get("cool", 0)) == 0: f += 1
-	# 2) aparo: aperta a defesa quando ele está chegando
-	b = _prep()
-	for i in 200:
-		var d := {}
-		if absf(b.x - px()) < 70 and not g.keys.get("F", false):
-			press("F")
-			d["F"] = true
-		elif g.keys.get("F", false):
-			d["F"] = true
-		frame(d)
-		P.face = 1
-		if b.st == "tonto" or int(b.get("cool", 0)) > 0:
-			break
-	print("aparo: st=", b.st)
-	if b.st != "tonto": f += 1
+	print("mala caindo no escudo: hp ", hp0, "->", P.hp)
+	if P.hp != hp0: f += 1
 	# 3) mala rolando no escudo
 	b = _prep()
 	b.st = "lasers"
@@ -58,10 +47,15 @@ func _initialize() -> void:
 		P.face = 1
 	print("mala rolando: hp ", hp0, "->", P.hp, " objs=", b.objs.size())
 	if P.hp != hp0: f += 1
-	# 4) sem escudo: machuca
+	# 4) sem escudo: a mala rolando machuca
 	b = _prep()
+	b.st = "lasers"
+	b.beams = []
+	b.floor = []
+	b.x = 15480.0
+	b.objs = [{"k": "rola", "x": px() + 120, "vx": -3.0, "rot": 0.0, "wait": 0}]
 	hp0 = P.hp
-	for i in 120:
+	for i in 80:
 		frame()
 		P.face = 1
 		if P.hp < hp0: break

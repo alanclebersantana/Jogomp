@@ -7,8 +7,8 @@ extends RefCounted
 ##   rola      malas rolando pelo chão (pule)  cai    malas caindo onde a sombra marca (desvie)
 ## Depois de cada rodada, o painel de energia abre — cada vez num lugar diferente, longe do Milis — e
 ## fica aberto pouco tempo: um golpe dá curto, o Fiscal cai tonto e aí é pisar na cabeça ou bater.
-## 3 fases: na 2ª a esteira do piso da arena puxa para a esquerda; na 3ª ela inverte e o Fiscal desce
-## da cabine e corre atrás do Milis (com malas caindo) até o painel ser acertado.
+## 3 fases: na 2ª a esteira do piso da arena puxa para a esquerda; na 3ª ela inverte e os padrões
+## vêm todos misturados e mais rápidos (o Fiscal fica sempre na cabine: não desce para correr atrás).
 
 const GY := 500.0
 
@@ -45,7 +45,7 @@ static func _pattern_list(hp: int) -> Array:
 		2:
 			return ["cai", "piso", "rola", "alto", "cai", "rasteiro"]
 		_:
-			return ["persegue"]
+			return ["grade", "cai", "rola", "piso", "alto", "cai", "rasteiro"]
 
 
 ## o painel abre longe do Milis (nunca no mesmo lugar duas vezes seguidas)
@@ -265,8 +265,8 @@ static func step(g, X) -> void:
 		"tonto":
 			if b.t > 240:
 				b.t = 0
-				# na 3ª fase ele levanta e volta a correr atrás; antes, volta para a cabine
-				b.st = "persegue" if int(b.hp) <= 1 else "volta"
+				# levanta e volta para a cabine (ele nunca desce para correr atrás do Milis)
+				b.st = "volta"
 		"volta":
 			# corre de volta para a escadinha da cabine e sobe
 			var alvo: float = float(b.cab_x)
@@ -365,11 +365,10 @@ static func _dano(g, X, b: Dictionary) -> void:
 		b.t = 0
 		b.objs = []
 		b.floor = []
+		b.st = "volta"
 		if b.hp == 1:
-			b.st = "persegue"
-			g.flash("Ele ficou furioso! Agora ele vem atrás de você. Falta 1!", 150)
+			g.flash("Ele ficou furioso: a esteira inverteu e os lasers vêm todos juntos. Falta 1!", 150)
 		else:
-			b.st = "volta"
 			g.flash("Isso! A esteira do chão ligou. Faltam %d." % b.hp, 140)
 
 
