@@ -31,6 +31,7 @@ const SUN := {"tarde": Vector3(686, 322, 1.0), "moinho": Vector3(900, 224, .6)}
 
 var mat: ShaderMaterial
 var add_node: Node2D
+var plane_node: Node2D   # aviões lá fora: recortados pela vidraça da pintura (plane_mask.gdshader)
 var _cloud_off := 0.0
 var _rain_off := 0.0
 var _w := {}
@@ -44,6 +45,12 @@ func _ready() -> void:
 	mat = ShaderMaterial.new()
 	mat.shader = preload("res://scripts/bg_fx.gdshader")
 	# brilho do sol somado (mistura aditiva), por cima da pintura
+	plane_node = _Sub.new()
+	plane_node.cb = _draw_planes
+	var pm := ShaderMaterial.new()
+	pm.shader = preload("res://scripts/plane_mask.gdshader")
+	plane_node.material = pm
+	add_child(plane_node)
 	add_node = _Sub.new()
 	add_node.cb = _draw_add
 	var am := CanvasItemMaterial.new()
@@ -61,6 +68,8 @@ func _process(_d: float) -> void:
 		_rain_off += FxClock.k * (.35 + wind * 1.2)
 		_update_mat()
 	queue_redraw()
+	if plane_node:
+		plane_node.queue_redraw()
 	if add_node:
 		add_node.queue_redraw()
 
@@ -115,12 +124,17 @@ func __draw_raw() -> void:
 	for k in keys:
 		_sky(k, nw.get(k, 0.0), w, oy)
 	_atmos(nw, w, oy, bh)
-	_aero_planes(ws, w)
 
 ## aeroporto: aviões decolando e pousando lá fora, atrás das vidraças (trechos de dia).
 ## A posição é presa ao cenário do fundo (que rola com a câmera) e o avião sempre anda para onde o
 ## bico aponta EM RELAÇÃO AO FUNDO: o Milis correndo não faz mais o avião parecer voar de ré.
 var _planes := [{}, {}]
+func _draw_planes(n: Node2D) -> void:
+	if game == null or not game.L:
+		return
+	Spr.begin(n)
+	_aero_planes(game.section_weights(), game.W + 4)
+
 func _aero_planes(ws: Dictionary, w: float) -> void:
 	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
 		return

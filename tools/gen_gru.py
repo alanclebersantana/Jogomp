@@ -684,8 +684,8 @@ for e in L["enemies"]:
     if e.get("r") and not (e["r"][0] <= e["x"] <= e["r"][1]):
         e["x"] = (e["r"][0] + e["r"][1]) // 2
 # drones em lugares abertos, com espaço para lutar (nunca em cima de vão, fio ou corrimão)
-drone(1790, 330, [1720, 1860])        # bancos do saguão, depois da arena do 1º segurança
-drone(9560, -200, [9380, 9740])       # em cima da passarela do mezanino da segurança
+pombo(1800, 250, [1730, 1870])        # drone espião nos bancos do saguão, depois da arena do 1º segurança
+pombo(9560, -230, [9380, 9740])       # drone espião em cima da passarela do mezanino da segurança
 # dicas só aparecem em cima do piso do terminal (no subsolo das bagagens elas não valem)
 for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))
