@@ -364,12 +364,22 @@ quebra(2875, "placa", 34)   # na beira da poça (sem encostar no vaso)
 L.setdefault("carts", []).append({"x0": 9230, "x1": 9800})   # fora da arena do 3º segurança
 andaime(2860, 220, [380, 260])
 milhas(2880, 3060, 230, 44)
-# segredos para voltar depois: o duto alto do começo (só com as botas-foguete) e malas presas no alto
-# dos painéis (só o gancho magnético alcança)
+# nada de "voltar depois": tudo o que aparece dá para pegar na hora.
+# começo: a viga em cima do painel de partidas tem um degrau (prateleira embaixo do painel) — pulo duplo alcança
 plat(140, 210, 170)
+plat(330, 360, 90)
 milhas(160, 290, 180, 26)
 caixa(290, y=210, item="heart")
-L.setdefault("stuck", []).extend([{"x": 1325, "y": 205, "n": 20}, {"x": 3785, "y": 195, "n": 20}])
+# lugares altos só para as botas-foguete — todos DEPOIS de pegar as botas (x 2300)
+plat(3930, 130, 120)                 # em cima dos balcões do check-in (do balcão: 280 px)
+milhas(3950, 4030, 100, 40)
+caixa(4010, y=130, item="heart")
+plat(7650, 215, 110)                 # em cima do raio-x, por cima dos espetos
+milhas(7665, 7745, 185, 40)
+plat(14560, 215, 120)                # reta final
+milhas(14575, 14665, 185, 45)
+# malas presas no alto dos painéis (só o gancho magnético alcança) — todas DEPOIS do gancho (x 7030)
+L.setdefault("stuck", []).extend([{"x": 8785, "y": 195, "n": 20}, {"x": 12775, "y": 185, "n": 20}])
 # ímã no teto em cima do vão das bandejas: com o gancho, atravessa balançando
 L.setdefault("anchors", []).append({"x": 8340, "y": 230})
 # cartazes de PROCURADO do vulto (aparecem e se completam conforme as pistas)

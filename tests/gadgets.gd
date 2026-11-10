@@ -1,19 +1,19 @@
 extends "res://tests/route_gru.gd"
-## Equipamentos: botas-foguete (duto alto do começo), gancho magnético (mala presa no alto, ímã no
+## Equipamentos: botas-foguete (plataforma alta em cima dos balcões do check-in), gancho magnético (mala presa no alto, ímã no
 ## teto em cima do vão das bandejas, arrancar o escudo do falso segurança).
 func _rocket_try(com_botas: bool) -> float:
 	carregar(0, false)
 	if com_botas:
 		g.INV.append("botas_foguete")
-	P.x = 330.0
-	P.y = 440.0
+	P.x = 3962.0
+	P.y = 340.0
 	wait_ground()
-	# pula para a esquerda: pulo, duplo no alto, foguete no alto do duplo
+	# pula reto do balcão: pulo, duplo no alto, foguete no alto do duplo
 	press("J")
 	frame({"J": true, "L": true})
 	var st := 0
 	for i in 160:
-		var d := {"J": true, "L": px() > 230}
+		var d := {"J": true, "R": px() < 3985 and i > 30}
 		if st == 0 and P.vy > -1:
 			press("J")
 			st = 1
@@ -29,13 +29,13 @@ func _initialize() -> void:
 	var f := 0
 	var sem: float = _rocket_try(false)
 	var com: float = _rocket_try(true)
-	print("duto alto: sem botas pousou y=", int(sem), " · com botas y=", int(com))
-	if sem < 400 or com > 215:
+	print("plataforma alta: sem botas pousou y=", int(sem), " · com botas y=", int(com))
+	if sem < 400 or com > 135:
 		f += 1
 	# mala presa no alto do painel
 	carregar(0, false)
 	g.INV.append("gancho")
-	P.x = 1225.0
+	P.x = 8685.0
 	P.y = 440.0
 	wait_ground()
 	var c0: int = g.coins

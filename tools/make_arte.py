@@ -540,9 +540,9 @@ def passageiros():
         # e com menos contraste) — continuam coloridos, mas nunca chamam mais atenção que os capangas
         q = NOVO["p_pax_" + n][0]
         rgb = q.convert("RGB")
-        rgb = ImageEnhance.Color(rgb).enhance(.45)
-        rgb = ImageEnhance.Contrast(rgb).enhance(.82)
-        rgb = Image.blend(rgb, Image.new("RGB", rgb.size, (205, 212, 225)), .18)
+        rgb = ImageEnhance.Color(rgb).enhance(.74)
+        rgb = ImageEnhance.Contrast(rgb).enhance(.9)
+        rgb = Image.blend(rgb, Image.new("RGB", rgb.size, (226, 218, 205)), .07)
         duo = rgb.convert("RGBA")
         duo.putalpha(q.getchannel("A"))
         NOVO["p_paxbg_" + n] = (duo, NOVO["p_pax_" + n][1], NOVO["p_pax_" + n][2])

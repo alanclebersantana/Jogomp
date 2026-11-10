@@ -113,10 +113,10 @@ static func _carts(g, T: int) -> void:
 			Spr.save()
 			Spr.translate(x, y + 3 + sin(T * .3) * .5)
 			Spr.scale(-1.0 if left else 1.0, 1.0)
-			Spr.ci.draw_texture_rect(lt, Rect2(-lw / 2, -lh, lw, lh), false, Color(.86, .88, .93, Spr.alpha))
+			Spr.ci.draw_texture_rect(lt, Rect2(-lw / 2, -lh, lw, lh), false, Color(.95, .95, .96, Spr.alpha))
 			Spr.restore()
 		else:
-			Spr.P("ob_limpeza", x, y + 3 + sin(T * .3) * .5, 120, left, 0.0, Color(.88, .9, .95))
+			Spr.P("ob_limpeza", x, y + 3 + sin(T * .3) * .5, 120, left, 0.0, Color(.95, .95, .97))
 		if Polish.FRESH and T % 6 == 0:
 			g.PARTS.append({"x": x + (-50.0 if not left else 50.0), "y": y - 2, "vx": randf_range(-.5, .5), "vy": -randf_range(.2, .6), "life": 18, "col": Color(.8, .9, 1, .7)})
 

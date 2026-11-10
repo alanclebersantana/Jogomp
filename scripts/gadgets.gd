@@ -127,9 +127,9 @@ func step() -> void:
 			g.burst(it.x, it.y - 20, 22, Color("#ffd76a"))
 			Polish.celebrate(it.x, it.y - 20, false)
 			if it.id == "botas_foguete":
-				g.flash_tut("Botas-foguete", "No ar, depois do pulo duplo, aperte PULAR de novo: um impulso das botas para cima. Lugares altos que você já viu agora estão ao seu alcance!", 320)
+				g.flash_tut("Botas-foguete", "No ar, depois do pulo duplo, aperte PULAR de novo: um impulso das botas para cima. Fique de olho nos lugares bem altos pelo caminho: agora eles estão ao seu alcance!", 320)
 			elif it.id == "gancho":
-				g.flash_tut("Gancho magnético", "Toque em ✋ perto de um ímã no teto para se pendurar, de um capanga para puxar (arranca o escudo do falso segurança) ou de uma mala presa no alto. Volte para pegar o que ficou para trás!", 360)
+				g.flash_tut("Gancho magnético", "Toque em ✋ perto de um ímã no teto para se pendurar, de um capanga para puxar (arranca o escudo do falso segurança) ou de uma mala presa no alto. Tem malas presas no alto dos painéis mais à frente!", 360)
 	# cabo voando até o alvo
 	if not hook.is_empty():
 		hook.t += 1
