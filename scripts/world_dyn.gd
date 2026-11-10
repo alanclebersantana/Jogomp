@@ -2173,9 +2173,12 @@ func _player_draw_raw(g: Game) -> void:
 					fnext = (f + 1) % n
 					fmix = ff - floor(ff)
 				"idle":
-					f = (T / 12) % n
-					fnext = (f + 1) % n
-					fmix = (T % 12) / 12.0
+					# parado: a expressão fica quieta (antes trocava a cada 1/4 de segundo, frenético);
+					# só de vez em quando (a cada ~6 s) muda um instante e volta — como uma piscada
+					var cyc: int = T % 280
+					f = 1 if (n > 1 and cyc >= 254 and cyc < 270) else 0
+					fnext = f
+					fmix = 0.0
 				"jump":
 					f = int(clamp((p.vy + 12) / 12.0, 0, .999) * n)
 				"fall":
