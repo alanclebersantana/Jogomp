@@ -606,14 +606,18 @@ L["pits"].append([11460, 12200])
 # volta para a ponta da passarela (sem precisar voltar até a grade)
 milhas(10990, 11190, 470, 40)
 caixa(11320, item="heart")
+# ITEM ESSENCIAL: as luvas isolantes do faxineiro ficam aqui embaixo — sem elas, os fios eletrificados
+# do vão dão choque e não seguram (é o único jeito de atravessar)
+L["items"].append({"x": 11395, "y": 476, "id": "luvas"})
+dica(11250, 11420, "As luvas isolantes do faxineiro! Com elas dá para segurar os fios eletrificados.", yg=300)
 escada(11452, 160, kind="ladder")
 # vão das bagagens: só atravessa balançando de fio em fio (3 fios de manutenção soltos do teto).
 # As passarelas ficam longe demais uma da outra para pular (nem com as botas-foguete).
 for vx, aim in ((11590, [11840, 120]), (11840, [12090, 120]), (12090, [12290, 160])):
-    L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "nosh": 1})
+    L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "eletro": 1})
 milhas(11690, 11750, 150, 30)
 milhas(11940, 12000, 150, 30)
-dica(11300, 11450, "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.", yl=220)
+dica(11300, 11450, "Fios eletrificados! Só com luvas isolantes: o faxineiro guarda as dele embaixo desta passarela. Com elas, balance de fio em fio até o outro lado.", yl=220)
 passarela(12230, 12500, 160, 200)
 chao(12200, 13580)
 chao(13640, 14200)

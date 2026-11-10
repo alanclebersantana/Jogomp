@@ -299,11 +299,42 @@ def objetos():
         if q is None:
             continue
         troca(n, q, 72, 56, 36, 28)
+    NOVO["it_luvas"] = (luvas_icone(), 36.0, 28.0)
     # pistas: ícone no chão (cl_N) e cartão grande (clb_N)
     for cid, q in enumerate([i[6], i[7], i[8], i[9], i[10], i[11]], start=1):
         troca("cl_%d" % cid, q, 60, 60, 30, 30)
         troca("clb_%d" % cid, q, 219, 220, 109, 110)
     return p, i
+
+
+def luvas_icone():
+    from PIL import ImageDraw
+    """luvas isolantes de borracha (amarelas, punho laranja), duas sobrepostas — 72x56"""
+    S = 4
+    im = Image.new("RGBA", (72 * S, 56 * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    ink = (30, 22, 14, 255)
+    def luva(ox, oy, cor, punho, ang):
+        lay = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        dd = ImageDraw.Draw(lay)
+        # palma
+        dd.rounded_rectangle((ox, oy + 40, ox + 64, oy + 120), 22, fill=cor, outline=ink, width=8)
+        # dedos
+        for k in range(4):
+            fx = ox + 2 + k * 16
+            dd.rounded_rectangle((fx, oy + 4 + (k % 2) * 8, fx + 15, oy + 66), 8, fill=cor, outline=ink, width=7)
+        # polegar
+        dd.rounded_rectangle((ox - 26, oy + 58, ox + 16, oy + 82), 12, fill=cor, outline=ink, width=7)
+        # punho
+        dd.rounded_rectangle((ox - 4, oy + 112, ox + 68, oy + 150), 10, fill=punho, outline=ink, width=8)
+        dd.line((ox + 4, oy + 126, ox + 60, oy + 126), fill=(255, 255, 255, 120), width=5)
+        lay = lay.rotate(ang, resample=Image.BICUBIC, center=(ox + 32, oy + 90))
+        im.alpha_composite(lay)
+    luva(70, 50, (245, 196, 40, 255), (226, 92, 30, 255), 14)
+    luva(160, 40, (255, 214, 64, 255), (236, 110, 36, 255), -12)
+    # raio pequeno (isolante)
+    d.polygon([(250, 18), (224, 70), (244, 70), (226, 116), (276, 52), (254, 52), (270, 18)], fill=(80, 170, 255, 255), outline=ink)
+    return im.resize((72, 56), Image.LANCZOS)
 
 
 def bastao(info):

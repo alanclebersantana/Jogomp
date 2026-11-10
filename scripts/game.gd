@@ -252,6 +252,9 @@ func load_level(i: int) -> void:
 			vo.aim = v.aim
 		if v.get("nosh", false):
 			vo.nosh = true   # fio de travessia sobre vão: sem faísca (um choque ali derrubava no buraco)
+		if v.get("eletro", false):
+			vo.eletro = true   # fio eletrificado: só dá para segurar com as luvas isolantes
+			vo.nosh = has_item("luvas")
 		VINES.append(vo)
 	OIL = []
 	for c in L.get("oil", []):
@@ -646,6 +649,10 @@ func item_name(id: String) -> String:
 # ======================================================================
 func give_item(id: String) -> void:
 	INV.append(id)
+	if id == "luvas":
+		for v in VINES:
+			if v.get("eletro", false):
+				v.nosh = true   # com as luvas, os fios não soltam mais faísca
 	if id == "engrenagem":
 		player.act = "gear"
 		player.actT = 60
@@ -1641,6 +1648,19 @@ func step() -> void:
 			var dy: float = hy - v.y
 			var t: float = dx * sx + dy * cy
 			var perp: float = abs(dx * cy - dy * sx)
+			if t > 24 and t < v.len + 22 and perp < 30 and v.get("eletro", false) and not has_item("luvas"):
+				# fio eletrificado sem luvas: choque leve, as mãos soltam e o Milis é jogado de volta
+				player.vx = -signf(v.x - hx) * 6.0 if absf(v.x - hx) > 1.0 else -float(player.face) * 6.0
+				player.vy = -4.0
+				player.wlock = 52   # o tranco manda: o direcional não puxa de volta para o vão
+				player.vineCD = 40
+				player.lastVine = v
+				shake = max(shake, 4)
+				burst(hx, hy, 14, Color(.7, .9, 1))
+				Audio.play("fire", -8, 1.9)
+				Audio.vib(40)
+				flash("Choque! O fio está eletrificado: sem luvas isolantes não dá para segurar.", 170)
+				continue
 			if t > 24 and t < v.len + 22 and perp < 30:
 				player.vine = v
 				player.erase("voff")

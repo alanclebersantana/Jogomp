@@ -6,6 +6,7 @@ const ITEM_INFO := {
 	"fusivel": ["Fusível queimado", "🔌"], "fita": ["Fita isolante", "🩹"], "fusivel_ok": ["Fusível emendado", "⚡"],
 	"bastao": ["Bastão de sinalização", "🦯"],
 	"botas_foguete": ["Botas-foguete", "🚀"], "gancho": ["Gancho magnético", "🧲"],
+	"luvas": ["Luvas isolantes", "🧤"],
 	"picareta": ["Bastão de sinalização", "🦯"],
 }
 const RECIPES := [

@@ -193,7 +193,10 @@ func fase_1_1() -> void:
 	S("porta subiu", until({}, func(): return g.M.GATES.filter(func(gt): return gt.get("id", "") == "seg1")[0].open >= 1.0, 300))
 	S("tapume 3", crawl(10675))
 	# mezanino
-	S("escada de serviço", walk_to(10895))
+	walk_to(11290)
+	S("pula a caixa do coração", jump_to(11395))
+	S("luvas isolantes (embaixo da passarela)", pegou("luvas"))
+	S("escada do fim da passarela", walk_to(11467))
 	S("sobe", climb_to("U", func(): return P.ladder == null and P.onGround and P.y < 160, 500))
 	S("passarela", walk_to(11432))
 	S("fio 1", grab_vine(g.VINES[0]))

@@ -1004,6 +1004,11 @@
    "x": 8560,
    "y": 476,
    "id": "cordao"
+  },
+  {
+   "x": 11395,
+   "y": 476,
+   "id": "luvas"
   }
  ],
  "locks": [
@@ -1075,7 +1080,7 @@
     11840,
     120
    ],
-   "nosh": 1
+   "eletro": 1
   },
   {
    "x": 11840,
@@ -1085,7 +1090,7 @@
     12090,
     120
    ],
-   "nosh": 1
+   "eletro": 1
   },
   {
    "x": 12090,
@@ -1095,7 +1100,7 @@
     12290,
     160
    ],
-   "nosh": 1
+   "eletro": 1
   }
  ],
  "springs": [],
@@ -2172,9 +2177,16 @@
    "yl": 640
   },
   {
+   "a": 11250,
+   "b": 11420,
+   "t": "As luvas isolantes do faxineiro! Com elas dá para segurar os fios eletrificados.",
+   "yg": 300,
+   "yl": 640
+  },
+  {
    "a": 11300,
    "b": 11450,
-   "t": "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.",
+   "t": "Fios eletrificados! Só com luvas isolantes: o faxineiro guarda as dele embaixo desta passarela. Com elas, balance de fio em fio até o outro lado.",
    "yl": 220
   },
   {
