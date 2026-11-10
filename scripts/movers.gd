@@ -186,8 +186,48 @@ func draw(T: int) -> void:
 					continue
 				_lift(o, T)
 			"path":
-				for s in o.plats:
-					_plank(s)
+				if g.L.get("theme", "") == "aeroporto":
+					_cargo_rail(o)
+					for s in o.plats:
+						_cargo_plat(s, T)
+				else:
+					for s in o.plats:
+						_plank(s)
+
+## aeroporto: a esteira de despacho que sobe e desce é uma plataforma de carga de metal, inteira,
+## correndo num trilho inclinado (o trilho mostra o caminho todo, com pés até o chão)
+func _cargo_rail(o: Dictionary) -> void:
+	var w: float = float(o.w)
+	var a := Vector2(float(o.x0) + w / 2, float(o.y0) + 22)
+	var b := Vector2(float(o.x1) + w / 2, float(o.y1) + 22)
+	var steel := Color("#4a5560")
+	# pés do trilho (até o chão)
+	for q in [a, b, (a + b) * .5]:
+		Spr.rect(q.x - 4, q.y, 8, 500.0 - q.y, Color("#3a434c"))
+		Spr.rect(q.x - 12, 494.0, 24, 6, Color("#2c333a"))
+	Spr.seg(a.x, a.y, b.x, b.y, Color(0, 0, 0, .35), 12)
+	Spr.seg(a.x, a.y, b.x, b.y, steel, 8)
+	Spr.seg(a.x, a.y - 2, b.x, b.y - 2, Color("#8a96a2"), 2)
+
+func _cargo_plat(s: Dictionary, T: int) -> void:
+	var x: float = s.x
+	var y: float = s.y
+	var w: float = s.w
+	# braço que liga a plataforma ao trilho
+	Spr.rect(x + w / 2 - 5, y + 14, 10, 10, Color("#3a434c"))
+	# tampo de metal inteiro, com borda listrada (amarelo e preto) e rebites
+	Spr.rr(x - 2, y - 2, w + 4, 20, 4, Color("#1c2228"))
+	Spr.rr(x, y, w, 16, 3, Color("#8c98a4"))
+	Spr.rect(x + 2, y + 1, w - 4, 3, Color("#c2ccd6"))
+	var k := 0.0
+	while k < w - 4:
+		var c := Color("#f2c230") if int(k / 12.0) % 2 == 0 else Color("#22262b")
+		Spr.rect(x + 2 + k, y + 10, min(12.0, w - 4 - k), 5, c)
+		k += 12.0
+	for rx in [x + 6, x + w - 6]:
+		Spr.circle(rx, y + 6, 1.8, Color("#3a434c"))
+	# luzinha de aviso piscando (ela se mexe)
+	Spr.circle(x + w / 2, y + 4, 2.4, Color(1, .6, .1, .6 + .4 * sin(T * .2)))
 
 const WS = preload("res://scripts/world_static.gd")
 ## tábua desenhada na origem (o veio da madeira não "pisca" enquanto ela anda)

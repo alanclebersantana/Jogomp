@@ -356,7 +356,6 @@ obj(980, "cafe", 46)
 obj(1180, "passaportes", 44)
 obj(1440, "lixeiras", 96)
 obj(2100, "ursinho", 30)
-quebra(2420, "malas", 74)
 obj(2960, "folhetos", 40)
 obj(3240, "etiqueta", 26)
 molhado(2860, 140)
@@ -387,7 +386,6 @@ L["posters"] = [{"x": 3500, "y": 330}, {"x": 2740, "y": 330, "rot": .05}, {"x": 
                 {"x": 7420, "y": 170}, {"x": 10590, "y": 180, "rot": .05}, {"x": 13080, "y": 390}]
 # cenário que reage: máquinas de lanche (soltam milhas), vasos e um carrinho de bagagem desgovernado
 quebra(1185, "lanche", 64)      # dentro da arena do 1º segurança (a investida dele bate na máquina)
-quebra(2805, "vaso", 40)
 quebra(9960, "carrinho", 70)    # arena do 3º segurança: empurre o carrinho nele
 quebra(11250, "lanche", 64)
 # check-in
@@ -413,7 +411,7 @@ quebra(4400, "malas", 70)
 obj(5200, "passaportes", 40)
 obj(5480, "papeis", 60)
 obj(5960, "cafe", 44)
-obj(6250, "lixeiras", 96)
+obj(6020, "lixeiras", 96)   # longe do caminho do caixote
 molhado(5980, 140)
 quebra(5960, "placa", 34)
 faxineiro(6900, [6650, 7150])
@@ -523,7 +521,7 @@ robo_falso(5420, [5250, 5650])
 # a fila em zigue-zague lá embaixo: fitas (plataformas baixas) e um caixote para a placa
 for i in range(4):
     plat(5200 + i * 160, 440 - (i % 2) * 40, 100)
-caixote(6050)
+caixote(6170)   # pertinho da placa do chão (6300)
 S.append({"t": "dirt", "x": 6300, "y": 520, "w": 70, "h": 120})
 L["plates"].append({"x": 6300, "y": 520, "w": 70, "gate": "cat1"})
 portao("cat1", 6500, 380, GY)

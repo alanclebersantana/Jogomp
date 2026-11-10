@@ -126,7 +126,7 @@ func fase_1_1() -> void:
 	use()
 	S("elevador desceu", until({}, func(): return float(g.MV.MV[0].pos) >= .999, 700))
 	walk_to(2300)
-	S("pula a pilha de malas", jump_to(2470))
+	walk_to(2470)
 	S("tapume 1 (rolando)", crawl(2635))
 	walk_to(2640)
 	S("caixa do coração", jump_to(2760))
