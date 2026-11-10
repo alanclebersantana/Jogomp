@@ -1659,7 +1659,7 @@ func _player(g: Game) -> void:
 	var p: Dictionary = g.player
 	# fim de tarde: sombra comprida do Tomé deitada no chão
 	var tw: float = g.section_weights().get("tarde", 0.0)
-	if tw > 0 and p.onGround:
+	if false and tw > 0 and p.onGround:   # (sem sombra do Milis)
 		var u: float = clamp((p.x - 3430.0) / 11710.0, 0, 1) * tw
 		if u > .2:
 			Spr.ellipse(p.x + p.w / 2 + off.x + 22 * u, p.y + p.h + 1 + off.y, 18 + 26 * u, 3.2, Color(.2, .08, .02, .22 * u))
@@ -2251,8 +2251,7 @@ func _player_draw_raw(g: Game) -> void:
 			# a sombra respira com o passo: mais larga e escura no apoio
 			var bn: float = bob3 / 8.0
 			# (no ar não tem sombra: ela ficava "voando" junto, debaixo dos pés)
-			if p.onGround:
-				Polish.shadow(cx, by + 1, 16 * air3 * (1.0 + .07 * bn), 4 * air3, .25 * air3 * (1.0 + .15 * bn))
+			# (sem sombra embaixo do Milis: pedido do Alan)
 			# na parede: o corpo afasta um palmo (só a mão encosta) e inclina para fora, tremendo com o atrito
 			var cx3: float = cx + p.face * 8.0 * wk
 			var rot3: float = p.lean + (p.face * .1 + sin(T * 1.1) * .012) * wk + p.face * (1.0 - dk3) * .35
@@ -2269,7 +2268,7 @@ func _player_draw_raw(g: Game) -> void:
 				_scarf(p, clamp(abs(wnd), .4, 1.0))
 				Spr.restore()
 			# J10 rastro de velocidade: um "borrão" do próprio desenho logo atrás quando corre no máximo
-			if abs(p.vx) > 5.2 and not g.low_fx:
+			if false:   # (sem rastro do Milis correndo)
 				for si in 2:
 					var so: float = -p.vx * (1.6 + si * 1.8)
 					Spr.save()
@@ -2332,11 +2331,10 @@ func _player_draw_raw(g: Game) -> void:
 		otex = om.tex
 		osrc = Spr.x4_src(om, Spr.x4_pos(om, ofp)[0])
 	var air: float = clamp(1 - abs(p.vy) / 16.0, .3, 1)
-	if p.onGround:
-		Polish.shadow(cx, by + 1, 16 * air, 4 * air, .25 * air)
+	# (sem sombra embaixo do Milis)
 	if p.puff:
 		Spr.glow(cx, by - 30, 50, Color(1, .96, .82, .55))
-	if p.run and p.onGround:
+	if false and p.run and p.onGround:   # (sem riscos de rastro correndo)
 		for k in 3:
 			var yy: float = by - 44 + k * 12
 			Spr.seg(cx - p.face * (20 + k * 4), yy, cx - p.face * (40 + k * 6), yy, Color(.94, .9, .78, .5), 2)
@@ -2771,7 +2769,7 @@ func _pose(key: String, tex: Texture2D, src: Rect2, dst: Rect2, x: float, y: flo
 		if _pose_last.has("key") and _pose_last.key != key and T - int(_pose_last.t) <= 2:
 			_ghost = _pose_last
 			_ghostT = GHOST_N
-	if _ghostT > 0 and not _ghost.is_empty():
+	if false and _ghostT > 0 and not _ghost.is_empty():   # (sem pose-fantasma: parecia rastro)
 		var a: float = float(_ghostT) / (GHOST_N + 1) * .6
 		Spr.save()
 		Spr.translate(_ppos.x + _ghost.off.x, _ppos.y + _ghost.off.y)

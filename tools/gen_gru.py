@@ -368,7 +368,7 @@ milhas(2880, 3060, 230, 44)
 plat(140, 210, 170)
 plat(330, 360, 90)
 milhas(160, 290, 180, 26)
-caixa(290, y=210, item="heart")
+caixa(290, y=210, n=8)   # começa com a vida cheia: lá em cima é caixa de milhas, não de coração
 # lugares altos só para as botas-foguete — todos DEPOIS de pegar as botas (x 2300)
 plat(3930, 130, 120)                 # em cima dos balcões do check-in (do balcão: 280 px)
 milhas(3950, 4030, 100, 40)
