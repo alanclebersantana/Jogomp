@@ -113,7 +113,6 @@ func fase_1_1() -> void:
 	S("coluna do painel (pulo duplo)", jump_to(1960, true))
 	walk_to(2030)
 	S("desce", jump_to(2200))
-	S("botas-foguete (no caminho)", walk_to(2300) and pegou("botas_foguete"))
 	# elevador panorâmico até o mirante (pista 1)
 	walk_to(2110)
 	S("entra no elevador", g.MV.on_plat(g.MV.MV[0]))
@@ -194,7 +193,6 @@ func fase_1_1() -> void:
 	# mezanino
 	walk_to(11290)
 	S("pula a caixa do coração", jump_to(11395))
-	S("luvas isolantes (embaixo da passarela)", pegou("luvas"))
 	S("escada do fim da passarela", walk_to(11467))
 	S("sobe", climb_to("U", func(): return P.ladder == null and P.onGround and P.y < 160, 500))
 	S("passarela", walk_to(11432))

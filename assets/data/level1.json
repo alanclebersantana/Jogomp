@@ -103,24 +103,6 @@
    "w": 90
   },
   {
-   "t": "plat",
-   "x": 3930,
-   "y": 130,
-   "w": 120
-  },
-  {
-   "t": "plat",
-   "x": 7650,
-   "y": 215,
-   "w": 110
-  },
-  {
-   "t": "plat",
-   "x": 14560,
-   "y": 215,
-   "w": 120
-  },
-  {
    "t": "pgate",
    "id": "auto1",
    "x": 8900,
@@ -1004,11 +986,6 @@
    "x": 8560,
    "y": 476,
    "id": "cordao"
-  },
-  {
-   "x": 11395,
-   "y": 476,
-   "id": "luvas"
   }
  ],
  "locks": [
@@ -1080,7 +1057,7 @@
     11840,
     120
    ],
-   "eletro": 1
+   "nosh": 1
   },
   {
    "x": 11840,
@@ -1090,7 +1067,7 @@
     12090,
     120
    ],
-   "eletro": 1
+   "nosh": 1
   },
   {
    "x": 12090,
@@ -1100,7 +1077,7 @@
     12290,
     160
    ],
-   "eletro": 1
+   "nosh": 1
   }
  ],
  "springs": [],
@@ -1110,12 +1087,6 @@
    "x": 290,
    "y": 172,
    "n": 8
-  },
-  {
-   "t": "break",
-   "x": 4010,
-   "y": 92,
-   "item": "heart"
   },
   {
    "t": "break",
@@ -1294,42 +1265,6 @@
   [
    290,
    180
-  ],
-  [
-   3950,
-   100
-  ],
-  [
-   3990,
-   100
-  ],
-  [
-   4030,
-   100
-  ],
-  [
-   7665,
-   185
-  ],
-  [
-   7705,
-   185
-  ],
-  [
-   7745,
-   185
-  ],
-  [
-   14575,
-   185
-  ],
-  [
-   14620,
-   185
-  ],
-  [
-   14665,
-   185
   ],
   [
    12260,
@@ -2177,16 +2112,9 @@
    "yl": 640
   },
   {
-   "a": 11250,
-   "b": 11420,
-   "t": "As luvas isolantes do faxineiro! Com elas dá para segurar os fios eletrificados.",
-   "yg": 300,
-   "yl": 640
-  },
-  {
    "a": 11300,
    "b": 11450,
-   "t": "Fios eletrificados! Só com luvas isolantes: o faxineiro guarda as dele embaixo desta passarela. Com elas, balance de fio em fio até o outro lado.",
+   "t": "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.",
    "yl": 220
   },
   {
@@ -3005,11 +2933,6 @@
   }
  ],
  "gadgets": [
-  {
-   "x": 2300,
-   "y": 476,
-   "id": "botas_foguete"
-  },
   {
    "x": 7030,
    "y": 280,

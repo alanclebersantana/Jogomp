@@ -369,14 +369,6 @@ plat(140, 210, 170)
 plat(330, 360, 90)
 milhas(160, 290, 180, 26)
 caixa(290, y=210, n=8)   # começa com a vida cheia: lá em cima é caixa de milhas, não de coração
-# lugares altos só para as botas-foguete — todos DEPOIS de pegar as botas (x 2300)
-plat(3930, 130, 120)                 # em cima dos balcões do check-in (do balcão: 280 px)
-milhas(3950, 4030, 100, 40)
-caixa(4010, y=130, item="heart")
-plat(7650, 215, 110)                 # em cima do raio-x, por cima dos espetos
-milhas(7665, 7745, 185, 40)
-plat(14560, 215, 120)                # reta final
-milhas(14575, 14665, 185, 45)
 # malas presas no alto dos painéis (só o gancho magnético alcança) — todas DEPOIS do gancho (x 7030)
 L.setdefault("stuck", []).extend([{"x": 8785, "y": 195, "n": 20}, {"x": 12775, "y": 185, "n": 20}])
 # ímã no teto em cima do vão das bandejas: com o gancho, atravessa balançando
@@ -474,7 +466,6 @@ elevador_vidro(2070, -40)
 bloco(2070, 2150, 511, 640)   # fundo do poço do elevador (um degrauzinho abaixo do piso)
 passarela(2160, 2488, -40, 0)
 pista(2440, -40, 1)
-L.setdefault("gadgets", []).append({"x": 2300, "y": 476, "id": "botas_foguete"})   # no caminho (obrigatório): a parede da segurança só passa com elas
 milhas(2190, 2400, -70, 42)
 dica(1990, 2160, "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...")
 caixa(2700, item="heart")
@@ -604,18 +595,14 @@ L["pits"].append([11460, 12200])
 # volta para a ponta da passarela (sem precisar voltar até a grade)
 milhas(10990, 11190, 470, 40)
 caixa(11320, item="heart")
-# ITEM ESSENCIAL: as luvas isolantes do faxineiro ficam aqui embaixo — sem elas, os fios eletrificados
-# do vão dão choque e não seguram (é o único jeito de atravessar)
-L["items"].append({"x": 11395, "y": 476, "id": "luvas"})
-dica(11250, 11420, "As luvas isolantes do faxineiro! Com elas dá para segurar os fios eletrificados.", yg=300)
 escada(11452, 160, kind="ladder")
 # vão das bagagens: só atravessa balançando de fio em fio (3 fios de manutenção soltos do teto).
-# As passarelas ficam longe demais uma da outra para pular (nem com as botas-foguete).
+# As passarelas ficam longe demais uma da outra para pular.
 for vx, aim in ((11590, [11840, 120]), (11840, [12090, 120]), (12090, [12290, 160])):
-    L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "eletro": 1})
+    L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "nosh": 1})
 milhas(11690, 11750, 150, 30)
 milhas(11940, 12000, 150, 30)
-dica(11300, 11450, "Fios eletrificados! Só com luvas isolantes: o faxineiro guarda as dele embaixo desta passarela. Com elas, balance de fio em fio até o outro lado.", yl=220)
+dica(11300, 11450, "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.", yl=220)
 passarela(12230, 12500, 160, 200)
 chao(12200, 13580)
 chao(13640, 14200)

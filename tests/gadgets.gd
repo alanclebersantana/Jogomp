@@ -1,5 +1,5 @@
 extends "res://tests/route_gru.gd"
-## Equipamentos: botas-foguete (plataforma alta em cima dos balcões do check-in), gancho magnético (mala presa no alto, ímã no
+## Equipamentos (as botas-foguete saíram do jogo): gancho magnético (mala presa no alto, ímã no
 ## teto em cima do vão das bandejas, arrancar o escudo do falso segurança).
 func _rocket_try(com_botas: bool) -> float:
 	carregar(0, false)
@@ -27,11 +27,12 @@ func _rocket_try(com_botas: bool) -> float:
 
 func _initialize() -> void:
 	var f := 0
-	var sem: float = _rocket_try(false)
-	var com: float = _rocket_try(true)
-	print("plataforma alta: sem botas pousou y=", int(sem), " · com botas y=", int(com))
-	if sem < 400 or com > 135:
-		f += 1
+	# (botas-foguete saíram do jogo)
+	if not g or true:
+		carregar(0, false)
+	for it in g.L.get("gadgets", []):
+		if it.id == "botas_foguete":
+			print("FALHA: botas-foguete ainda na fase"); f += 1
 	# mala presa no alto do painel
 	carregar(0, false)
 	g.INV.append("gancho")
