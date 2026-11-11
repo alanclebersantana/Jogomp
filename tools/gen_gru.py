@@ -348,6 +348,14 @@ atendente(14280, GY, "barros2", [
 # começo do saguão, a pausa antes do check-in, depois do carrinho e antes do Fiscal
 pax(300, "exec", r=[150, 900], spd=.9, re=1)
 pax(620, "cel", r=[480, 860], spd=.5, re=1)
+# mais vida no terminal: gente passando (com passos de verdade) e um senhor cochilando no banco
+pax(1640, "piloto", r=[1560, 2020], spd=.7)
+pax(2236, "dorme", k="sit", y=GY - 34, look=False, z="z")
+pax(2500, "comissaria", r=[2300, 2720], spd=.8)
+pax(5150, "exec", r=[4980, 5520], spd=1.0)
+pax(6500, "cel", r=[6400, 6820], spd=.5)
+pax(9300, "turista", k="stand", look=False)
+pax(12900, "idosa", k="stand")
 painel(220)
 painel(1240, 210, 170)
 painel(2060)

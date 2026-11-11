@@ -967,14 +967,7 @@ static func tool_fx(g: Game, T: int) -> void:
 				pts.push_back(Vector2(cx + f * cos(a) * 42, p.y + 14 + sin(a) * 34))
 			Spr.ci.draw_polyline(pts, Color(1, .95, .8, .55 * (1.0 - k * .6)), 7, true)
 			Spr.ci.draw_polyline(pts, Color(1, 1, 1, .9 * (1.0 - k * .5)), 2.5, true)
-			var tip: Vector2 = pts[pts.size() - 1]
-			if Rig.ready("tome"):
-				return
-			Spr.save()
-			Spr.translate(tip.x, tip.y)
-			Spr.rotate(a1 * f + (0.0 if f > 0 else PI))
-			Spr.A("it_picareta", 0, 0, .3, f < 0)
-			Spr.restore()
+			# (sem desenhar outro bastão na ponta do arco: a pose do golpe já segura o bastão)
 	if p.get("guard", false):
 		var lx: float = cx + f * 18
 		var ly: float = p.y + 12

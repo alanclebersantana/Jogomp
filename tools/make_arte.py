@@ -345,17 +345,29 @@ def luvas_icone():
 
 
 def bastao(info):
-    """o bastão de sinalização (no lugar da picareta): recorta da pose de golpe a parte laranja"""
-    g = info["golpe"]
-    import numpy as np
-    a = np.asarray(g).astype(int)
-    lar = (a[..., 0] > 200) & (a[..., 1] > 80) & (a[..., 1] < 200) & (a[..., 2] < 90) & (a[..., 3] > 100)
-    ys, xs = np.where(lar)
-    if len(xs) > 20:
-        cx0, cx1, cy0, cy1 = xs.min(), xs.max(), ys.min(), ys.max()
-        b = g.crop((max(0, cx0 - 6), max(0, cy0 - 6), cx1 + 6, cy1 + 6))
-    else:
-        b = g
+    """o bastão de sinalização (no lugar da picareta): desenhado à parte (o recorte da pose de golpe
+    pegava o rastro laranja junto e trazia um Milis inteiro em miniatura)"""
+    from PIL import ImageDraw, ImageFilter
+    S = 4
+    L = Image.new("RGBA", (120 * S, 120 * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(L)
+    ink = (30, 22, 14, 255)
+    # haste luminosa (vertical; gira depois)
+    d.rounded_rectangle((48 * S, 6 * S, 72 * S, 84 * S), radius=12 * S, fill=ink)
+    d.rounded_rectangle((52 * S, 10 * S, 68 * S, 80 * S), radius=8 * S, fill=(246, 112, 28, 255))
+    d.rounded_rectangle((55 * S, 14 * S, 61 * S, 74 * S), radius=3 * S, fill=(255, 200, 90, 255))
+    # cabo preto
+    d.rounded_rectangle((46 * S, 80 * S, 74 * S, 112 * S), radius=7 * S, fill=ink)
+    d.rounded_rectangle((50 * S, 84 * S, 70 * S, 108 * S), radius=5 * S, fill=(58, 60, 66, 255))
+    for yy in (90, 96, 102):
+        d.line((51 * S, yy * S, 69 * S, yy * S), fill=ink, width=2 * S)
+    gl = Image.new("RGBA", L.size, (0, 0, 0, 0))
+    ImageDraw.Draw(gl).rounded_rectangle((44 * S, 2 * S, 76 * S, 86 * S), radius=16 * S, fill=(255, 220, 80, 120))
+    gl = gl.filter(ImageFilter.GaussianBlur(5 * S))
+    gl.alpha_composite(L)
+    b = gl.rotate(-35, resample=Image.BICUBIC, expand=True)
+    b = b.resize((b.width // S, b.height // S), Image.LANCZOS)
+    b = b.crop(b.getbbox())
     NOVO["it_picareta"] = (caber(b, 102, 110, 51, 55), 51.0, 55.0)
     im = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
     im.alpha_composite(cel(b, 256, 256, 220 / max(b.size), 128, 128, False))

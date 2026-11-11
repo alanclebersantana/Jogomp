@@ -105,6 +105,20 @@ static func _faxineiro(g, e: Dictionary) -> bool:
 		if s > 60:
 			e.x = clamp(e.x + e.dir * (s - 60) * .25, e.r[0], e.r[1])
 		return true
+	# repara no Milis: para, vira para ele com cara de espanto e depois vai na direção dele
+	e.wcd = int(e.get("wcd", 0)) - 1
+	var w: int = int(e.get("watch", 0))
+	if w == 0 and int(e.wcd) <= 0 and _near(g, e, 230):
+		var p: Dictionary = g.player
+		e.watch = 46
+		e.wcd = 420
+		e.dir = 1 if p.x + p.w / 2 > e.x else -1
+		Audio.play("robo_bip", -14, .7)
+		return true
+	if w > 0:
+		e.watch = w - 1
+		e.y = e.base
+		return true
 	# (ele conhece o próprio piso molhado: não escorrega nele — quem escorrega é o Milis)
 	return false
 

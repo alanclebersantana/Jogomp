@@ -553,7 +553,8 @@ func post() -> void:
 				Audio.play("stomp", -10)
 				g.burst(c.x + c.w / 2, land, 8, Color("#b7a77f"))
 			c.y = land - c.h
-			c.vy = 0.0
+			# caixa pesada: um quiquezinho na queda alta e assenta
+			c.vy = -c.vy * .22 if c.vy > 6.0 else 0.0
 		else:
 			c.y = ny
 	# placas de pressão (a lista de corpos é montada uma vez por passo: antes era refeita, com um

@@ -220,7 +220,7 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 	n.self_modulate = _env(g)
 	for e in g.EN:
 		var segk: bool = e.k == "boar" and SegGuard.is_seg(g, e)
-		if e.dead > (180 if segk and e.get("dk", "") == "seg" else 50):
+		if e.dead > (180 if segk and e.get("dk", "") == "seg" else (110 if e.get("dk", "") == "tomba" else 50)):
 			continue
 		if e.x < g.cam - 400 or e.x > g.cam + g.W + 400:
 			continue
@@ -1037,6 +1037,13 @@ func _enemy(e: Dictionary) -> void:
 			var q: float = min(1, e.dead / 4.0)
 			var wob: float = sin(e.dead * .9) * .09 * (1.0 - min(1.0, e.dead / 18.0)) if e.dead > 4 else 0.0
 			Spr.scale(1 + .3 * q - wob, 1 - .62 * q + wob)
+		elif e.dk == "tomba":
+			# deitado no chão: gira pelos pés e sobe meia espessura (não afunda no piso); some devagar
+			var rt: float = float(e.get("rot", 0.0))
+			Spr.translate(float(e.get("ddx", 0.0)), float(e.ddy) - abs(sin(rt)) * 16.0)
+			Spr.rotate(rt * (1.0 if e.dir > 0 else -1.0))
+			if e.dead > 80:
+				Spr.alpha *= clamp((110.0 - e.dead) / 30.0, 0.0, 1.0)
 		else:
 			Spr.translate(float(e.get("ddx", 0.0)), e.ddy)
 			var m := 0.0 if Game.FLY.has(e.k) else -15.0
@@ -1099,10 +1106,14 @@ func _enemy(e: Dictionary) -> void:
 		"janitor":
 			# faxineiro com a enceradeira (arte olhando para a direita)
 			var jn := "fax_ko" if e.dead else "fax_%d" % (int(dist / 9.0) % 4)
-			if not e.dead and int(e.get("cs", 1.0) * 10) == 0:
+			if not e.dead and (int(e.get("cs", 1.0) * 10) == 0 or int(e.get("watch", 0)) > 0):
 				jn = "fax_vira"
 			var jr = Spr.AR.get("p_" + jn)
-			if jr != null:
+			var fw: Texture2D = Spr.opt("fax_walk")
+			if fw and not e.dead and jn != "fax_vira":
+				# ciclo de andar desenhado (8 quadros: passos de verdade empurrando a enceradeira)
+				Spr.frame(fw, int(dist / 7.0) % int(fw.get_width() / 320), 320, 240, 140, 236, 0, 3, 104.0 / 210.0)
+			elif jr != null:
 				var jh: float = 104.0 if not e.dead else 60.0
 				Spr.P(jn, 0, 3, jh * jr[2] / jr[3])
 			else:
@@ -2056,8 +2067,6 @@ func _player_draw_raw(g: Game) -> void:
 		elif p.run and p.onGround and abs(p.vx) > 3 and not Spr.anim.has("run"):
 			n = "pai_run1" if int(p.anim * 1.6) % 2 else "pai_run2"
 		if n != "":
-			if p.onGround:
-				Spr.ellipse(cx, by + 1, 18, 4, Color(0, 0, 0, .22))
 			var cm: Dictionary = Spr.x4("A:" + cyk) if cyk != "" else {}
 			var ar = Spr.AR.get(n)
 			if not cm.is_empty():

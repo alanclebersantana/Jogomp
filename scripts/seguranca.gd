@@ -221,6 +221,13 @@ static func draw(g, e: Dictionary, dist: float, T: int) -> void:
 		n = "seg_investe"
 		dy = -abs(sin(dist * .2)) * 3.0
 	elif abs(float(e.get("_bvx", 0.0))) > .15:
+		# ciclo de andar desenhado (8 quadros: joelhos dobrando, braço balançando); sem ele, as 2 poses antigas
+		var wk: Texture2D = Spr.opt("seg_walk")
+		if wk:
+			var wn: int = int(wk.get_width() / 260)
+			var wf: int = int(dist / 9.0) % wn
+			Spr.frame(wk, wf, 260, 230, 130, 224, 0, dy, SC)
+			return
 		n = ["seg_andaA", "seg_parado", "seg_andaB", "seg_parado"][int(dist / 16.0) % 4]
 	else:
 		n = "seg_bravo" if e.get("mad", false) and (T / 40) % 3 == 0 else "seg_parado"

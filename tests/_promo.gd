@@ -35,6 +35,9 @@ func _initialize() -> void:
 		"fios": await _fios()
 		"foguete": await _foguete()
 		"chefe": await _chefe()
+		"defesa": await _defesa()
+		"drone": await _drone()
+		"chefe2": await _chefe2()
 	quit()
 
 func _put(x: float, y: float) -> void:
@@ -188,5 +191,127 @@ func _chefe() -> void:
 			d["L"] = px > 14700
 		for k in d:
 			g.keys[k] = d[k]
+		await _tick()
+		_keys({})
+
+
+func _seg():
+	for q in g.EN:
+		if q.k == "boar" and not q.dead and q.x < 1500:
+			return q
+	return null
+
+func _defesa() -> void:
+	_put(1170.0, 440.0)
+	await _warm(10)
+	for i in 300:
+		var e = _seg()
+		var d := {}
+		if e:
+			var dx: float = e.x - (g.player.x + g.player.w / 2)
+			var perigo: bool = int(e.get("wind", 0)) > 0 or int(e.get("charge", 0)) > 0 or e.has("proj")
+			if perigo and absf(dx) < 260:
+				if i % 90 < 45:
+					d["F"] = true          # escudo levantado
+					g.player.face = 1 if dx > 0 else -1
+				elif int(g.M.dodge_t) == 0:
+					_press("F")             # esquiva
+					d["F"] = true
+					d["L" if dx > 0 else "R"] = true
+			elif absf(dx) > 140:
+				d["R" if dx > 0 else "L"] = true
+			elif i % 40 == 0:
+				_press("G")
+		for k in d:
+			g.keys[k] = d[k]
+		await _tick()
+		_keys({})
+
+func _drone() -> void:
+	for q in g.EN:
+		if q.k == "boar" and q.x < 1500:
+			q.dead = 99
+	g.ARN.A[0].done = true
+	g.ARN.A[0].h = 0.0
+	_put(1620.0, 440.0)
+	await _warm(10)
+	for i in 220:
+		var c = null
+		for q in g.EN:
+			if q.k == "crow" and not q.dead and q.x < 2100:
+				c = q
+		var d := {}
+		if c:
+			var dx: float = c.x - (g.player.x + g.player.w / 2)
+			if absf(dx) > 40 and str(c.get("st", "")) != "dive":
+				d["R" if dx > 0 else "L"] = true
+			if absf(dx) < 90 and c.y > g.player.y - 140:
+				if i % 10 == 0:
+					_press("J")
+				if i % 10 == 4:
+					_press("G")
+			d["J"] = g.keys.get("J", false)
+		for k in d:
+			g.keys[k] = d[k]
+		await _tick()
+		_keys({})
+
+func _chefe2() -> void:
+	_put(14700.0, 400.0)
+	await _warm(5)
+	# entra na arena e deixa a apresentação rodar (sem apagar a cena), pulando as falas
+	for i in 400:
+		_keys({"R": g.player.x < 14860})
+		if not g.CINE.is_empty() and i % 8 == 0:
+			g.keys["Jp"] = true
+		for c in main.ui_layer.get_children():
+			if c.has_method("_end"):
+				c._end()
+		if main.state != main.S.PLAY:
+			if main.panel and main.panel.has_meta("ok"):
+				main.panel.get_meta("ok").call()
+			main.state = main.S.PLAY
+		main._show_hud(false)
+		g.player.hp = 5
+		root.get_texture().get_image().save_jpg("/tmp/promo/fr_%s/%04d.jpg" % [clip, nf], .92)
+		nf += 1
+		await process_frame
+		if g.X.boss_active() and str(g.X.BOSS.st) not in ["wait", "espera", "intro"] and g.CINE.is_empty():
+			break
+	print("chefe ativo em ", nf, " st=", g.X.BOSS.st)
+	for i in 600:
+		var b = g.X.BOSS
+		var p = g.player
+		var cx: float = p.x + p.w / 2
+		var d := {}
+		var sombra := false
+		for o in b.get("objs", []):
+			if o.k == "cai" and int(o.t) > 0 and int(o.t) < 40 and absf(float(o.x) - cx) < 60.0:
+				sombra = true
+			if o.k == "rola" and int(o.wait) == 0 and float(o.x) > cx and float(o.x) - cx < 110.0 and p.onGround:
+				_press("J")
+		if sombra:
+			d["F"] = true    # escudo segura a mala que cai
+		var k: String = str(b.get("beam_k", ""))
+		var bt: int = int(b.get("bt", 0))
+		var warn: int = int(b.get("warn", 50))
+		if str(b.st) == "lasers" and k == "rasteiro" and bt == warn - 6 and p.onGround:
+			_press("J")
+		if str(b.st) == "lasers" and k == "alto" and bt > warn - 12:
+			d["S"] = true
+		if str(b.st) in ["painel"] and b.has("pan_x"):
+			var pan: float = float(b.pan_x) + 46.0
+			if absf(cx - pan) > 10:
+				d["R" if pan > cx else "L"] = true
+			elif i % 14 == 0:
+				_press("G")
+		elif not sombra and i % 140 < 70:
+			d["R"] = cx < 15150
+		elif not sombra:
+			d["L"] = cx > 14760
+		if g.keys.get("J", false) == false and int(g.keys.get("Jp", 0)) == 0:
+			pass
+		for kk in d:
+			g.keys[kk] = d[kk]
 		await _tick()
 		_keys({})

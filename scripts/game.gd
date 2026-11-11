@@ -1446,6 +1446,13 @@ func step() -> void:
 				top2 = min(top2, 1.6)
 			if player.guard:
 				top2 = min(top2, 1.2)
+			# recuperando de uma queda alta: anda devagar uns instantes
+			if int(player.get("heavyT", 0)) > 0:
+				player.heavyT = int(player.heavyT) - 1
+				top2 = min(top2, TOP * .45)
+			# arrancada com inércia: saindo do parado, os primeiros passos aceleram menos
+			if player.onGround and want != 0 and abs(player.vx) < 1.4 and not player.run and int(player.get("pushT", 0)) <= 0:
+				acc *= .7
 			if player.dog:
 				top2 = top2 * 1.18
 			if wet and want == 0:
@@ -1542,6 +1549,9 @@ func step() -> void:
 	if player.onGround and not was_ground and prev_vy > 11 and not player.slam:
 		Polish.land_heavy(player.x + player.w / 2, player.y + player.h, prev_vy)
 		player.squash = min(1.2, prev_vy / 11)
+		# queda alta tem peso: os joelhos absorvem, perde parte do embalo e leva um instante para retomar
+		player.vx *= .55
+		player.heavyT = int(clamp((prev_vy - 11.0) * 2.0 + 8.0, 8, 16))
 	if player.onGround and not was_ground and prev_vy > 4 and not player.slam:
 		Polish.land_soft(player.x + player.w / 2, player.y + player.h, prev_vy)
 	if player.onGround and not was_ground and prev_vy > 6:
@@ -1812,6 +1822,8 @@ func step() -> void:
 			# (depois de sumir de vez não precisa mais contar nem cair)
 			if e.dead < 400:
 				e.dead += 1
+				if e.get("dk") == "tomba":
+					_tomba(e)
 				if e.get("dk") == "flip":
 					e.ddy += e.dvy
 					e.dvy += .45
@@ -4170,6 +4182,18 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 	e.dvy = -6.0
 	e.ddx = 0.0
 	e.dvx = (1.0 if e.x > player.x + player.w / 2 else -1.0) * (2.4 if how != "stomp" else 1.2)
+	# aeroporto: o capanga não sai voando girando como desenho antigo — o golpe empurra, ele tomba
+	# para trás, bate no chão, quica um pouco, escorrega e fica estatelado até sumir
+	if not seg and e.dk == "flip" and L.get("theme", "") == "aeroporto":
+		e.dk = "tomba"
+		e.dvy = -4.5 if not FLY.has(e.k) else -2.0
+		e.dvx = (1.0 if e.x > player.x + player.w / 2 else -1.0) * (4.2 if how != "stomp" else 2.0)
+		e.rot = 0.0
+		e.bnc = 0
+		# quem já tem desenho de nocaute deitado (faxineiro, robô falso) não gira; a mala só tomba um pouco
+		e.rmax = 0.0 if e.k in ["janitor", "frog"] else (.35 if e.k == "fly" else PI * .5)
+		var fl: float = floor_under(e.x, e.y - 20.0)
+		e.gy = clamp(fl - e.y, 0.0, 600.0) if fl < 90000.0 else 0.0
 	if seg:
 		# desaba de costas, escorrega um pouco e fica no chão um tempo (sem girar no ar)
 		e.dk = "seg"
@@ -4196,6 +4220,37 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 	Audio.play("stomp")
 	Audio.vib(20)
 	fx("fx_dust", e.x, e.y - 10, 18, .22)
+
+## capanga derrubado (aeroporto): empurrão, queda de costas, quique no chão, escorrega e fica estatelado
+func _tomba(e: Dictionary) -> void:
+	var gy: float = float(e.get("gy", 0.0))
+	var dx: float = float(e.dvx)
+	if wall_at(e.x + float(e.ddx) + dx + sign(dx) * 24.0, e.y + float(e.ddy) - 20.0):
+		e.dvx = -dx * .3
+		dx = e.dvx
+	e.ddx = float(e.ddx) + dx
+	e.ddy = float(e.ddy) + float(e.dvy)
+	e.dvy = float(e.dvy) + .55
+	var side: float = 1.0 if float(e.get("ddx", 0.0)) >= 0 else -1.0
+	if float(e.ddy) >= gy:
+		e.ddy = gy
+		if float(e.dvy) > 2.2 and int(e.get("bnc", 0)) < 2:
+			# bateu no chão: quica (cada vez menos), poeira e um baque
+			e.dvy = -float(e.dvy) * .32
+			e.bnc = int(e.get("bnc", 0)) + 1
+			fx("fx_dust", e.x + float(e.ddx), e.y + gy - 4, 16, .12, -.2)
+			burst(e.x + float(e.ddx), e.y + gy - 2, 5, _dust_col())
+			if int(e.bnc) == 1:
+				Audio.play("stomp", -12, .7)
+				shake = max(shake, 2)
+		else:
+			e.dvy = 0.0
+		e.dvx = float(e.dvx) * .8   # atrito do piso
+	else:
+		e.dvx = float(e.dvx) * .985
+	# gira para deitar de costas (no ar vai girando; no chão assenta deitado)
+	var alvo: float = side * float(e.get("rmax", PI * .5))
+	e.rot = float(e.get("rot", 0.0)) + (alvo - float(e.get("rot", 0.0))) * (.16 if float(e.ddy) < gy else .3)
 
 func gain_coin(x: float, y: float, silent: bool = false) -> void:
 	coins += 1

@@ -129,6 +129,7 @@ func __draw_raw() -> void:
 ## A posição é presa ao cenário do fundo (que rola com a câmera) e o avião sempre anda para onde o
 ## bico aponta EM RELAÇÃO AO FUNDO: o Milis correndo não faz mais o avião parecer voar de ré.
 var _planes := [{}, {}]
+var _taxi := {}
 func _draw_planes(n: Node2D) -> void:
 	if game == null or not game.L:
 		return
@@ -168,6 +169,23 @@ func _aero_planes(ws: Dictionary, w: float) -> void:
 		var pw: float = 150.0 - k * 40.0
 		# a arte aponta para a direita: indo para a esquerda, espelha
 		Spr.P("ob_aviao", x, y, pw, dir < 0, (-.18 if k == 0 else .1) * -dir, Color(1, 1, 1, .9 * day))
+	# um terceiro avião taxiando devagar na pista, lá no fundo (no chão, sem subir nem descer), com
+	# as luzes piscando na ponta das asas e na cauda
+	var per2 := 2600
+	var u2: int = (game.T + 1300) % per2
+	var cyc2: int = (game.T + 1300) / per2
+	if int(_taxi.get("cyc", -1)) != cyc2:
+		_taxi.cyc = cyc2
+		_taxi.bx = -200.0 - ox
+	var tx: float = float(_taxi.bx) + .55 * u2 + ox
+	if tx > -260 and tx < w + 260:
+		var ty: float = H * .7 + sin(u2 * .05) * .4
+		Spr.P("ob_aviao", tx, ty, 96.0, false, 0.0, Color(.92, .94, 1, .78 * day))
+		if (game.T / 18) % 2 == 0:
+			Spr.circle(tx - 40, ty - 10, 1.6, Color(1, .2, .2, .9 * day))
+			Spr.circle(tx + 6, ty - 4, 1.6, Color(.3, 1, .4, .9 * day))
+		if (game.T % 70) < 4:
+			Spr.glow(tx - 44, ty - 22, 10, Color(1, 1, 1, .8 * day))
 
 static func hh(x: float, k: int = 0) -> float:
 	var v := sin(x * 12.9898 + k * 78.233) * 43758.5453

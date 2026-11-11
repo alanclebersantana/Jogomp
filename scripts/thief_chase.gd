@@ -7,6 +7,11 @@ class_name ThiefChase
 
 var g
 var CH: Array = []
+const VCW := 280.0
+const VCH := 360.0
+const VH := 112.0     # altura na tela (px do mundo): um adulto, bem mais alto que o Milis
+## corrida: passada, passagem, passada, passagem... (quadros da folha na ordem do movimento)
+const RUN_SEQ := [0, 1, 2, 5, 4, 6]
 
 func _init(game) -> void:
 	g = game
@@ -41,7 +46,7 @@ func step() -> void:
 				c.x += c.vx
 				if Polish.FRESH and c.t % 6 == 0:
 					g.PARTS.append({"x": c.x - 10, "y": float(c.y) - 2, "vx": -.8, "vy": -randf_range(.2, .7), "life": 16, "col": Color(.8, .82, .86, .6)})
-				var tr: Dictionary = g.R(c.x - 20, float(c.y) - 84, 40, 84)
+				var tr: Dictionary = g.R(c.x - 20, float(c.y) - 104, 40, 104)
 				if g.hit(p, tr) and p.dyingT <= 0:
 					_caught(c)
 				elif c.x >= float(c.x1):
@@ -80,6 +85,15 @@ func draw(T: int) -> void:
 					Spr.circle(x + sin(k * 1.7) * 18 * u, y - 24 - u * 30 - k * 4, 10 * (1.0 - u) + 3, Color(.3, .24, .38, .5 * (1.0 - u)))
 			continue
 		if st == 2:
+			# o vulto cai sentado com o tranco, levanta e foge sem a mala
+			var tx: Texture2D = Spr.opt("vulto")
+			if tx and tx.get_width() >= VCW * 13:
+				var ct: int = int(c.t)
+				if ct < 40:
+					_frame(x + 6, y, 9 if ct > 6 else 8, false, 1.0)
+				elif ct < 130:
+					var fx: float = x + 6 + (ct - 40) * 4.0 + max(0, ct - 60) * 1.2
+					_frame(fx, y + (-abs(sin(ct * PI / 15.0)) * 2.0), 10 + (ct / 5) % 3, false, clamp((130 - ct) / 30.0, 0, 1))
 			# a mala largada no chão, ainda brilhando um pouco
 			if c.t < 240:
 				var a: float = 1.0 - c.t / 240.0
@@ -87,14 +101,38 @@ func draw(T: int) -> void:
 				Spr.rr(x - 13, y - 22, 26, 20, 3, Color(1, .78, .2, a))
 				Spr.rr(x - 5, y - 26, 10, 5, 2, Color(.4, .3, .1, a))
 			continue
-		# um adulto de capa: bem mais alto que o Milis (~85 px)
+		# um adulto de capuz: bem mais alto que o Milis (~92 px); quadros desenhados (assets/sprites/vulto.png)
+		var tv: Texture2D = Spr.opt("vulto")
+		if tv:
+			var nfr: int = int(tv.get_width() / VCW)
+			var ph: float = float(c.x) / 16.0
+			var fr: int = RUN_SEQ[int(ph) % RUN_SEQ.size()]
+			if int(c.t) < 10 and nfr >= 9:
+				fr = 8   # o susto quando o Milis aparece (depois dispara)
+			var bob: float = -abs(sin(ph * PI / 3.0)) * 2.0
+			Polish.shadow(x, y + 1, 18, 4, .22)
+			_frame(x, y + bob, fr, false, 1.0)
+			# a mala brilha (por cima do desenho)
+			Spr.glow(x - 27, y - 39, 30, Color(1, .85, .3, .22 + .08 * sin(T * .3)))
+			if T % 10 < 5:
+				Spr.circle(x - 36 + sin(T * .3) * 4, y - 48, 1.6, Color(1, 1, .8))
+			continue
 		Spr.save()
 		Spr.translate(x, y)
 		Spr.scale(1.75, 1.75)
 		_hood(0.0, 0.0, T, float(c.vx))
 		Spr.restore()
 
-## o vulto: capa roxa-escura com capuz, dois olhos acesos e a mala brilhando na mão
+func _frame(x: float, y: float, fr: int, flip: bool, a: float) -> void:
+	var t: Texture2D = Spr.opt("vulto")
+	var sc: float = VH / 330.0
+	Spr.save()
+	Spr.translate(x, y)
+	Spr.scale(-sc if flip else sc, sc)
+	Spr.ci.draw_texture_rect_region(t, Rect2(-VCW * .54, -352, VCW, VCH), Rect2(fr * VCW, 0, VCW, VCH), Color(1, 1, 1, a * Spr.alpha))
+	Spr.restore()
+
+## o vulto (desenho antigo, se faltar a folha): capa roxa-escura com capuz, dois olhos acesos e a mala brilhando na mão
 func _hood(x: float, y: float, T: int, vx: float) -> void:
 	var ph: float = T * .45
 	var run: float = clamp(vx / 3.9, 0.0, 1.0)

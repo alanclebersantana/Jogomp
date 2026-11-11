@@ -28,6 +28,7 @@ static func back(g, T: int) -> void:
 		return
 	_reset(g)
 	_neon_floor(g, T)
+	_floor_shine(g, T)
 	_boards(g, T)
 	_posters(g, T)
 	_carts(g, T)
@@ -43,9 +44,13 @@ static func _pax(g, T: int) -> void:
 		var k: String = str(p.get("k", "walk"))
 		var fresh: bool = Polish.FRESH
 		# anda de um lado para o outro dentro do trecho dele
+		# sem ciclo de passos desenhado, ninguém desliza parado: fica em pé olhando o movimento
+		if k == "walk" and Spr.opt(n + "_walk") == null:
+			k = "stand"
 		if k == "walk" and fresh and int(p.rt) <= 0:
 			var spd: float = float(p.get("spd", .9))
 			p.px += p.dir * spd
+			p.wd = float(p.get("wd", 0.0)) + spd
 			var r: Array = p.r
 			if p.px > float(r[1]):
 				p.px = float(r[1])
@@ -83,7 +88,18 @@ static func _pax(g, T: int) -> void:
 		elif k == "sit":
 			bob = sin(T * .03 + x) * .8
 		Spr.ellipse(x, y + 1, w * .32, 5, Color(0, 0, 0, .22))
-		Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(1, 1, 1, .94))
+		# andando: ciclo de passos desenhado (assets/sprites/pax_<nome>_walk.png, já na versão "de cenário")
+		var wt: Texture2D = Spr.opt(n + "_walk") if k == "walk" and int(p.rt) <= 0 else null
+		if wt:
+			var wn: int = int(wt.get_width() / 240)
+			var wsc: float = hgt / 240.0
+			Spr.save()
+			Spr.translate(x, y + 3 + bob * .4)
+			Spr.scale(-wsc if face_left else wsc, wsc)
+			Spr.ci.draw_texture_rect_region(wt, Rect2(-130, -256, 240, 260), Rect2((int(float(p.get("wd", 0.0)) / 8.0) % wn) * 240, 0, 240, 260), Color(1, 1, 1, .94 * Spr.alpha))
+			Spr.restore()
+		else:
+			Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(1, 1, 1, .94))
 		if int(p.rt) > 20 and p.has("re"):
 			var by: float = y - hgt - 18 + hop
 			Spr.rr(x - 12, by - 14, 24, 22, 8, Color(1, 1, 1, .95))
@@ -137,6 +153,7 @@ static func front(g, T: int) -> void:
 	if not aero(g):
 		return
 	_reset(g)
+	_light_dust(g, T)
 	_papers(g, T)
 	_plane_shadow(g, T)
 	_fluor(g, T)
@@ -156,6 +173,10 @@ static func _papers(g, T: int) -> void:
 	if Polish.FRESH:
 		if PAPERS.size() < 4 and T % 140 == 0:
 			PAPERS.append({"x": g.cam + randf() * g.W, "y": g.cam_y + 40 + randf() * 120, "vx": randf_range(.6, 1.6), "vy": randf_range(.2, .6), "r": randf() * TAU, "life": 520, "c": _paper_col()})
+		# folhas secas das plantas do saguão caindo de vez em quando (giram e planam em zigue-zague)
+		if PAPERS.size() < 7 and T % 210 == 105:
+			var lc := [Color("#7aa83c"), Color("#c9a13a"), Color("#a8642a"), Color("#5f8f34")]
+			PAPERS.append({"x": g.cam + randf() * g.W, "y": g.cam_y + 20 + randf() * 80, "vx": randf_range(.3, 1.0), "vy": randf_range(.1, .4), "r": randf() * TAU, "life": 600, "c": lc[randi() % lc.size()], "leaf": true})
 		if pl.onGround and abs(pl.vx) > 3.6 and T % 16 == 0 and PAPERS.size() < 8:
 			PAPERS.append({"x": pl.x + pl.w / 2 - sign(pl.vx) * 10, "y": pl.y + pl.h - 6, "vx": -sign(pl.vx) * randf_range(.5, 1.5) + pl.vx * .3, "vy": -randf_range(1.5, 3.0), "r": randf() * TAU, "life": 220, "c": _paper_col()})
 		var i := PAPERS.size() - 1
@@ -177,10 +198,71 @@ static func _papers(g, T: int) -> void:
 		Spr.rotate(sin(p.r) * .8)
 		Spr.scale(cos(p.r * 1.3), 1)
 		var c: Color = p.c
-		Spr.rect(-6, -4, 12, 8, Color(c.r, c.g, c.b, .95 * a))
-		Spr.rect(-4, -2, 8, 1, Color(0, 0, 0, .25 * a))
-		Spr.rect(-4, 1, 6, 1, Color(0, 0, 0, .2 * a))
+		if p.get("leaf", false):
+			Spr.ellipse(0, 0, 7, 3.2, Color(c.r * .6, c.g * .6, c.b * .6, .9 * a))
+			Spr.ellipse(0, 0, 6, 2.4, Color(c.r, c.g, c.b, .95 * a))
+			Spr.seg(-6, 0, 6, 0, Color(c.r * .55, c.g * .55, c.b * .5, .8 * a), 1)
+		else:
+			Spr.rect(-6, -4, 12, 8, Color(c.r, c.g, c.b, .95 * a))
+			Spr.rect(-4, -2, 8, 1, Color(0, 0, 0, .25 * a))
+			Spr.rect(-4, 1, 6, 1, Color(0, 0, 0, .2 * a))
 		Spr.restore()
+
+static func hh(x: float, k: int = 0) -> float:
+	var v := sin(x * 12.9898 + k * 78.233) * 43758.5453
+	return v - floor(v)
+
+## luz do sol entrando pelas vidraças (de dia): faixas de luz inclinadas e poeirinha brilhando nelas
+static func _light_dust(g, T: int) -> void:
+	var sc := _section(g)
+	var bg: String = str(sc.get("bg", ""))
+	if not bg in ["vila", "tarde"]:
+		return
+	var warm := Color(1, .93, .72) if bg == "vila" else Color(1, .72, .45)
+	var W: float = g.W
+	var H: float = g.H
+	var top: float = g.cam_y
+	# faixas de luz (paralaxe leve, andam um pouco mais devagar que o cenário)
+	var per := 520.0
+	var off: float = fposmod(-g.cam * .85, per)
+	var xx: float = g.cam - per + off
+	while xx < g.cam + W + per:
+		var a: float = .075 + .02 * sin(T * .01 + xx * .01)
+		Spr.poly(PackedVector2Array([Vector2(xx, top), Vector2(xx + 110, top), Vector2(xx + 330, top + H), Vector2(xx + 170, top + H)]), Color(warm.r, warm.g, warm.b, a))
+		xx += per
+	if g.low_fx:
+		return
+	# poeira suspensa: pontinhos que flutuam e cintilam quando atravessam a luz
+	for i in 34:
+		var sp: float = .12 + hh(i, 1) * .25
+		var x: float = g.cam + fposmod(hh(i, 2) * W * 1.2 + T * sp, W * 1.2) - W * .1
+		var y: float = top + H * .12 + fposmod(hh(i, 3) * H * .7 + sin(T * .013 + i) * 18.0 - T * .04 * hh(i, 4), H * .7)
+		var tw: float = .5 + .5 * sin(T * (.05 + hh(i, 5) * .05) + i * 2.1)
+		var r: float = .9 + hh(i, 6) * 1.1
+		Spr.circle(x, y, r, Color(1, .98, .9, .3 + .45 * tw))
+		if tw > .85:
+			Spr.glow(x, y, 6, Color(1, .95, .8, .25))
+
+## piso encerado refletindo as vidraças (de dia): faixas claras que deslizam ao contrário da câmera
+static func _floor_shine(g, T: int) -> void:
+	var sc := _section(g)
+	if not str(sc.get("bg", "")) in ["vila", "tarde"]:
+		return
+	var per := 300.0
+	var off: float = fposmod(g.cam * .35, per)
+	var xx: float = g.cam - per + off
+	var pits: Array = g.L.get("pits", [])
+	while xx < g.cam + g.W + per:
+		var over := false
+		for pt in pits:
+			if xx + 106 > float(pt[0]) and xx < float(pt[1]):
+				over = true
+		if over:
+			xx += per
+			continue
+		Spr.vgrad(xx, 500, 70, 28, Color(1, 1, 1, .1), Color(1, 1, 1, 0))
+		Spr.vgrad(xx + 84, 500, 22, 20, Color(1, 1, 1, .07), Color(1, 1, 1, 0))
+		xx += per
 
 static func _paper_col() -> Color:
 	var cs := [Color(1, 1, 1), Color(.98, .96, .88), Color(1, .9, .55), Color(.75, .88, 1)]
@@ -257,6 +339,11 @@ static func _boards(g, T: int) -> void:
 		var y: float = float(b.y)
 		var w: float = float(b.get("w", 150))
 		var h: float = float(b.get("h", 64))
+		# balança de leve nos cabos (o ar-condicionado e o vai e vem do saguão)
+		Spr.save()
+		Spr.translate(x + w / 2, y - 260)
+		Spr.rotate(sin(T * .021 + i * 1.7) * .006 + sin(T * .053 + i) * .002)
+		Spr.translate(-(x + w / 2), -(y - 260))
 		Spr.seg(x + 16, y, x + 16, y - 260, Color("#3a414c"), 2)
 		Spr.seg(x + w - 16, y, x + w - 16, y - 260, Color("#3a414c"), 2)
 		Spr.rr(x - 5, y - 5, w + 10, h + 10, 4, Color("#1b1e24"))
@@ -264,6 +351,11 @@ static func _boards(g, T: int) -> void:
 		Spr.text("PARTIDAS" if i % 2 == 1 else "CHEGADAS", x + 6, y + 6, 8, Color.WHITE, HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b)
 		board(x, y + 10, w, h - 10, T, i)
 		Spr.glow(x + w / 2, y + h / 2, w * .6, Color(1, .85, .4, .06))
+		# LED de "embarque" piscando no canto
+		if ((T + i * 23) / 24) % 2 == 0:
+			Spr.circle(x + w - 8, y + 2, 2.2, Color(.3, 1, .45, .95))
+			Spr.glow(x + w - 8, y + 2, 9, Color(.3, 1, .45, .35))
+		Spr.restore()
 
 # ---------------------------------------------------------------- painel de voos girando
 ## em cima da arte do painel (colunas do cenário): as linhas de voos trocam de vez em quando

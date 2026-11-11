@@ -779,13 +779,13 @@ const WARM_OPT := ["boar_ko", "boar_wind", "boss_charge", "crow_dive", "crow_ko"
 	"ride_gallop", "ride_jump", "sapo_rei", "sled_tome", "urso", "esquilo", "cavalo",
 	"isis_climb", "isis_joy", "isis_scared", "p_tora_neve", "p_pedra_neve", "p_galho_neve",
 	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido",
-	"seg_escudo", "brk_lanche", "brk_lanche_q", "brk_vaso", "brk_vaso_q", "brk_carrinho", "aero_lavadora"]
+	"seg_escudo", "brk_lanche", "brk_lanche_q", "brk_vaso", "brk_vaso_q", "brk_carrinho", "aero_lavadora", "vulto", "seg_walk", "fax_walk", "pax_exec_walk", "pax_cel_walk", "pax_comissaria_walk", "pax_piloto_walk"]
 ## folhas que saem em silhueta (clarão do golpe, contorno vermelho dos inimigos, contorno de luz do Tomé)
 const WARM_SIL := ["atlas1", "atlas2", "extra", "en_boar", "en_frog2", "en_crow2", "javali", "pai", "pai2", "isis2",
 	"pai_climb", "pai_rope_a", "pai_rope_b", "pai_vine_a", "pai_vine_b", "cao", "esquilo", "gaviao", "bagre", "urso",
 	"boar_ko", "boar_wind", "crow_dive", "crow_ko", "frog_ko", "frog_tongue", "dog_dig", "dog_joy", "dog_sniff",
 	"isis_climb", "isis_joy", "isis_scared", "isis_run", "morcego_rei", "sapo_rei",
-	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido"]
+	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido", "seg_walk", "fax_walk"]
 var _warm_req := {}      # caminho -> função que guarda o recurso pronto
 ## testes (tests/hitch.gd): avisa quando algo é carregado no meio do jogo (dá travadinha no celular)
 var trace_late := false
