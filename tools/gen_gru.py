@@ -671,7 +671,7 @@ L["enemies"] = [e for e in L["enemies"] if int(e["x"]) in _FICA_1_1]
 # quando ele derruba o segurança (não dá para passar sem lutar)
 _AJUSTE = {
     1300: {"r": [1225, 1430], "arena": [1130, 1488]},
-    4100: {"r": [4480, 4740], "arena": [4350, 4795]},     # embaixo da esteira de despacho
+    4100: {"r": [4480, 4740], "arena": [4350, 4795], "radio": 1},  # embaixo da esteira de despacho; chama reforço no rádio
     10000: {"r": [10040, 10290], "arena": [9905, 10340]},  # entre o mezanino e a porta do crachá
     2450: {"r": [8700, 8780]},                             # robô depois das bandejas (longe de tapume e de arena)
     5700: {"r": [5620, 5980], "cy": 330, "y": 330},        # drone na fila do check-in

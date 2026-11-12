@@ -19,7 +19,7 @@ static func _pc(g) -> float:
 static func update(g, e: Dictionary) -> bool:
 	e.y = e.base
 	_radio(g, e)
-	for k in ["hurtT", "blockT", "open", "ccd"]:
+	for k in ["hurtT", "blockT", "open", "ccd", "radioT"]:
 		if int(e.get(k, 0)) > 0:
 			e[k] = int(e[k]) - 1
 	var mad: bool = e.get("mad", false)
@@ -141,6 +141,18 @@ static func on_hit(g, e: Dictionary, how: String) -> bool:
 		Audio.play("stomp", -2, .75)
 		Audio.play("roar", -10, 1.3)
 		Audio.vib(22)
+		# o do rádio, na última pancada antes de cair, chama reforço: um drone entra voando na arena
+		if e.hp == 1 and e.get("radio") and not e.get("called"):
+			e.called = 1
+			e.radioT = 70
+			Audio.play("robo_bip", -4, .6)
+			g.flash("O segurança chamou reforço no rádio!", 110)
+			var ar: Array = e.get("arena", e.get("r", [e.x - 200, e.x + 200]))
+			var from_r: bool = g.player.x < e.x
+			var dx: float = float(ar[1]) + 120.0 if from_r else float(ar[0]) - 120.0
+			g.EN.append({"k": "crow", "x": dx, "y": float(e.base) - 330.0, "cy": float(e.base) - 220.0,
+				"r": [float(ar[0]) + 40.0, float(ar[1]) - 40.0], "dir": -1 if from_r else 1, "dead": 0,
+				"base": float(e.base) - 220.0, "stun": 0, "leap": 0, "x0": dx, "sx": dx, "minion": 1})
 		return true
 	# 3ª pancada: ele ainda levanta o escudo, mas o escudo voa longe
 	e.shd = {"x": e.x + e.dir * 40.0, "y": e.y - 100.0, "vx": kd * 5.0, "vy": -9.0, "r": 0.0, "vr": .32 * kd, "t": 0}
@@ -319,6 +331,16 @@ static func _radio(g, e: Dictionary) -> void:
 		e.camp = max(0, int(e.get("camp", 0)) - 2)
 
 static func draw_radio(e: Dictionary, T: int) -> void:
+	if int(e.get("radioT", 0)) > 0 and not e.dead:
+		# falando no rádio: o aparelho perto da boca e ondas saindo dele
+		var rx: float = e.x + e.dir * 22
+		var ry: float = e.y - 150
+		Spr.rr(rx - 5, ry - 10, 10, 18, 2, Color("#1b1d22"))
+		Spr.rect(rx - 3, ry - 7, 6, 4, Color("#6fd06a") if (T / 6) % 2 == 0 else Color("#2a5a2a"))
+		Spr.rect(rx + 1, ry - 18, 2, 8, Color("#1b1d22"))
+		for k in 3:
+			var u: float = fposmod(T * .05 + k / 3.0, 1.0)
+			Spr.ring(rx, ry - 4, 8 + u * 26, Color(.6, 1, .6, .55 * (1.0 - u)), 2)
 	if int(e.get("thr", 0)) > 0 and not e.dead:
 		var u: float = .5 + .5 * sin(T * .9)
 		Spr.glow(e.x + e.dir * 30, e.y - 140, 26, Color(1, .3, .2, .25 + .3 * u))

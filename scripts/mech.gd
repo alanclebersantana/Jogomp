@@ -209,6 +209,11 @@ func _fight(p: Dictionary) -> void:
 			combo_n = 0
 	if parry_t > 0:
 		parry_t -= 1
+	if int(p.get("counterT", 0)) > 0:
+		p.counterT = int(p.counterT) - 1
+		# brilho no bastão enquanto a janela de contra-ataque está aberta
+		if g.T % 3 == 0:
+			g.PARTS.append({"x": p.x + p.w / 2 + p.face * 14, "y": p.y + p.h * .35, "vx": randf_range(-.4, .4), "vy": -.8, "life": 14, "col": Color(.6, .95, 1)})
 	var busy: bool = p.ladder or p.vine or p.get("bar") or p.swim or p.dyingT > 0
 	# --- defesa / esquiva
 	if g.pressed("F") and not busy:
@@ -334,6 +339,10 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 			var push: float = 70.0 if how in ["spin", "kick"] else 30.0
 			if not e.dead:
 				e.x += dir * push * .5
+			elif e.get("dk", "") == "tomba":
+				# derrubado no aeroporto: o golpe forte joga mais longe, mas ele tomba e quica (não voa girando)
+				e.dvx = dir * (6.5 if how in ["spin", "kick"] else 4.2)
+				e.dvy = -6.0 if how in ["spin", "kick"] else -4.5
 			elif e.get("dk", "") != "seg":
 				# derrubado: voa girando para longe (no giro e no chute, bem mais longe)
 				e.dk = "flip"
@@ -342,8 +351,23 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 				e.ddx = float(e.get("ddx", 0.0))
 				e.ddy = float(e.get("ddy", 0.0))
 			Polish.impact(e.x, e.y - 60)
-			g.hit_stop = max(int(g.hit_stop), 5 if how in ["spin", "kick"] else 3)
-			g.shake = max(g.shake, 5 if how in ["spin", "kick"] else 3)
+			var fin: bool = how == "spin"
+			var ctr: bool = int(p.get("counterT", 0)) > 0
+			g.hit_stop = max(int(g.hit_stop), 7 if fin or ctr else (5 if how == "kick" else 3))
+			g.shake = max(g.shake, 7 if fin or ctr else (5 if how == "kick" else 3))
+			if fin or ctr:
+				# golpe final do combo (ou contra-ataque depois da defesa perfeita): tem outro peso — clarão,
+				# estalo grave e faíscas
+				Polish.flash_white = max(Polish.flash_white, 5)
+				Audio.play("stomp", -3, .74)
+				Audio.vib(45)
+				Polish.impact(e.x, e.y - 60, Color(1, .9, .5), 12, 34.0)
+				g.burst(e.x, e.y - 60, 14, Color("#ffd76a"))
+			if ctr and not e.dead and e.get("k", "") == "boar" and SegGuard.is_seg(g, e):
+				# contra-ataque no segurança conta um golpe a mais
+				SegGuard.on_hit(g, e, "hit")
+			if ctr:
+				p.counterT = 0
 			if how == "kick" and kick_kind == "fly":
 				# voadora acertou: quica para trás
 				p.vy = -6.5
@@ -453,6 +477,10 @@ func on_block(from_x: float) -> void:
 				e.x += (1.0 if e.x > p.x else -1.0) * 40.0
 	if parry:
 		parry_t = 0
+		# defesa perfeita: câmera lenta, anel de luz e uma janela de contra-ataque (o próximo golpe pesa mais)
+		g.slowmo = max(int(g.slowmo), 32)
+		p.counterT = 75
+		Polish.part("ringw", p.x + p.w / 2 + p.face * 18, p.y + p.h * .4, 0, 0, 22, Color(.6, .95, 1, .9), {"size": 80.0})
 		g.hit_stop = max(int(g.hit_stop), 7)
 		Audio.play("clue", -6, 1.6)
 		Polish.impact(p.x + p.w / 2 + p.face * 24, p.y + p.h * .4)
