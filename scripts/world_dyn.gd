@@ -37,7 +37,22 @@ func _ready() -> void:
 	front_node.cb = _draw_front_node
 	add_child(front_node)
 
+## jaqueta comprada na loja: troca o verde do casaco do Milis (uniform do sombreado do nó dele)
+var _skin_t := -1
+func _apply_skin() -> void:
+	var id: String = str(Save.getv("shop", "skin", "verde"))
+	var m: ShaderMaterial = pl_node.material
+	var tbl := {"verde": [-1.0, 1.0, 1.0], "azul": [.6, 1.0, 1.0], "vermelho": [.0, 1.1, 1.2], "roxo": [.77, 1.0, 1.0],
+		"laranja": [.07, 1.1, 1.05], "amarelo": [.14, 1.05, 1.15], "preto": [.6, .15, .45], "dourado": [.12, .9, 1.25]}
+	var v: Array = tbl.get(id, tbl.verde)
+	m.set_shader_parameter("jacket_hue", float(v[0]))
+	m.set_shader_parameter("jacket_sat", float(v[1]))
+	m.set_shader_parameter("jacket_val", float(v[2]))
+
 func _process(_d: float) -> void:
+	if _skin_t < 0 or (game != null and abs(game.T - _skin_t) > 60):
+		_skin_t = game.T if game else 0
+		_apply_skin()
 	queue_redraw()
 
 ## true no primeiro desenho depois de um passo da lógica: contadores visuais só andam aí

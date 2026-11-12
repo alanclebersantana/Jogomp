@@ -1365,6 +1365,9 @@ func show_title() -> void:
 	var gb := _button("GALERIA", show_gallery)
 	gb.custom_minimum_size = Vector2(150, 46)
 	row.add_child(gb)
+	var lb := _button("LOJA", show_shop)
+	lb.custom_minimum_size = Vector2(150, 46)
+	row.add_child(lb)
 	var ob := _button("OPÇÕES", func(): show_options(false))
 	ob.custom_minimum_size = Vector2(150, 46)
 	row.add_child(ob)
@@ -2574,6 +2577,61 @@ func _migrate_gallery() -> void:
 			Save.cfg.set_value("gallery", "e%d_d%d" % [int(pr[0]) + 1, int(pr[1])], true)
 	Save.setv("gallery", "split_v1", true)
 
+## loja: as milhas juntadas nas fases compram jaquetas novas para o Milis (troca a cor do casaco)
+const SKINS := [
+	["verde", "Verde Milhas Plus", -1.0, 1.0, 1.0, 0],
+	["azul", "Azul Céu", .6, 1.0, 1.0, 150],
+	["vermelho", "Vermelho Decolagem", .0, 1.1, 1.2, 200],
+	["roxo", "Roxo Milhas", .77, 1.0, 1.0, 250],
+	["laranja", "Laranja Pôr do Sol", .07, 1.1, 1.05, 300],
+	["amarelo", "Amarelo Táxi", .14, 1.05, 1.15, 350],
+	["preto", "Preto Executivo", .6, .15, .45, 500],
+	["dourado", "Dourado VIP", .12, .9, 1.25, 1000],
+]
+
+func show_shop() -> void:
+	var vb := _overlay(.88)
+	vb.add_theme_constant_override("separation", 6)
+	var wallet: int = int(Save.getv("shop", "wallet", 0))
+	var owned: Array = Save.getv("shop", "owned", ["verde"])
+	var cur: String = str(Save.getv("shop", "skin", "verde"))
+	vb.add_child(_label("LOJA DO MILIS", 30, GOLD, Spr.font_title))
+	vb.add_child(_label("Saldo: %d milhas  (as milhas pegas nas fases entram aqui)" % wallet, 15, Color("#e8dcc0"), Spr.font_b))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 6)
+	grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	vb.add_child(grid)
+	for sk in SKINS:
+		var id: String = sk[0]
+		var txt: String
+		if id == cur:
+			txt = "✓ " + sk[1]
+		elif owned.has(id):
+			txt = sk[1] + " · vestir"
+		else:
+			txt = "%s · %d milhas" % [sk[1], sk[5]]
+		var b := _button(txt, func():
+			var ow: Array = Save.getv("shop", "owned", ["verde"])
+			if not ow.has(id):
+				var wl: int = int(Save.getv("shop", "wallet", 0))
+				if wl < int(sk[5]):
+					Audio.play("hurt", -10)
+					return
+				Save.setv("shop", "wallet", wl - int(sk[5]))
+				ow.append(id)
+				Save.setv("shop", "owned", ow)
+				Audio.play("special", -6)
+			Save.setv("shop", "skin", id)
+			show_shop())
+		b.custom_minimum_size = Vector2(300, 42)
+		var cc: Color = Color.from_hsv(float(sk[2]), clamp(.8 * float(sk[3]), 0, 1), clamp(.75 * float(sk[4]), 0, 1)) if float(sk[2]) >= 0 else Color("#3f8f4a")
+		b.add_theme_color_override("font_color", cc.lightened(.35))
+		grid.add_child(b)
+	vb.add_child(_button("VOLTAR", show_title))
+	panel.set_meta("back", show_title)
+
 func show_gallery(ep: int = 1) -> void:
 	var eps: int = clampi(int(Save.getv("prog", "eps", 1)), 1, EPISODES.size())
 	ep = clampi(ep, 1, eps)
@@ -2681,6 +2739,14 @@ func _on_results() -> void:
 	if pen >= pt * .9 and nc >= ntot and dr == game.DRWS.size():
 		stars = 3
 	Save.set_best(game.level_idx, {"stars": stars, "pen": pen, "clues": nc, "specs": ns})
+	# carteira da loja: as milhas pegas na fase viram saldo para comprar jaquetas para o Milis
+	Save.setv("shop", "wallet", int(Save.getv("shop", "wallet", 0)) + pen)
+	# recorde de tempo da fase
+	var rk: String = "t%d" % game.level_idx
+	var rec: int = int(Save.getv("rec", rk, 0))
+	var new_rec: bool = rec == 0 or secs < rec
+	if new_rec:
+		Save.setv("rec", rk, secs)
 	var gk: String = "final" if game.level_idx == 0 else "final%d" % (game.level_idx + 1)
 	var prev: Array = Save.getv("gallery", gk, [])
 	if game.SPECGOT.size() >= prev.size():
@@ -2695,6 +2761,10 @@ func _on_results() -> void:
 	head.add_child(_label(game.L.get("endTitle", "FIM DA FASE"), 16, Color("#cdbfa6"), Spr.font_title))
 	head.add_child(_label("★".repeat(stars) + "☆".repeat(3 - stars), 34, Color("#ffd76a")))
 	vb.add_child(head)
+	if new_rec:
+		vb.add_child(_label("NOVO RECORDE DE TEMPO!", 16, Color("#7dffa0"), Spr.font_title))
+	else:
+		vb.add_child(_label("Recorde: %d:%02d" % [rec / 60, rec % 60], 13, Color("#cdbfa6"), Spr.font_b))
 	var mid := HBoxContainer.new()
 	mid.alignment = BoxContainer.ALIGNMENT_CENTER
 	mid.add_theme_constant_override("separation", 26)

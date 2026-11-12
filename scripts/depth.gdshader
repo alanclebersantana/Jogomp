@@ -15,9 +15,34 @@ uniform float line_px = 3.4;      // espessura do contorno, em pixels da pintura
 uniform vec4 line_col : source_color = vec4(0.13, 0.08, 0.05, 0.92);
 
 #define A(uv) texture(TEXTURE, uv).a
+// loja: cor da jaqueta do Milis (troca só o verde do casaco). hue < 0 = a jaqueta verde de sempre
+uniform float jacket_hue = -1.0;
+uniform float jacket_sat = 1.0;
+uniform float jacket_val = 1.0;
+
+vec3 rgb2hsv(vec3 c) {
+	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+	vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+	float d = q.x - min(q.w, q.y);
+	float e = 1.0e-10;
+	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+vec3 hsv2rgb(vec3 c) {
+	vec3 p = abs(fract(c.xxx + vec3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0);
+	return c.z * clamp(p - 1.0, 0.0, 1.0);
+}
 
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
+	if (jacket_hue >= 0.0 && c.a > 0.02) {
+		vec3 h = rgb2hsv(c.rgb);
+		float g = smoothstep(0.19, 0.24, h.x) * (1.0 - smoothstep(0.46, 0.52, h.x)) * smoothstep(0.18, 0.3, h.y);
+		if (g > 0.0) {
+			vec3 n = hsv2rgb(vec3(jacket_hue, clamp(h.y * jacket_sat, 0.0, 1.0), clamp(h.z * jacket_val, 0.0, 1.0)));
+			c.rgb = mix(c.rgb, n, g);
+		}
+	}
 	vec2 ps = TEXTURE_PIXEL_SIZE;
 	vec2 L = normalize(light_uv);
 	if (c.a > 0.02) {
