@@ -1017,6 +1017,10 @@ func _touch_squash(_d: float) -> void:
 		var dk: float = 1.0 - .2 * clamp(p, 0.0, 1.0)
 		if tb.get_meta("k") == "A":
 			tb.modulate = Color(tb.modulate.r * dk, tb.modulate.g * dk, tb.modulate.b * dk, tb.modulate.a)
+		elif tb.get_meta("k") == "G" and game.L and int(game.player.get("counterT", 0)) > 0:
+			# janela de contra-ataque (depois da defesa perfeita): o botão do golpe pisca em azul-claro
+			var u: float = .5 + .5 * sin(Time.get_ticks_msec() * .02)
+			tb.modulate = Color(dk * lerpf(1.0, .6, u), dk, dk * lerpf(1.0, 1.4, u), tb.modulate.a)
 		else:
 			tb.modulate = Color(dk, dk, dk, tb.modulate.a)
 
@@ -1335,12 +1339,8 @@ func show_title() -> void:
 	Audio.set_song("aero_tema")
 	var vb := _overlay(.35)
 	# a ilustração da Isis desenhando, escurecida atrás do título (como era antes)
-	var img := TextureRect.new()
-	img.texture = load("res://assets/ui/cena1.jpg")
-	img.set_anchors_preset(Control.PRESET_FULL_RECT)
-	img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	img.modulate = Color(.8, .8, .8)
+	# fundo vivo: o saguão de Guarulhos com o Milis correndo e avião decolando lá fora
+	var img := preload("res://scripts/ui/title_aero.gd").new()
 	panel.add_child(img)
 	panel.move_child(img, 0)
 	vb.add_child(_label("CADÊ AS\nMILHAS?!", 50, Color("#f2d28a"), Spr.font_title))
@@ -1860,6 +1860,11 @@ func _update_cine_bars() -> void:
 	if state == S.PLAY and game.L and game.running:
 		if not game.CINE.is_empty() or game.slowmo > 0:
 			want = 1.0
+		elif game.ARN:
+			# entrada na arena de um segurança: faixas de cinema enquanto as grades descem
+			var aa: Dictionary = game.ARN.active()
+			if not aa.is_empty() and not aa.get("done", false) and int(aa.get("t", 999)) < 90:
+				want = 1.0
 		else:
 			for b in Polish.bosses():
 				if b.ref.get("st", "") == "intro":

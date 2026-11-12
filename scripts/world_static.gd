@@ -1101,6 +1101,10 @@ static func plat(s: Dictionary) -> void:
 		Spr.circle(bx + bw - 5, s.y + 8 + jy + oy * .3, 1.4, Color(.25, .22, .2))
 		bx += bw
 		bi += 1
+	if oy != 0.0:
+		# leitura da tela: um friso claro no topo de tudo em que dá para pisar (não se perde no fundo)
+		Spr.rect(s.x + 2, s.y - 2, s.w - 4, 2.5, Color(1, .97, .78, .75))
+		Spr.rect(s.x + 2, s.y + .5, s.w - 4, 1.5, Color(.1, .08, .05, .35))
 	if s.get("hatch"):
 		return
 	Spr.seg(s.x + 10, s.y + 16, s.x + 4, s.y + 40, Color(0, 0, 0, .35), 2)

@@ -401,11 +401,15 @@ static func _tick_expr(p: Dictionary, T: int) -> void:
 		want = "wow"
 	elif int(p.get("happyT", 0)) > 0:
 		want = "happy"
+	elif int(p.get("pushT", 0)) > 0:
+		want = "effort"
 	else:
 		for e in g.EN:
 			if not e.dead and abs(e.x - fx) < 150 and abs(e.y - (p.y + p.h)) < 120:
 				want = "angry"
 				break
+		if want == "" and int(p.get("hp", 5)) == 1:
+			want = "tired"
 	# troca com uma folguinha (não pisca entre duas expressões) e um bip do robô
 	if want != str(p.get("expr", "")):
 		p.exprHold = int(p.get("exprHold", 0)) + 1

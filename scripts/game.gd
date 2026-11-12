@@ -100,6 +100,7 @@ var coins := 0
 var coin_life := 0
 var shake := 0.0
 var hit_stop := 0
+var hurt_edge := 0     # borda vermelha pulsando na tela quando leva dano
 var slowmo := 0            # câmera lenta (golpe final nos chefes)
 var shake_dir := Vector2.ZERO   # tremor com direção (empurra para o lado do impacto)
 var bird_near := false     # algum passarinho voando perto (o Tomé olha para cima)
@@ -3227,6 +3228,12 @@ func _p1_post(pcx: float, _pcy: float) -> void:
 				set_meta("poster_t", T)   # os cartazes de PROCURADO ganham um detalhe novo
 			Audio.play("clue")
 			Audio.vib(80)
+			hud_fly(c.x, c.y, "card")
+			if L.get("theme", "") == "aeroporto":
+				# chuva de bilhetes de embarque caindo em volta
+				for i in 18:
+					Polish.part("chip", c.x + randf_range(-60, 60), c.y - randf_range(20, 90), randf_range(-2.0, 2.0), -randf_range(1.5, 4.5), 90,
+						[Color("#ffffff"), Color("#f5e3a0"), Color("#9fd0ff"), Color("#ffb3a8")][i % 4], {"gy": c.y + 60, "size": randf_range(3.5, 5.5)})
 			clue_opened.emit(int(c.id))
 			Polish.celebrate(player.x + player.w / 2, player.y + 10, false)
 	for s in SPECS:
@@ -4257,8 +4264,19 @@ func _tomba(e: Dictionary) -> void:
 	var alvo: float = side * float(e.get("rmax", PI * .5))
 	e.rot = float(e.get("rot", 0.0)) + (alvo - float(e.get("rot", 0.0))) * (.16 if float(e.ddy) < gy else .3)
 
+## milhas e cartões voando até o painel de cima (posição na tela de onde saíram)
+var HUDFLY: Array = []
+
+func hud_fly(x: float, y: float, k: String) -> void:
+	if HUDFLY.size() > 24 or camera == null:
+		return
+	var z: float = camera.zoom.x
+	HUDFLY.append({"x": (x - rcam) * z, "y": (y - rcam_y) * z, "t": 0, "k": k, "d": randf_range(0, 4)})
+
 func gain_coin(x: float, y: float, silent: bool = false) -> void:
 	coins += 1
+	if not silent:
+		hud_fly(x, y, "coin")
 	coin_life += 1
 	Audio.play("pen", -21)   # (bem baixinho: são centenas de milhas pelo caminho)
 	if not silent:
@@ -4349,6 +4367,7 @@ func hurt(d: int, from_x: float) -> void:
 		return
 	player.hp -= d
 	kb.call()
+	hurt_edge = 30
 	# impacto: clarão branco curto e corpo achatado com o tranco
 	player.hitFx = 10
 	player.squash = .7

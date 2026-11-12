@@ -2930,6 +2930,14 @@ func _visor_expr(p: Dictionary, sheet: String, fr: int, dst: Rect2, cx: float, b
 				Spr.circle(ox, oy, e * .3, ec)
 			"wow":
 				Spr.ellipse(ox, oy, e * .7, e * .95, ec)
+			"effort":
+				# fazendo força: olhos apertados (><)
+				Spr.seg(ox - e * .8 * k, oy - e * .6, ox + e * .5 * k, oy, ec, lw)
+				Spr.seg(ox + e * .5 * k, oy, ox - e * .8 * k, oy + e * .6, ec, lw)
+			"tired":
+				# cansado: pálpebras de LED caídas pela metade
+				Spr.seg(ox - e, oy - e * .05, ox + e, oy - e * .05, ec, lw)
+				Spr.ellipse(ox, oy + e * .35, e * .55, e * .32, ec)
 	if ex == "happy" or ex == "wow":
 		Spr.seg(c.x - e * .9, c.y + r.size.y * .22, c.x, c.y + r.size.y * .3, ec, lw * .8)
 		Spr.seg(c.x, c.y + r.size.y * .3, c.x + e * .9, c.y + r.size.y * .22, ec, lw * .8)

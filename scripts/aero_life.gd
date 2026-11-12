@@ -107,6 +107,18 @@ static func _pax(g, T: int) -> void:
 			var by: float = y - hgt - 18 + hop
 			Spr.rr(x - 12, by - 14, 24, 22, 8, Color(1, 1, 1, .95))
 			Spr.text(str(p.get("bal", "!")), x, by + 3, 15, Color("#c8302a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		# o turista (e o menino) tiram foto do Milis quando ele passa: celular erguido e um flash
+		if k == "stand" and (n.ends_with("turista") or n.ends_with("menino")) and abs(pcx - x) < 260:
+			var ph: int = (T + int(x)) % 150
+			var hx: float = x + (-1.0 if face_left else 1.0) * w * .28
+			var hy: float = y - hgt * .72
+			Spr.rr(hx - 4, hy - 7, 8, 13, 2, Color("#1c1f26"))
+			Spr.rect(hx - 3, hy - 5, 6, 8, Color("#8fd0ff"))
+			if ph < 6:
+				Spr.glow(hx, hy, 34, Color(1, 1, 1, .85 * (1.0 - ph / 6.0)))
+				Spr.circle(hx, hy, 6, Color(1, 1, 1, .95))
+				if ph == 0 and fresh:
+					Audio.play("click", -14, 1.4)
 		if k == "sit" and str(p.get("z", "")) != "":
 			var zt: int = (T + int(x)) % 120
 			Spr.text("z", x + 18 + zt * .15, y - hgt * .78 - zt * .3, 12 + zt / 30, Color(1, 1, 1, 1.0 - zt / 120.0), HORIZONTAL_ALIGNMENT_LEFT, Spr.font_b, 3)
@@ -282,6 +294,16 @@ static func _light_dust(g, T: int) -> void:
 	while xx < g.cam + W + per:
 		var a: float = .075 + .02 * sin(T * .01 + xx * .01)
 		Spr.poly(PackedVector2Array([Vector2(xx, top), Vector2(xx + 110, top), Vector2(xx + 330, top + H), Vector2(xx + 170, top + H)]), Color(warm.r, warm.g, warm.b, a))
+		# o Milis passando dentro da faixa de luz fica iluminado
+		var pl: Dictionary = g.player
+		var pcx: float = pl.x + pl.w / 2
+		var pcy: float = pl.y + pl.h * .45
+		var v: float = clamp((pcy - top) / H, 0.0, 1.0)
+		var l0: float = xx + 170.0 * v
+		var l1: float = xx + 110.0 + 220.0 * v
+		if pcx > l0 and pcx < l1:
+			var edge: float = clamp(min(pcx - l0, l1 - pcx) / 30.0, 0.0, 1.0)
+			Spr.glow(pcx, pcy, 46, Color(warm.r, warm.g, warm.b, .22 * edge))
 		xx += per
 	if g.low_fx:
 		return

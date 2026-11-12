@@ -447,7 +447,12 @@ L["chases"] = [
      "pista": "Caiu do bolso dele um bilhete: Encontro no portão 7. Assinado: B."}]
 # objetos em primeiro plano (escuros e desfocados, passando na frente da câmera): poucos, longe da ação
 L["fg"] = [{"x": 760, "k": "coluna"}, {"x": 3500, "k": "fila"}, {"x": 6350, "k": "lixeira"},
-           {"x": 8020, "k": "coluna"}, {"x": 10720, "k": "bancos"}, {"x": 12380, "k": "coluna"}, {"x": 14300, "k": "fila", "flip": True}]
+           {"x": 8020, "k": "coluna"}, {"x": 10720, "k": "bancos"}, {"x": 12380, "k": "coluna"}, {"x": 14300, "k": "fila", "flip": True},
+           # mais coisas passando na frente da câmera (desfocadas), como numa filmagem
+           {"x": 2050, "k": "bancos", "flip": True}, {"x": 4650, "k": "coluna"}, {"x": 5450, "k": "lixeira", "flip": True},
+           {"x": 9300, "k": "coluna"}, {"x": 11800, "k": "lixeira"}, {"x": 13300, "k": "bancos"}, {"x": 15300, "k": "coluna"}]
+# alguém atrasado correndo pelo terminal (passo apressado)
+pax(7700, "exec", r=[7260, 8000], spd=2.3)
 pax(14380, "piloto", r=[14360, 14540], spd=.6)
 pax(14470, "teen", k="stand", re=1, bal="oi!")
 painel(12700, 190)

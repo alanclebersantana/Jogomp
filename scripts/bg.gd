@@ -136,6 +136,37 @@ func _draw_planes(n: Node2D) -> void:
 	Spr.begin(n)
 	_aero_planes(game.section_weights(), game.W + 4)
 
+## pancada de chuva lá fora no trecho do check-in: o céu da vidraça fecha (cinza), a chuva cai em
+## riscos e gotas escorrem no vidro; de vez em quando um relâmpago clareia o saguão
+func _glass_rain(w: float, H: float, day: float) -> void:
+	var c: float = game.cam + game.W * .5
+	var k: float = clamp(min(c - 4300.0, 6700.0 - c) / 400.0, 0.0, 1.0) * day
+	if k <= .01:
+		return
+	var T: int = game.T
+	Spr.rect(-10, -10, w + 20, H + 20, Color(.42, .47, .55, .45 * k))
+	# chuva caindo lá fora (riscos inclinados)
+	for i in 70:
+		var hx: float = fposmod(sin(i * 12.9898) * 43758.5453, 1.0)
+		var hy: float = fposmod(sin(i * 78.233) * 12345.678, 1.0)
+		var x: float = fposmod(hx * w * 1.2 - T * 2.2 - game.rcam * .1, w * 1.2) - w * .1
+		var y: float = fposmod(hy * H + T * 13.0, H)
+		Spr.seg(x, y, x - 4, y + 16, Color(.85, .9, 1, .35 * k), 1.2)
+	# gotas escorrendo no vidro (descem devagar, param, descem de novo)
+	for i in 26:
+		var hx2: float = fposmod(sin(i * 3.7 + 1.1) * 9137.3, 1.0)
+		var hy2: float = fposmod(sin(i * 5.3 + 2.2) * 7351.1, 1.0)
+		var sp: float = .4 + hx2 * .8
+		var x2: float = fposmod(hx2 * w * 1.1 - game.rcam * PX, w * 1.1) - w * .05
+		var y2: float = fposmod(hy2 * H + T * sp + sin(T * .03 + i) * 6.0, H)
+		Spr.seg(x2, y2 - 18, x2, y2, Color(.9, .95, 1, .22 * k), 1.5)
+		Spr.circle(x2, y2, 2.2, Color(.95, .98, 1, .5 * k))
+	# relâmpago: clarão na tela e trovão um pouco depois
+	if game.running and T % 900 == 300 and k > .6:
+		game.lightning = 12
+	if game.running and T % 900 == 330 and k > .6:
+		Audio.play("thunder", -6, .9)
+
 func _aero_planes(ws: Dictionary, w: float) -> void:
 	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
 		return
@@ -146,6 +177,7 @@ func _aero_planes(ws: Dictionary, w: float) -> void:
 		return
 	var H: float = game.H
 	var ox: float = -game.rcam * PX
+	_glass_rain(w, H, day)
 	for k in 2:
 		var per: int = 1100 + k * 500
 		var cyc: int = (game.T + k * 700) / per
@@ -313,6 +345,32 @@ func _atmos(nw: Dictionary, w: float, oy: float, bh: float) -> void:
 				PackedColorArray([cm, cm, c0, c0]))
 
 ## brilho do sol (mistura somada): halo grande e respirando + reflexo horizontal fininho
+## pista à noite (aeroporto): luzes da pista e do pátio cintilando pela vidraça, acendendo uma a uma
+## conforme o Milis entra no trecho da noite
+func _night_lights(al: float, oy: float, bh: float, w: float) -> void:
+	if al < .03 or not Spr.tex.has("bg_noite"):
+		return
+	var tx: Texture2D = Spr.tex["bg_noite"]
+	var sc: float = bh / tx.get_height()
+	var tw: float = tx.get_width() * sc
+	var x: float = fposmod(-game.rcam * PX, tw * 2) - tw * 2
+	var into: float = clamp((game.cam - 10500.0) / 900.0, 0.0, 1.0)
+	var T: int = game.T
+	while x < w:
+		for i in 46:
+			var hx: float = fposmod(sin(i * 12.9898) * 43758.5453, 1.0)
+			var hy: float = fposmod(sin(i * 78.233) * 9631.11, 1.0)
+			if float(i) / 46.0 > into:
+				continue
+			var lx: float = x + tw * (.46 + hx * .52)
+			var ly: float = oy + bh * (.47 + hy * .14)
+			var tw2: float = .5 + .5 * sin(T * (.04 + hx * .06) + i * 2.3)
+			var col := Color(1, .85, .45) if i % 3 != 0 else (Color(.45, .7, 1) if i % 2 == 0 else Color(1, .35, .3))
+			Spr.circle(lx, ly, 1.2 + tw2, Color(col.r, col.g, col.b, al * (.25 + .5 * tw2)))
+			if tw2 > .9:
+				Spr.glow(lx, ly, 8, Color(col.r, col.g, col.b, al * .3))
+		x += tw
+
 func _draw_add(n: CanvasItem) -> void:
 	if game == null or not game.L or game.low_fx:
 		return
@@ -323,6 +381,8 @@ func _draw_add(n: CanvasItem) -> void:
 	var oy: float = min(0.0, -(game.rcam_y - game.L.top) * PX)
 	var bh: float = game.H + max(0.0, (game.L.bottom - game.L.top) - game.H) * PX
 	var t := FxClock.ft
+	if game.L.get("theme", "") == "aeroporto":
+		_night_lights(float(_w.get("noite", 0.0)), oy, bh, w)
 	for k in SUN:
 		if game.L.get("theme", "") == "aeroporto":
 			break

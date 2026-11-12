@@ -148,6 +148,8 @@ func __draw_raw() -> void:
 			draw_line(Vector2(d.x, d.y), Vector2(d.x + 14 * sl, d.y - 14), rc, 1.3)
 	if not game.low_fx:
 		_vignette(vs)
+	_hurt_edge(vs)
+	_hud_fly(vs)
 	Polish.draw_screen(self, vs)
 	if game.lightning > 0:
 		draw_rect(Rect2(Vector2.ZERO, vs), Color(.9, .94, 1, game.lightning / 14.0))
@@ -172,6 +174,61 @@ func __draw_raw() -> void:
 		draw_arc(pc, ir + wide / 2.0, 0, TAU, 72, Color(0, 0, 0), wide, true)
 		if ir > 2:
 			draw_arc(pc, ir + 2, 0, TAU, 72, Color(.1, .07, .04, .6), 4, true)
+
+## borda vermelha: pulsa quando o Milis leva dano e fica pulsando fraquinho com 1 coração só
+func _hurt_edge(vs: Vector2) -> void:
+	var a: float = 0.0
+	if int(game.hurt_edge) > 0:
+		if game.running:
+			game.hurt_edge = int(game.hurt_edge) - 1
+		a = game.hurt_edge / 30.0 * .55
+	if game.running and int(game.player.get("hp", 5)) == 1 and game.L.get("theme", "") == "aeroporto":
+		a = max(a, .18 + .12 * sin(game.T * .12))
+	if a <= .01:
+		return
+	var c := vs / 2
+	var n := 36
+	var ri := c * .82
+	var ro := c * 1.45
+	var a0 := Color(.9, .05, .05, 0)
+	var a1 := Color(.9, .05, .05, a)
+	for i in n:
+		var t0: float = TAU * i / n
+		var t1: float = TAU * (i + 1) / n
+		var d0 := Vector2(cos(t0), sin(t0))
+		var d1 := Vector2(cos(t1), sin(t1))
+		draw_polygon(PackedVector2Array([c + d0 * ri, c + d1 * ri, c + d1 * ro, c + d0 * ro]),
+			PackedColorArray([a0, a0, a1, a1]))
+
+## milhas (e cartões) voando em curva até o contador no painel de cima
+func _hud_fly(vs: Vector2) -> void:
+	var L2: Array = game.HUDFLY
+	if L2.is_empty():
+		return
+	var k := 0
+	while k < L2.size():
+		var f: Dictionary = L2[k]
+		if game.running:
+			f.t = int(f.t) + 1
+		var dur: float = 26.0 if f.k == "coin" else 44.0
+		var u: float = clamp((f.t - f.d) / dur, 0.0, 1.0)
+		if u >= 1.0:
+			L2.remove_at(k)
+			continue
+		var tgt: Vector2 = vs * (Vector2(.182, .053) if f.k == "coin" else Vector2(.852, .046))
+		var p0 := Vector2(f.x, f.y)
+		var mid := Vector2(lerpf(p0.x, tgt.x, .3), min(p0.y, tgt.y) - 60.0)
+		var e: float = u * u * (3.0 - 2.0 * u)
+		var p: Vector2 = p0.lerp(mid, e).lerp(mid.lerp(tgt, e), e)
+		var r: float = (9.0 if f.k == "coin" else 14.0) * (1.0 - .35 * u)
+		if f.k == "coin":
+			draw_circle(p, r + 2, Color(.25, .1, .4, .8))
+			draw_circle(p, r, Color(.62, .36, .92))
+			draw_circle(p - Vector2(r * .3, r * .3), r * .35, Color(1, 1, 1, .7))
+		else:
+			draw_rect(Rect2(p - Vector2(r * 1.3, r * .8), Vector2(r * 2.6, r * 1.6)), Color(.95, .78, .25))
+			draw_rect(Rect2(p - Vector2(r * 1.3, r * .3), Vector2(r * 2.6, r * .3)), Color(.3, .2, .05, .7))
+		k += 1
 
 ## vinheta só nas bordas: um anel de elipses (o centro não é desenhado, sai bem mais barato que
 ## uma imagem por cima da tela inteira)
