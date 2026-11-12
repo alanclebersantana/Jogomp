@@ -88,6 +88,11 @@ def dica(a, b, t, **kw):
     L["hints"].append(d)
 
 
+def icone(a, b, x, y, g):
+    """dica sem texto: um balão com o gesto (botões) aparece em cima do lugar quando o Milis chega perto"""
+    L.setdefault("icons", []).append({"a": a, "b": b, "x": x, "y": y, "g": g})
+
+
 def inimigo(k, x, r, y=GY, **kw):
     d = {"k": k, "x": x, "y": y, "r": list(r)}
     d.update(kw)
@@ -124,8 +129,10 @@ def mala_monstro(x, cy, r):
     inimigo("bat", x, r, cy, cy=cy)
 
 
-def caixa(x, y=GY, n=4, item=None):
+def caixa(x, y=GY, n=4, item=None, soft=False):
     d = {"t": "break", "x": x, "y": y - 38}
+    if soft:
+        d["soft"] = 1
     if item:
         d["item"] = item
     else:
@@ -393,12 +400,12 @@ pax(3195, "menino", k="stand", sc=.62)
 # esteiras rolantes do piso: no check-in a favor (ajuda a correr), no mezanino contra (segura o Milis)
 # a favor: ajuda a alcançar o vulto que foge pelo check-in
 L.setdefault("walks", []).append({"x0": 3220, "x1": 3580, "y": GY, "dir": 1, "spd": 1.8})
-dica(3150, 3300, "Esteira rolante a favor: use o embalo para alcançar o vulto!")
+icone(3150, 3300, 3270, 420, "»")
 # a favor, levando direto para a esteira do raio-x que dá choque: espere o choque passar antes de subir nela
 L["walks"].append({"x0": 7490, "x1": 7598, "y": GY, "dir": 1, "spd": 2.0})
 # a favor antes do vão das bandejas: o embalo dá o pulo comprido
 L["walks"].append({"x0": 8010, "x1": 8196, "y": GY, "dir": 1, "spd": 2.4})
-dica(7990, 8090, "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!")
+icone(7990, 8090, 8100, 420, "» ↑")
 # contra, embaixo da porta automática de vidro: passe correndo enquanto a porta está aberta
 L["walks"].append({"x0": 8760, "x1": 8996, "y": GY, "dir": -1, "spd": 1.7})
 pax(3040, "mae", r=[2880, 3160], spd=.6)   # mãe e filha passeando antes da esteira rolante (fora dela)
@@ -465,7 +472,7 @@ chao(1500, 2070)
 chao(2150, 3400)
 peca(1880, 2040, 300, 500, "p_pc_cabine", -4, 0, 4)   # cabine de informações (de vidro)
 milhas(1890, 2030, 270, 35)
-dica(1720, 1900, "Alto demais? Pule de novo no ar: pulo duplo!")
+icone(1720, 1900, 1800, 360, "↑↑")
 dica(2160, 2300, "Parado, segure ↑ para olhar para cima: tem coisa lá no mezanino!")
 arco(2050, 2300, 470, 90, 6)
 robo_falso(2450, [2580, 2760])
@@ -475,7 +482,7 @@ bloco(2070, 2150, 511, 640)   # fundo do poço do elevador (um degrauzinho abaix
 passarela(2160, 2488, -40, 0)
 pista(2440, -40, 1)
 milhas(2190, 2400, -70, 42)
-dica(1990, 2160, "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...")
+icone(1990, 2160, 2070, 380, "✋")
 caixa(2700, item="heart")
 plat(2780, 380, 120)
 plat(2960, 280, 120)
@@ -500,13 +507,13 @@ cambista(4100, [3760, 4180])
 drone(4560, 300, [4420, 4700])
 # (o quadrinho do drone aparece sozinho quando o 1º drone surge na tela: Game._comic_check)
 cambista(4950, [4820, 5080], y=230)
-dica(3420, 3700, "Fila do check-in. Os balcões dão bons degraus.")
+
 # esteira de despacho que sobe (plataforma que anda)
 L["movers"].append({"k": "path", "x0": 4400, "x1": 4680, "y0": 330, "y1": 230, "w": 110, "per": 260})
 peca(4800, 5100, 230, 500, "p_pc_porta", 6, 2)   # parede do despacho, com a porta restrita
 milhas(4830, 5080, 200, 50)
 milhas(5030, 5080, 200, 40)
-dica(4200, 4345, "A esteira de despacho sobe e desce: espere ela chegar e pule em cima (do chão, com pulo duplo).")
+icone(4200, 4345, 4270, 360, "↑↑")
 totem(4880, 230)
 # lá de cima, planar com as asas por cima da fila até a ilha seguinte
 plat(5500, 300, 120)
@@ -536,7 +543,7 @@ milhas(7010, 7110, 250, 34)
 milhas(7010, 7110, 200, 34)
 caixa(7095, y=280, item="heart")
 L.setdefault("gadgets", []).append({"x": 7030, "y": 280, "id": "gancho"})
-dica(6540, 6700, "Uma escada rolante na contramão... corra contra ela: lá em cima tem alguma coisa!")
+
 totem(7170, GY, 1)
 caixa(7240, n=4)
 
@@ -554,7 +561,7 @@ plat(8260, 420, 90, crumble=1)
 plat(8380, 380, 90, crumble=1)
 arco(8220, 8470, 400, 60, 6)
 chao(8480, 10600)
-dica(8100, 8300, "Bandejas soltas: elas caem logo depois que você pisa!")
+
 pombo(8700, 300, [8500, 9000])
 drone(8340, 300, [8220, 8460])
 mala_monstro(9700, -160, [9450, 9880])
@@ -567,7 +574,7 @@ coluna(9060, 260, -60)
 milhas(9220, 9880, -70, 50)
 cartao(9850, -40, "Cartão de embarque dourado 2/3: carimbado \"VOO ESPECIAL — PORTÃO 2??\". Quem será o passageiro?")
 L["items"].append({"x": 9500, "y": -64, "id": "cartao_acesso"})
-dica(8900, 9150, "Saída de ar-condicionado: pule em cima dela e o vento leva você lá para cima.")
+icone(8900, 9150, 9010, 420, "↑")
 mala_monstro(9600, -200, [9300, 9850])
 L["items"].append({"x": 8560, "y": 476, "id": "cordao"})
 drone(9500, 360, [9300, 9750])
@@ -593,7 +600,7 @@ L["sections"].append({"x": 10600, "song": "gru_seguranca", "bg": "noite", "gt": 
 chao(10600, 11460)
 # parede de grade de manutenção para escalar até a passarela (longe de qualquer saída de vento)
 escada(10880, 160, kind="net")
-dica(10820, 10960, "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).")
+icone(10820, 10960, 10890, 400, "↑")
 passarela(10930, 11450, 160, 200)   # passarela de serviço
 milhas(10960, 11420, 130, 50)
 robo_falso(11300, [11000, 11550], y=160)
@@ -604,13 +611,15 @@ L["pits"].append([11460, 12200])
 milhas(10990, 11190, 470, 40)
 caixa(11320, item="heart")
 escada(11452, 160, kind="ladder")
+# fio de treino em cima da passarela, ainda sem buraco embaixo: o jogador descobre o balanço sem risco
+L["vines"].append({"x": 11230, "y": -200, "len": 262, "aim": [11400, 160], "nosh": 1})
 # vão das bagagens: só atravessa balançando de fio em fio (3 fios de manutenção soltos do teto).
 # As passarelas ficam longe demais uma da outra para pular.
 for vx, aim in ((11590, [11840, 120]), (11840, [12090, 120]), (12090, [12290, 160])):
     L["vines"].append({"x": vx, "y": -200, "len": 350, "aim": aim, "nosh": 1})
 milhas(11690, 11750, 150, 30)
 milhas(11940, 12000, 150, 30)
-dica(11300, 11450, "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.", yl=220)
+dica(11380, 11460, "Fios soltos sobre o vão: balance e salte de um fio para o outro até a outra passarela.", yl=220)
 passarela(12230, 12500, 160, 200)
 chao(12200, 13580)
 chao(13640, 14200)
@@ -623,12 +632,12 @@ S[-1]["esc"] = 2
 plat(13030, 140, 130)
 milhas(12990, 13180, 230, 46)
 cartao(13095, 140, "Cartão de embarque dourado 3/3: a hora do voo — 23h59.")
-dica(12380, 12560, "Escada rolante: fique em cima que ela leva você ao mezanino. Lá do alto, um pulo duplo alcança a prateleira.")
+icone(12380, 12560, 12470, 330, "↑↑")
 # sala secreta embaixo do piso (mergulho no alçapão)
 deposito(13580, "s1", "alc1")
 pista(13330, 960, 2)
 L["gold"] = {"x": 13380, "y": 930}
-dica(13450, 13600, "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele.")
+icone(13450, 13600, 13610, 420, "↑ ↓")
 cambista(13900, [13750, 14050])
 pista(14000, GY, 3)
 totem(13450)
@@ -652,7 +661,7 @@ L["spanX"] = 16300   # a porta (15900) não fica atrás dos botões da direita
 # ou se arrastando abaixado
 for tx in (2490, 7360, 10530):
     bloco(tx, tx + 120, -620, GY - 34, t="tapume")
-dica(2380, 2480, "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.")
+icone(2300, 2480, 2420, 420, "» ↓")
 # um capanga por vez na tela: só estes ficam na 1-1 (os patrulhamentos ficam a ~1 tela de distância
 # um do outro), e a variedade continua: cambista, robô, faxineiro, mala voadora e drone
 _FICA_1_1 = {1300, 2450, 4100, 5700, 10000, 13300}
@@ -684,6 +693,25 @@ for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))
 # hora do dia no nome de cada trecho: o tempo passa enquanto o Milis atravessa o terminal
 L["periods"] = ["Saguão · 14:00", "Check-in · 16:00", "Segurança · 18:00", "Mezanino · 20:00"]
+# mais caixas de coração pelo caminho (uma a cada trecho, sempre na rota — sem precisar voltar)
+caixa(1600, y=456, item="heart", soft=True)
+caixa(3660, y=410, item="heart", soft=True)
+caixa(4880, item="heart", soft=True)
+caixa(6560, item="heart", soft=True)
+caixa(7900, item="heart", soft=True)
+caixa(9050, item="heart", soft=True)
+caixa(10450, item="heart", soft=True)
+caixa(12350, item="heart", soft=True)
+caixa(13450, item="heart", soft=True)
+caixa(14900, item="heart", soft=True)
+# segredos no alto: uma grade de ventilação torta na parede é a pista; em cima, um coração e milhas
+def segredo_alto(x, y, gx, gy):
+    plat(x - 50, y, 100)
+    caixa(x, y=y, item="heart")
+    milhas(x - 40, x + 40, y - 70, 40)
+    L.setdefault("grilles", []).append({"x": gx, "y": gy})
+segredo_alto(9480, 340, 9480, 440)
+segredo_alto(7060, 140, 7060, 236)
 salvar(1)
 
 
@@ -926,17 +954,6 @@ milhas(300, 650, 470)
 dica(0, 500, "A pista de Guarulhos, à noite. Lá na frente, o ronco de uma moto...")
 totem(520)
 caixa(760, item="heart")
-# mais caixas de coração pelo caminho (uma a cada trecho, sempre na rota — sem precisar voltar)
-caixa(1600, y=456, item="heart")
-caixa(3660, y=410, item="heart")
-caixa(4880, item="heart")
-caixa(6560, item="heart")
-caixa(7900, item="heart")
-caixa(9050, item="heart")
-caixa(10450, item="heart")
-caixa(12350, item="heart")
-caixa(13450, item="heart")
-caixa(14900, item="heart")
 robo_falso(1000, [850, 1150])
 # vala de drenagem com placas soltas
 L["pits"].append([1200, 1500])

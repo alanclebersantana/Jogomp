@@ -27,6 +27,7 @@ static func back(g, T: int) -> void:
 	if not aero(g):
 		return
 	_reset(g)
+	_grilles(g, T)
 	_neon_floor(g, T)
 	_floor_shine(g, T)
 	_boards(g, T)
@@ -155,6 +156,7 @@ static func front(g, T: int) -> void:
 	if not aero(g):
 		return
 	_reset(g)
+	_icons(g, T)
 	_light_dust(g, T)
 	_papers(g, T)
 	_plane_shadow(g, T)
@@ -209,6 +211,55 @@ static func _papers(g, T: int) -> void:
 			Spr.rect(-4, -2, 8, 1, Color(0, 0, 0, .25 * a))
 			Spr.rect(-4, 1, 6, 1, Color(0, 0, 0, .2 * a))
 		Spr.restore()
+
+## dicas sem texto: um balão com o gesto (↑↑ pulo duplo, ↓ abaixar, » correr, ✋ usar) em cima do
+## lugar, enquanto o Milis está no trecho
+static func _icons(g, T: int) -> void:
+	var px: float = g.player.x + g.player.w / 2
+	for ic in g.L.get("icons", []):
+		var a0: float = float(ic.a)
+		var b0: float = float(ic.b)
+		var d: float = max(a0 - px, px - b0, 0.0)
+		var al: float = clamp(1.0 - d / 80.0, 0.0, 1.0)
+		if al <= 0.0:
+			continue
+		var x: float = float(ic.x)
+		var y: float = float(ic.y) + sin(T * .09) * 4.0
+		var gtxt: String = str(ic.g)
+		var w: float = max(48.0, 22.0 + gtxt.length() * 13.0)
+		var pulse: float = 1.0 + .06 * sin(T * .2)
+		Spr.save()
+		Spr.translate(x, y)
+		Spr.scale(pulse, pulse)
+		Spr.poly(PackedVector2Array([Vector2(-7, 18), Vector2(7, 18), Vector2(0, 30)]), Color(1, 1, 1, .92 * al))
+		Spr.rr(-w / 2 - 2, -22, w + 4, 44, 22, Color(.1, .16, .28, .9 * al))
+		Spr.rr(-w / 2, -20, w, 40, 20, Color(1, 1, 1, .94 * al))
+		Spr.text(gtxt, 0, 8, 22, Color(.12, .2, .36, al), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 0)
+		Spr.restore()
+
+## grade de ventilação torta na parede: pista de que tem segredo lá em cima (brilha de vez em quando)
+static func _grilles(g, T: int) -> void:
+	for gr in g.L.get("grilles", []):
+		var x: float = float(gr.x)
+		var y: float = float(gr.y)
+		if x < g.cam - 100 or x > g.cam + g.W + 100:
+			continue
+		Spr.save()
+		Spr.translate(x, y)
+		Spr.rotate(.22)
+		Spr.rr(-22, -14, 44, 28, 3, Color("#2a3140"))
+		Spr.rr(-20, -12, 40, 24, 2, Color("#8a94a6"))
+		for i in 5:
+			Spr.rect(-17, -9 + i * 4.4, 34, 2, Color("#3a4252"))
+		Spr.circle(-17, -9, 1.4, Color("#cfd6e2"))
+		Spr.circle(17, 9, 1.4, Color("#cfd6e2"))
+		Spr.restore()
+		# um parafuso caído embaixo e um brilho que sobe (aponta o caminho para o alto)
+		Spr.circle(x + 14, y + 26, 1.6, Color("#9aa3b2"))
+		var k: int = T % 150
+		if k < 30:
+			var u: float = k / 30.0
+			Spr.glow(x, y - 20 - u * 60, 10, Color(1, .95, .6, .5 * (1.0 - u)))
 
 static func hh(x: float, k: int = 0) -> float:
 	var v := sin(x * 12.9898 + k * 78.233) * 43758.5453

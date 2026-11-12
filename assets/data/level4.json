@@ -92,66 +92,6 @@
    "x": 760,
    "y": 462,
    "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 1600,
-   "y": 418,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 3660,
-   "y": 372,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 4880,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 6560,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 7900,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 9050,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 10450,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 12350,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 13450,
-   "y": 462,
-   "item": "heart"
-  },
-  {
-   "t": "break",
-   "x": 14900,
-   "y": 462,
-   "item": "heart"
   }
  ],
  "enemies": [

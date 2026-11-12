@@ -571,7 +571,7 @@ func blockers() -> Array:
 			continue
 		b.append(s)
 	for c in CR:
-		if not c.dead:
+		if not c.dead and not c.get("soft"):
 			b.append(c)
 	for p in LILY:
 		if p.st != 2:
@@ -1780,6 +1780,10 @@ func step() -> void:
 		running = false
 		rest_reached.emit(rt.rest)
 		return
+	# caixas de coração "macias" (no meio do caminho): não barram, abrem quando o Milis passa por elas
+	for c in CR:
+		if c.get("soft") and not c.dead and abs(c.x - player.x) < 80 and hit(player, c):
+			break_crate(c)
 	# fogueiras
 	for k in CHK.size():
 		var c: Dictionary = CHK[k]
@@ -1791,6 +1795,7 @@ func step() -> void:
 		cur_chk = k
 		if not c.on:
 			c.on = true
+			c.lit_t = T
 			Audio.play("fire")
 			Audio.play("special", -12, .8)
 			Audio.vib(35)

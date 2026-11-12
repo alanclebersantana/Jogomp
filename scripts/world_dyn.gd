@@ -773,6 +773,9 @@ func _glow_mush(x: float, y: float, t: int) -> void:
 	Spr.A("mu_1" if t > 5 else ("mu_2" if t > 0 else "mu_0"), x, y + 2, 1)
 
 func _campfire(c: Dictionary) -> void:
+	if game.L.get("theme", "") == "aeroporto":
+		_totem(c)
+		return
 	if c.has("rest"):
 		# fogueira grande: troncos de assento dos dois lados e fogo alto, sempre acesa (chama o Tomé)
 		Spr.glow(c.x, c.y - 30, 110 + sin(T * .2) * 6, Color(1, .7, .3, .4))
@@ -803,6 +806,31 @@ func _campfire(c: Dictionary) -> void:
 		_pennant(c.x + 34, c.y)
 
 ## J7/O8 chama viva: tremula, estica e deita com o vento
+## totem de check-in (o ponto de volta do aeroporto): grande e fácil de ver. Apagado, a tela pisca
+## chamando ("CHECK-IN" e uma seta); feito, fica verde com um facho de luz e o ✓, e quando o Milis
+## passa nele pela primeira vez solta um anel de luz
+func _totem(c: Dictionary) -> void:
+	var x: float = c.x
+	var y: float = c.y
+	var on: bool = c.on
+	var cur: bool = game.cur_chk == game.CHK.find(c)
+	if on:
+		var a: float = .16 + .06 * sin(T * .08)
+		Spr.vgrad(x - 18, y - 230, 36, 230, Color(.4, 1, .55, 0), Color(.4, 1, .55, a * (1.4 if cur else .8)))
+		Spr.glow(x, y - 40, 70, Color(.35, 1, .5, .22))
+		var since: int = T - int(c.get("lit_t", -999))
+		if since >= 0 and since < 40:
+			var u: float = since / 40.0
+			Spr.ring(x, y - 40, 20 + u * 90, Color(.5, 1, .6, .6 * (1.0 - u)), 3)
+	else:
+		Spr.glow(x, y - 40, 46, Color(1, .85, .4, .12 + .08 * sin(T * .12)))
+	Spr.A("o_fire_on" if on else "o_fire_off", x, y + 2, 1.55)
+	if on:
+		Spr.text("✓", x, y - 108 + sin(T * .06) * 2, 22, Color("#7dffa0"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
+	elif (T / 22) % 2 == 0:
+		Spr.text("CHECK-IN", x, y - 116, 13, Color("#ffe08a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
+		Spr.text("▼", x, y - 98 + sin(T * .15) * 3, 16, Color("#ffe08a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
+
 func _flame(x: float, y: float, sc: float) -> void:
 	var w: float = float(game.AMB.get("wind", 0.0)) + Polish.gust_k() * .6
 	Spr.save()

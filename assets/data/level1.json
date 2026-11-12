@@ -946,6 +946,18 @@
    "y": -620,
    "w": 120,
    "h": 1086
+  },
+  {
+   "t": "plat",
+   "x": 9430,
+   "y": 340,
+   "w": 100
+  },
+  {
+   "t": "plat",
+   "x": 7010,
+   "y": 140,
+   "w": 100
   }
  ],
  "swamp": [],
@@ -1050,6 +1062,16 @@
  ],
  "vines": [
   {
+   "x": 11230,
+   "y": -200,
+   "len": 262,
+   "aim": [
+    11400,
+    160
+   ],
+   "nosh": 1
+  },
+  {
    "x": 11590,
    "y": -200,
    "len": 350,
@@ -1129,6 +1151,88 @@
    "t": "break",
    "x": 11320,
    "y": 462,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 1600,
+   "y": 418,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 3660,
+   "y": 372,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 4880,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 6560,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 7900,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 9050,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 10450,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 12350,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 13450,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 14900,
+   "y": 462,
+   "soft": 1,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 9480,
+   "y": 302,
+   "item": "heart"
+  },
+  {
+   "t": "break",
+   "x": 7060,
+   "y": 102,
    "item": "heart"
   }
  ],
@@ -1965,6 +2069,30 @@
   [
    15880,
    470
+  ],
+  [
+   9440,
+   270
+  ],
+  [
+   9480,
+   270
+  ],
+  [
+   9520,
+   270
+  ],
+  [
+   7020,
+   70
+  ],
+  [
+   7060,
+   70
+  ],
+  [
+   7100,
+   70
   ]
  ],
  "clocks": [],
@@ -2010,18 +2138,6 @@
  ],
  "hints": [
   {
-   "a": 3150,
-   "b": 3300,
-   "t": "Esteira rolante a favor: use o embalo para alcançar o vulto!",
-   "yl": 640
-  },
-  {
-   "a": 7990,
-   "b": 8090,
-   "t": "Esteira a favor bem antes do vão: corra junto com ela e pule no fim, o embalo leva longe!",
-   "yl": 640
-  },
-  {
    "a": 0,
    "b": 520,
    "t": "Guarulhos! O ladrão espalhou as milhas LATAM pelo terminal. Ande com ← → e pule com o botão de pulo.",
@@ -2034,33 +2150,9 @@
    "yl": 640
   },
   {
-   "a": 1720,
-   "b": 1900,
-   "t": "Alto demais? Pule de novo no ar: pulo duplo!",
-   "yl": 640
-  },
-  {
    "a": 2160,
    "b": 2300,
    "t": "Parado, segure ↑ para olhar para cima: tem coisa lá no mezanino!",
-   "yl": 640
-  },
-  {
-   "a": 1990,
-   "b": 2160,
-   "t": "Elevador panorâmico: entre e toque em ✋ USAR. Lá em cima tem um mirante...",
-   "yl": 640
-  },
-  {
-   "a": 3420,
-   "b": 3700,
-   "t": "Fila do check-in. Os balcões dão bons degraus.",
-   "yl": 640
-  },
-  {
-   "a": 4200,
-   "b": 4345,
-   "t": "A esteira de despacho sobe e desce: espere ela chegar e pule em cima (do chão, com pulo duplo).",
    "yl": 640
   },
   {
@@ -2076,27 +2168,9 @@
    "yl": 640
   },
   {
-   "a": 6540,
-   "b": 6700,
-   "t": "Uma escada rolante na contramão... corra contra ela: lá em cima tem alguma coisa!",
-   "yl": 640
-  },
-  {
    "a": 7200,
    "b": 7500,
    "t": "A segurança! Alguém ligou as esteiras do raio-x na tomada errada: cuidado com os choques.",
-   "yl": 640
-  },
-  {
-   "a": 8100,
-   "b": 8300,
-   "t": "Bandejas soltas: elas caem logo depois que você pisa!",
-   "yl": 640
-  },
-  {
-   "a": 8900,
-   "b": 9150,
-   "t": "Saída de ar-condicionado: pule em cima dela e o vento leva você lá para cima.",
    "yl": 640
   },
   {
@@ -2106,40 +2180,16 @@
    "yl": 640
   },
   {
-   "a": 10820,
-   "b": 10960,
-   "t": "Grade de manutenção: escale até a passarela (cima/baixo e para os lados).",
-   "yl": 640
-  },
-  {
-   "a": 11300,
-   "b": 11450,
-   "t": "Fios de manutenção soltos: pule no primeiro, balance e salte de um fio para o outro até a outra passarela.",
+   "a": 11380,
+   "b": 11460,
+   "t": "Fios soltos sobre o vão: balance e salte de um fio para o outro até a outra passarela.",
    "yl": 220
-  },
-  {
-   "a": 12380,
-   "b": 12560,
-   "t": "Escada rolante: fique em cima que ela leva você ao mezanino. Lá do alto, um pulo duplo alcança a prateleira.",
-   "yl": 640
-  },
-  {
-   "a": 13450,
-   "b": 13600,
-   "t": "Esse piso parece oco... pule e mergulhe (↓ no ar) em cima dele.",
-   "yl": 640
   },
   {
    "a": 14600,
    "b": 15600,
    "t": "Fiscal: pule malas e lasers baixos, abaixe (↓) nos altos, saia das faixas acesas do chão. Painel piscando? Corra até ele e bata!",
    "boss": 1,
-   "yl": 640
-  },
-  {
-   "a": 2380,
-   "b": 2480,
-   "t": "Tapume de obra! Corra e abaixe (↓) para passar rolando pelo vão de baixo.",
    "yl": 640
   }
  ],
@@ -2929,6 +2979,78 @@
    "spd": 1.6
   }
  ],
+ "icons": [
+  {
+   "a": 3150,
+   "b": 3300,
+   "x": 3270,
+   "y": 420,
+   "g": "»"
+  },
+  {
+   "a": 7990,
+   "b": 8090,
+   "x": 8100,
+   "y": 420,
+   "g": "» ↑"
+  },
+  {
+   "a": 1720,
+   "b": 1900,
+   "x": 1800,
+   "y": 360,
+   "g": "↑↑"
+  },
+  {
+   "a": 1990,
+   "b": 2160,
+   "x": 2070,
+   "y": 380,
+   "g": "✋"
+  },
+  {
+   "a": 4200,
+   "b": 4345,
+   "x": 4270,
+   "y": 360,
+   "g": "↑↑"
+  },
+  {
+   "a": 8900,
+   "b": 9150,
+   "x": 9010,
+   "y": 420,
+   "g": "↑"
+  },
+  {
+   "a": 10820,
+   "b": 10960,
+   "x": 10890,
+   "y": 400,
+   "g": "↑"
+  },
+  {
+   "a": 12380,
+   "b": 12560,
+   "x": 12470,
+   "y": 330,
+   "g": "↑↑"
+  },
+  {
+   "a": 13450,
+   "b": 13600,
+   "x": 13610,
+   "y": 420,
+   "g": "↑ ↓"
+  },
+  {
+   "a": 2300,
+   "b": 2480,
+   "x": 2420,
+   "y": 420,
+   "g": "» ↓"
+  }
+ ],
  "neon": [
   {
    "x": 12400,
@@ -3032,5 +3154,15 @@
   "y": 410,
   "kind": "exit"
  },
- "spanX": 16300
+ "spanX": 16300,
+ "grilles": [
+  {
+   "x": 9480,
+   "y": 440
+  },
+  {
+   "x": 7060,
+   "y": 236
+  }
+ ]
 }
