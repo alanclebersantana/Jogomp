@@ -1,0 +1,65 @@
+{
+ "fax_walk": {
+  "base": 236,
+  "ch": 240,
+  "cw": 320,
+  "hgt": 210,
+  "hx": 100,
+  "n": 8,
+  "step": 63.0
+ },
+ "pax_cel_walk": {
+  "base": 256,
+  "ch": 260,
+  "cw": 240,
+  "hgt": 240,
+  "hx": 130,
+  "n": 9,
+  "step": 72.0
+ },
+ "pax_comissaria_walk": {
+  "base": 256,
+  "ch": 260,
+  "cw": 240,
+  "hgt": 240,
+  "hx": 130,
+  "n": 16,
+  "step": 72.0
+ },
+ "pax_exec_walk": {
+  "base": 256,
+  "ch": 260,
+  "cw": 240,
+  "hgt": 240,
+  "hx": 130,
+  "n": 9,
+  "step": 72.0
+ },
+ "pax_mae_walk": {
+  "base": 256,
+  "ch": 260,
+  "cw": 340,
+  "hgt": 240,
+  "hx": 220,
+  "n": 8,
+  "step": 72.0
+ },
+ "pax_piloto_walk": {
+  "base": 256,
+  "ch": 260,
+  "cw": 240,
+  "hgt": 240,
+  "hx": 130,
+  "n": 7,
+  "step": 72.0
+ },
+ "seg_walk": {
+  "base": 224,
+  "ch": 230,
+  "cw": 260,
+  "hgt": 214,
+  "hx": 122,
+  "n": 8,
+  "step": 64.2
+ }
+}

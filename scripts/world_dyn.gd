@@ -1112,7 +1112,7 @@ func _enemy(e: Dictionary) -> void:
 			var fw: Texture2D = Spr.opt("fax_walk")
 			if fw and not e.dead and jn != "fax_vira":
 				# ciclo de andar desenhado (8 quadros: passos de verdade empurrando a enceradeira)
-				Spr.frame(fw, int(dist / 7.0) % int(fw.get_width() / 320), 320, 240, 140, 236, 0, 3, 104.0 / 210.0)
+				Spr.frame(fw, Spr.walk_frame("fax_walk", dist, 104.0 / 210.0), 320, 240, 140, 236, 0, 3, 104.0 / 210.0)
 			elif jr != null:
 				var jh: float = 104.0 if not e.dead else 60.0
 				Spr.P(jn, 0, 3, jh * jr[2] / jr[3])

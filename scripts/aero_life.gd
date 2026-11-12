@@ -91,12 +91,14 @@ static func _pax(g, T: int) -> void:
 		# andando: ciclo de passos desenhado (assets/sprites/pax_<nome>_walk.png, já na versão "de cenário")
 		var wt: Texture2D = Spr.opt(n + "_walk") if k == "walk" and int(p.rt) <= 0 else null
 		if wt:
-			var wn: int = int(wt.get_width() / 240)
-			var wsc: float = hgt / 240.0
+			var wm: Dictionary = Spr.walk_meta(n + "_walk")
+			var cw: float = float(wm.get("cw", 240))
+			var chh: float = float(wm.get("ch", 260))
+			var wsc: float = hgt / float(wm.get("hgt", 240))
 			Spr.save()
 			Spr.translate(x, y + 3 + bob * .4)
 			Spr.scale(-wsc if face_left else wsc, wsc)
-			Spr.ci.draw_texture_rect_region(wt, Rect2(-130, -256, 240, 260), Rect2((int(float(p.get("wd", 0.0)) / 8.0) % wn) * 240, 0, 240, 260), Color(1, 1, 1, .94 * Spr.alpha))
+			Spr.ci.draw_texture_rect_region(wt, Rect2(-float(wm.get("hx", 130)), -float(wm.get("base", 256)), cw, chh), Rect2(Spr.walk_frame(n + "_walk", float(p.get("wd", 0.0)), wsc) * cw, 0, cw, chh), Color(1, 1, 1, .94 * Spr.alpha))
 			Spr.restore()
 		else:
 			Spr.P(nm, x, y + 3 + bob + hop, w, face_left, 0.0, Color(1, 1, 1, .94))

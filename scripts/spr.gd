@@ -794,6 +794,27 @@ func late(what: String) -> void:
 		print("LOADLATE ", what)
 var warmed := false
 
+## ciclos de andar desenhados (assets/data/walks.json, feito pelo tools/make_walks.py): cada volta da
+## tira é um passo; o quadro sai da distância andada, então o pé plantado não patina no chão
+var _walks = null
+
+func walk_meta(name: String) -> Dictionary:
+	walk_frame(name, 0.0, 1.0)
+	return _walks.get(name, {})
+
+func walk_frame(name: String, dist: float, sc: float) -> int:
+	if _walks == null:
+		_walks = {}
+		var f := FileAccess.open("res://assets/data/walks.json", FileAccess.READ)
+		if f:
+			var d = JSON.parse_string(f.get_as_text())
+			if d is Dictionary:
+				_walks = d
+	var m: Dictionary = _walks.get(name, {})
+	var n: int = int(m.get("n", 8))
+	var per: float = max(2.0, float(m.get("step", 40.0)) * sc / n)
+	return int(abs(dist) / per) % n
+
 func _req(pth: String, put: Callable) -> void:
 	if _warm_req.has(pth) or not ResourceLoader.exists(pth):
 		return

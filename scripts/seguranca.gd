@@ -224,8 +224,7 @@ static func draw(g, e: Dictionary, dist: float, T: int) -> void:
 		# ciclo de andar desenhado (8 quadros: joelhos dobrando, braço balançando); sem ele, as 2 poses antigas
 		var wk: Texture2D = Spr.opt("seg_walk")
 		if wk:
-			var wn: int = int(wk.get_width() / 260)
-			var wf: int = int(dist / 9.0) % wn
+			var wf: int = Spr.walk_frame("seg_walk", dist, SC)
 			Spr.frame(wk, wf, 260, 230, 130, 224, 0, dy, SC)
 			return
 		n = ["seg_andaA", "seg_parado", "seg_andaB", "seg_parado"][int(dist / 16.0) % 4]
