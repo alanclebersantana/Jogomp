@@ -692,7 +692,9 @@ for e in L["enemies"]:
         e["x"] = (e["r"][0] + e["r"][1]) // 2
 # drones em lugares abertos, com espaço para lutar (nunca em cima de vão, fio ou corrimão)
 pombo(1800, 250, [1730, 1870])        # drone espião nos bancos do saguão, depois da arena do 1º segurança
-pombo(9560, -230, [9380, 9740])       # drone espião em cima da passarela do mezanino da segurança
+pombo(9560, -230, [9380, 9740])
+# falso carregador no check-in: para, ergue uma mala e arremessa (rebata com o bastão)
+inimigo("porter", 5250, [5060, 5460])
 # dicas só aparecem em cima do piso do terminal (no subsolo das bagagens elas não valem)
 for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))

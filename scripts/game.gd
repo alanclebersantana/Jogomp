@@ -1837,6 +1837,8 @@ func step() -> void:
 					e.ddx = float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0))
 				if e.has("proj"):
 					SegGuard.tick_proj(self, e)   # o rádio que já estava no ar termina de voar
+				if e.has("mala"):
+					Capangas.tick_mala(self, e)
 				if e.get("dk") == "seg":
 					# o segurança derrubado escorrega de costas no piso, freando (para na parede)
 					if wall_at(e.x + float(e.get("ddx", 0.0)) + float(e.get("dvx", 0.0)) + sign(float(e.get("dvx", 0.0))) * 50, e.y - 20):
@@ -3604,6 +3606,8 @@ func ebox(e: Dictionary) -> Dictionary:
 		return R(e.x - 22, e.y - 26, 44, 50)
 	if e.k == "janitor":
 		return R(e.x - 30, e.y - 96, 60, 96)
+	if e.k == "porter":
+		return R(e.x - 24, e.y - 104, 48, 104)
 	if e.k == "boar" and L.get("theme", "") == "aeroporto":
 		return R(e.x - 38, e.y - 162, 76, 162)
 	if FLY.has(e.k):
@@ -3744,6 +3748,8 @@ func _enemy_life(e: Dictionary) -> void:
 func _update_enemy_core(e: Dictionary) -> void:
 	if e.has("proj"):
 		SegGuard.tick_proj(self, e)
+	if e.has("mala"):
+		Capangas.tick_mala(self, e)
 	if e.stun > 0:
 		e.stun -= 1
 		return

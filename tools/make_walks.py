@@ -17,6 +17,7 @@ JOBS = {
     'pax_comissaria': ('pax_comissaria_walk.png', 240, 260, 256, 240, 130, None, True),
     'pax_piloto': ('pax_piloto_walk.png', 240, 260, 256, 240, 130, None, True),
     'pax_mae': ('pax_mae_walk.png', 340, 260, 256, 240, 220, None, True),
+    'porter': ('porter_src.png', 300, 240, 236, 220, 150, None, False),
 }
 
 # faixa (em x, relativa à cabeça) onde procurar o pé da frente: o faxineiro empurra a enceradeira
@@ -97,6 +98,9 @@ def pieces_grid(src):
 
 # folhas bagunçadas (fileiras tortas, um desenho solto no meio): recorte à mão, (x0, y0, x1, y1)
 BOXES = {
+    # falso carregador: 4 andando (em cima) e 4 do arremesso (pega, ergue, joga, solta) — sem ordenar pelo pé
+    'porter': [(70, 20, 270, 272), (375, 20, 595, 272), (70, 278, 270, 518), (375, 278, 595, 518),
+               (70, 515, 270, 775), (375, 512, 595, 775), (60, 785, 268, 1020), (375, 785, 600, 1020)],
     'pax_mae': [(18, 10, 247, 335), (338, 10, 531, 335), (531, 10, 760, 335),
                 (20, 365, 255, 690), (285, 365, 500, 690), (505, 365, 740, 690),
                 (70, 705, 305, 1015), (470, 705, 705, 1015)],
@@ -150,7 +154,7 @@ def make(name):
             off = 0
         xs = np.where(band.any(axis=0))[0]
         fr.append((xs.max() + off - HX) if len(xs) else 0)
-    order = sorted(range(len(cells)), key=lambda i: -fr[i])
+    order = sorted(range(len(cells)), key=lambda i: -fr[i]) if name != 'porter' else list(range(len(cells)))
     step = float(fr[order[0]] - fr[order[-1]])
     sheet = Image.new('RGBA', (CW * len(cells), CH), (0, 0, 0, 0))
     for k, i in enumerate(order):

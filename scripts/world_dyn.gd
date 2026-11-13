@@ -280,6 +280,7 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 					Spr.restore()
 			Spr.sil_c = Color(0, 0, 0, 0)
 		_enemy(e)
+		Capangas.draw_mala(e)
 		if segk:
 			# irritado: o rosto e o corpo esquentam (vermelho pulsando por cima do desenho)
 			if e.get("mad", false) and not e.dead:
@@ -909,7 +910,7 @@ const OUT8 := [Vector2(1, 0), Vector2(-1, 0), Vector2(0, 1), Vector2(0, -1), Vec
 ## estados em que o bicho começa um ataque (aparece o "!" vermelho antes)
 const ATK := {"crow": [5], "squirrel": [1], "spider": [1], "bat": [1], "owl": [1], "mole": [2]}
 ## nomes para a dica do primeiro encontro
-const EN_NAME := {"crow": "Drone espião", "janitor": "Faxineiro (só dá para pisar por trás)", "bat": "Mala-monstro", "fly": "Mala voadora", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
+const EN_NAME := {"crow": "Drone espião", "porter": "Falso carregador (rebata a mala com o bastão)", "janitor": "Faxineiro (só dá para pisar por trás)", "bat": "Mala-monstro", "fly": "Mala voadora", "spider": "Drone de gancho", "squirrel": "Esquilo bravo",
 	"frog": "Robô falsificado", "piranha": "Piranha", "leech": "Sanguessuga", "boar": "Falso segurança", "owl": "Coruja brava", "mole": "Toupeira"}
 ## olhos vermelhos brilhando (posição na arte de cada bicho, olhando para a direita)
 const EYES := {}   # a arte nova já tem os olhos acesos dos capangas
@@ -1146,6 +1147,28 @@ func _enemy(e: Dictionary) -> void:
 					Spr.frame(Spr.tex.en_frog2, ff, 130, 70, 65, 68, 0, 3, .82)
 			else:
 				Spr.A("en_frog_jump" if e.leap else "en_frog", 0, 3, .9 if e.leap else .82 + sin(T * .12) * .02)
+		"porter":
+			# falso carregador (arte olhando para a direita): anda; no arremesso pega, ergue e joga a mala
+			var pt: Texture2D = Spr.opt("porter_walk")
+			if pt:
+				var fr: int
+				var th: int = int(e.get("thr", 0))
+				if e.dead:
+					fr = 7
+				elif th > 36:
+					fr = 4
+				elif th > 16:
+					fr = 5
+				elif th > 6:
+					fr = 6
+				elif th > 0:
+					fr = 7
+				else:
+					fr = int(dist / 13.0) % 4
+				if th > 16 and th <= 36 and (T / 4) % 2 == 0:
+					# aviso: a mala erguida pisca
+					Spr.glow(0, -128, 30, Color(1, .8, .3, .35))
+				Spr.frame(pt, fr, 300, 240, 150, 236, 0, 3, 104.0 / 220.0)
 		"janitor":
 			# faxineiro com a enceradeira (arte olhando para a direita)
 			var jn := "fax_ko" if e.dead else "fax_%d" % (int(dist / 9.0) % 4)
