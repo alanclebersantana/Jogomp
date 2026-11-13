@@ -564,6 +564,12 @@ func P_cycle(key: String, names: Array, fpos: float, cx: float, y: float, w: flo
 	restore()
 
 # ---------- formas ----------
+var cnt = null
+func _c() -> void:
+	var st := get_stack()
+	var k: String = "%s:%s" % [st[2].source.get_file(), st[2].function] if st.size() > 2 else "?"
+	cnt[k] = cnt.get(k, 0) + 1
+
 func col(c: Color, a: float = 1.0) -> Color:
 	return Color(c.r, c.g, c.b, c.a * a * alpha)
 
@@ -571,13 +577,16 @@ func rect(x: float, y: float, w: float, h: float, c: Color) -> void:
 	ci.draw_rect(Rect2(x, y, w, h), col(c))
 
 func circle(x: float, y: float, r: float, c: Color) -> void:
+	if cnt != null: _c()
 	ci.draw_circle(Vector2(x, y), r, col(c))
 
 func ring(x: float, y: float, r: float, c: Color, w: float = 2.0, a0: float = 0.0, a1: float = TAU) -> void:
+	if cnt != null: _c()
 	ci.draw_arc(Vector2(x, y), r, a0, a1, 24, col(c), w, true)
 
 var _UC := PackedVector2Array()
 func ellipse(x: float, y: float, rx: float, ry: float, c: Color, rot: float = 0.0) -> void:
+	if cnt != null: _c()
 	# elipse muito pequena vira círculo (polígono minúsculo não triangula)
 	if rx < 3.5 or ry < 2.0:
 		if rx >= 3.5:
@@ -605,16 +614,20 @@ func ellipse(x: float, y: float, rx: float, ry: float, c: Color, rot: float = 0.
 	ci.draw_colored_polygon(pts, col(c))
 
 func poly(pts: PackedVector2Array, c: Color) -> void:
+	if cnt != null: _c()
 	if pts.size() >= 3:
 		ci.draw_colored_polygon(pts, col(c))
 
 func line(pts: PackedVector2Array, c: Color, w: float = 2.0) -> void:
+	if cnt != null: _c()
 	ci.draw_polyline(pts, col(c), w, true)
 
 func seg(x0: float, y0: float, x1: float, y1: float, c: Color, w: float = 2.0) -> void:
+	if cnt != null: _c()
 	ci.draw_line(Vector2(x0, y0), Vector2(x1, y1), col(c), w, true)
 
 func rr(x: float, y: float, w: float, h: float, r: float, c: Color) -> void:
+	if cnt != null: _c()
 	if w < 1.0 or h < 1.0:
 		return
 	r = min(r, min(w, h) / 2)
@@ -646,10 +659,12 @@ func glow(x: float, y: float, r: float, c: Color) -> void:
 	ci.draw_texture_rect(glow_tex, Rect2(x - r, y - r, r * 2, r * 2), false, col(c))
 
 func vgrad(x: float, y: float, w: float, h: float, c0: Color, c1: Color) -> void:
+	if cnt != null: _c()
 	var pts := PackedVector2Array([Vector2(x, y), Vector2(x + w, y), Vector2(x + w, y + h), Vector2(x, y + h)])
 	ci.draw_polygon(pts, PackedColorArray([col(c0), col(c0), col(c1), col(c1)]))
 
 func hgrad(x: float, y: float, w: float, h: float, c0: Color, c1: Color) -> void:
+	if cnt != null: _c()
 	var pts := PackedVector2Array([Vector2(x, y), Vector2(x + w, y), Vector2(x + w, y + h), Vector2(x, y + h)])
 	ci.draw_polygon(pts, PackedColorArray([col(c0), col(c1), col(c1), col(c0)]))
 
@@ -779,13 +794,13 @@ const WARM_OPT := ["boar_ko", "boar_wind", "boss_charge", "crow_dive", "crow_ko"
 	"ride_gallop", "ride_jump", "sapo_rei", "sled_tome", "urso", "esquilo", "cavalo",
 	"isis_climb", "isis_joy", "isis_scared", "p_tora_neve", "p_pedra_neve", "p_galho_neve",
 	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido",
-	"seg_escudo", "brk_lanche", "brk_lanche_q", "brk_vaso", "brk_vaso_q", "brk_carrinho", "aero_lavadora", "vulto", "seg_walk", "fax_walk", "pax_exec_walk", "pax_cel_walk", "pax_comissaria_walk", "pax_piloto_walk"]
+	"seg_escudo", "brk_lanche", "brk_lanche_q", "brk_vaso", "brk_vaso_q", "brk_carrinho", "aero_lavadora", "vulto", "seg_walk", "fax_walk", "pax_exec_walk", "pax_cel_walk", "pax_comissaria_walk", "pax_piloto_walk", "pax_mae_walk", "porter_walk", "porter_mala"]
 ## folhas que saem em silhueta (clarão do golpe, contorno vermelho dos inimigos, contorno de luz do Tomé)
 const WARM_SIL := ["atlas1", "atlas2", "extra", "en_boar", "en_frog2", "en_crow2", "javali", "pai", "pai2", "isis2",
 	"pai_climb", "pai_rope_a", "pai_rope_b", "pai_vine_a", "pai_vine_b", "cao", "esquilo", "gaviao", "bagre", "urso",
 	"boar_ko", "boar_wind", "crow_dive", "crow_ko", "frog_ko", "frog_tongue", "dog_dig", "dog_joy", "dog_sniff",
 	"isis_climb", "isis_joy", "isis_scared", "isis_run", "morcego_rei", "sapo_rei",
-	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido", "seg_walk", "fax_walk"]
+	"seg_parado", "seg_andaA", "seg_andaB", "seg_bravo", "seg_firme", "seg_guarda", "seg_investe", "seg_tonto", "seg_caido", "seg_walk", "fax_walk", "porter_walk", "milhas"]
 var _warm_req := {}      # caminho -> função que guarda o recurso pronto
 ## testes (tests/hitch.gd): avisa quando algo é carregado no meio do jogo (dá travadinha no celular)
 var trace_late := false
@@ -801,6 +816,7 @@ var _walks = null
 ## cenários de outro aeroporto: a fase pede um conjunto ("gig" = Galeão) e as mesmas chaves de trecho
 ## (vila = dia, tarde = pôr do sol, noite) passam a usar assets/bg/<conjunto>_<chave>.jpg
 var _bgset := ""
+var _chao_base := {}
 const BGSET_KEYS := {"vila": "dia", "tarde": "tarde", "noite": "noite"}
 func set_bgset(sname: String) -> void:
 	if sname == _bgset:
@@ -813,6 +829,14 @@ func set_bgset(sname: String) -> void:
 			if ResourceLoader.exists(alt):
 				pth = alt
 		tex["bg_" + k] = load(pth)
+	# piso do aeroporto (Galeão: calçadão de ondas); sem conjunto, volta o de Guarulhos
+	if not _chao_base.has("vila") and tex.has("chao_vila"):
+		_chao_base["vila"] = tex["chao_vila"]
+	var cp: String = "res://assets/sprites/chao_%s.png" % sname
+	if sname != "" and ResourceLoader.exists(cp):
+		tex["chao_vila"] = load(cp)
+	elif _chao_base.has("vila"):
+		tex["chao_vila"] = _chao_base["vila"]
 
 func walk_meta(name: String) -> Dictionary:
 	walk_frame(name, 0.0, 1.0)

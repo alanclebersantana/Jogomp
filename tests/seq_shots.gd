@@ -20,10 +20,14 @@ func _initialize() -> void:
 		if c.has_method("_end"):
 			c._end()
 	await process_frame
-	main.panel.get_meta("ok").call()
+	if main.panel and main.panel.has_meta("ok"):
+		main.panel.get_meta("ok").call()
 	var g = main.game
 	g.lives = 99
 	g.clue_opened.disconnect(main._on_clue)
+	for n in g.L.get("npcs", []):
+		n.seen = true
+	g.L["chases"] = []
 	for cid in ["cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho", "sapo", "morcego", "brutus", "vigia"]:
 		root.get_node("Save").setv("comic", cid, true)
 	var args := OS.get_cmdline_user_args()

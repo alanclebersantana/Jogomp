@@ -19,7 +19,7 @@ func _initialize() -> void:
 	for i in 3:
 		await process_frame
 	var sv = root.get_node("Save")
-	for cid in ["cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho"]:
+	for cid in ["drone", "seguranca", "vento", "fiscal_a", "fiscal_b", "fiscal", "abertura", "cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho"]:
 		sv.setv("comic", cid, true)
 	main.start_level(false, int(OS.get_environment("LVL")) if OS.get_environment("LVL") != "" else 0)
 	await process_frame

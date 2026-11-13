@@ -186,6 +186,10 @@ func draw(T: int) -> void:
 					continue
 				_lift(o, T)
 			"path":
+				var pa: float = min(float(o.x0), float(o.x1))
+				var pb: float = max(float(o.x0), float(o.x1)) + float(o.w)
+				if pb + 60 < cx0 or pa - 60 > cx1:
+					continue
 				if g.L.get("theme", "") == "aeroporto" and o.get("skin", "") == "bondinho":
 					_bond_cable(o)
 					for s in o.plats:
@@ -224,16 +228,38 @@ func _bond_cable(o: Dictionary) -> void:
 		Spr.rect(q.x - 6, q.y - 40, 12, 46, Color("#4a5560"))
 		Spr.circle(q.x, q.y, 9, Color("#2c333a"))
 		Spr.circle(q.x, q.y, 4, Color("#c2ccd6"))
-	var n := 16
-	var prev := a
-	for i in range(1, n + 1):
-		var u: float = float(i) / n
-		var p: Vector2 = a.lerp(b, u) + Vector2(0, sin(u * PI) * 14.0)
-		Spr.seg(prev.x, prev.y, p.x, p.y, Color(0, 0, 0, .35), 5)
-		Spr.seg(prev.x, prev.y, p.x, p.y, Color("#7f8b97"), 2.5)
-		prev = p
+	var pts := PackedVector2Array()
+	for i in 17:
+		var u: float = float(i) / 16.0
+		pts.append(a.lerp(b, u) + Vector2(0, sin(u * PI) * 14.0))
+	Spr.line(pts, Color(0, 0, 0, .35), 5)
+	Spr.line(pts, Color("#7f8b97"), 2.5)
 
 func _bondinho(s: Dictionary, T: int) -> void:
+	var w: float = s.w
+	# balanço de pêndulo: a cabine fica para trás quando o cabo acelera e passa do ponto quando freia
+	# (só o desenho; o piso onde o Milis pisa continua reto). Uma molinha por cabine.
+	var vx: float = float(s.get("dx", 0.0))
+	var sw: float = float(s.get("_sw", 0.0))
+	var sv: float = float(s.get("_sv", 0.0))
+	if int(s.get("_st", -1)) != T:
+		var ax: float = vx - float(s.get("_pvx", vx))
+		sv += (-ax * .22 - sw * .05) - sv * .06
+		sw = clamp(sw + sv, -.09, .09)
+		s["_sw"] = sw
+		s["_sv"] = sv
+		s["_pvx"] = vx
+		s["_st"] = T
+	var pcx: float = float(s.x) + w / 2
+	var ptop: float = float(s.y) - 128 - 26
+	Spr.save()
+	Spr.translate(pcx, ptop)
+	Spr.rotate(sw + sin(T * .035 + pcx * .01) * .008)
+	Spr.translate(-pcx, -ptop)
+	_bondinho_body(s, T)
+	Spr.restore()
+
+func _bondinho_body(s: Dictionary, T: int) -> void:
 	var x: float = s.x
 	var y: float = s.y
 	var w: float = s.w
@@ -244,7 +270,11 @@ func _bondinho(s: Dictionary, T: int) -> void:
 	Spr.circle(cx, top - 26, 7, Color("#2c333a"))
 	Spr.circle(cx, top - 26, 3, Color("#c2ccd6"))
 	# cabine: teto vermelho, colunas, vidro azulado translúcido, faixa e piso
+	Spr.rr(x - 9, top - 9, w + 18, 22, 8, Color("#1c1418"))
+	Spr.rect(x - 3, top + 6, 3, 122, Color("#1c1418"))
+	Spr.rect(x + w, top + 6, 3, 122, Color("#1c1418"))
 	Spr.rr(x - 6, top - 6, w + 12, 16, 6, Color("#a3261f"))
+	Spr.rect(x - 2, top - 4, w + 4, 3, Color("#e2584a"))
 	Spr.rect(x - 4, top + 8, w + 8, 4, Color("#6e1712"))
 	Spr.rect(x + 2, top + 10, w - 4, 112, Color(.62, .82, .95, .22))
 	for k in [x, x + w - 6, x + w / 2 - 3]:

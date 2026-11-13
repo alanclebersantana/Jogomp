@@ -1158,7 +1158,8 @@
   6300,
   8200
  ],
- "nightAt": 9300,
+ "nightAt": 99999,
+ "bgMirror": 1,
  "periods": [
   "Desembarque · 10:00",
   "Quiosques · 13:00",

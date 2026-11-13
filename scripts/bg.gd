@@ -154,7 +154,7 @@ func _glass_rain(w: float, H: float, day: float) -> void:
 		var hy: float = fposmod(sin(i * 78.233) * 12345.678, 1.0)
 		var x: float = fposmod(hx * w * 1.2 - T * 2.2 - game.rcam * .1, w * 1.2) - w * .1
 		var y: float = fposmod(hy * H + T * 13.0, H)
-		Spr.seg(x, y, x - 4, y + 16, Color(.85, .9, 1, .35 * k), 1.2)
+		_streak(x, y, 16.5, .245, 1.2, Color(.85, .9, 1, .35 * k))
 	# gotas escorrendo no vidro (descem devagar, param, descem de novo)
 	for i in 26:
 		var hx2: float = fposmod(sin(i * 3.7 + 1.1) * 9137.3, 1.0)
@@ -162,13 +162,19 @@ func _glass_rain(w: float, H: float, day: float) -> void:
 		var sp: float = .4 + hx2 * .8
 		var x2: float = fposmod(hx2 * w * 1.1 - game.rcam * PX, w * 1.1) - w * .05
 		var y2: float = fposmod(hy2 * H + T * sp + sin(T * .03 + i) * 6.0, H)
-		Spr.seg(x2, y2 - 18, x2, y2, Color(.9, .95, 1, .22 * k), 1.5)
-		Spr.circle(x2, y2, 2.2, Color(.95, .98, 1, .5 * k))
+		Spr.rect(x2 - .75, y2 - 18, 1.5, 18, Color(.9, .95, 1, .22 * k))
+		Spr.rect(x2 - 1.6, y2 - 2.2, 3.2, 4.4, Color(.95, .98, 1, .5 * k))
 	# relâmpago: clarão na tela e trovão um pouco depois
 	if game.running and T % 900 == 300 and k > .6:
 		game.lightning = 12
 	if game.running and T % 900 == 330 and k > .6:
 		Audio.play("thunder", -6, .9)
+
+## risco de chuva inclinado como retângulo girado (retângulos saem em lote; linhas, uma chamada cada)
+func _streak(x: float, y: float, ln: float, ang: float, wd: float, c: Color) -> void:
+	Spr.ci.draw_set_transform(Vector2(x, y), ang, Vector2.ONE)
+	Spr.ci.draw_rect(Rect2(-wd * .5, 0, wd, ln), Spr.col(c))
+	Spr.ci.draw_set_transform_matrix(Spr.M)
 
 func _aero_planes(ws: Dictionary, w: float) -> void:
 	if game.L.get("theme", "") != "aeroporto" or not Spr.AR.has("p_ob_aviao"):
@@ -350,9 +356,10 @@ func _atmos(nw: Dictionary, w: float, oy: float, bh: float) -> void:
 ## brilho do sol (mistura somada): halo grande e respirando + reflexo horizontal fininho
 ## pista à noite (aeroporto): luzes da pista e do pátio cintilando pela vidraça, acendendo uma a uma
 ## conforme o Milis entra no trecho da noite
-func _night_lights(al: float, oy: float, bh: float, w: float) -> void:
+func _night_lights(n: CanvasItem, al: float, oy: float, bh: float, w: float) -> void:
 	if al < .03 or not Spr.tex.has("bg_noite"):
 		return
+	Spr.begin(n)
 	var tx: Texture2D = Spr.tex["bg_noite"]
 	var sc: float = bh / tx.get_height()
 	var tw: float = tx.get_width() * sc
@@ -369,9 +376,13 @@ func _night_lights(al: float, oy: float, bh: float, w: float) -> void:
 			var ly: float = oy + bh * (.47 + hy * .14)
 			var tw2: float = .5 + .5 * sin(T * (.04 + hx * .06) + i * 2.3)
 			var col := Color(1, .85, .45) if i % 3 != 0 else (Color(.45, .7, 1) if i % 2 == 0 else Color(1, .35, .3))
-			Spr.circle(lx, ly, 1.2 + tw2, Color(col.r, col.g, col.b, al * (.25 + .5 * tw2)))
+			if lx < -12 or lx > w + 12:
+				continue
+			# (tudo com a mesma textura de brilho: as luzes saem num lote só)
+			Spr.glow(lx, ly, 2.6 + tw2 * 1.6, Color(col.r, col.g, col.b, al * (.5 + .5 * tw2)))
+			Spr.glow(lx, ly, 2.6 + tw2 * 1.6, Color(1, 1, 1, al * (.35 + .4 * tw2)))
 			if tw2 > .9:
-				Spr.glow(lx, ly, 8, Color(col.r, col.g, col.b, al * .3))
+				Spr.glow(lx, ly, 9, Color(col.r, col.g, col.b, al * .3))
 		x += tw
 
 func _draw_add(n: CanvasItem) -> void:
@@ -385,7 +396,7 @@ func _draw_add(n: CanvasItem) -> void:
 	var bh: float = game.H + max(0.0, (game.L.bottom - game.L.top) - game.H) * PX
 	var t := FxClock.ft
 	if game.L.get("theme", "") == "aeroporto":
-		_night_lights(float(_w.get("noite", 0.0)), oy, bh, w)
+		_night_lights(n, float(_w.get("noite", 0.0)), oy, bh, w)
 	for k in SUN:
 		if game.L.get("theme", "") == "aeroporto":
 			break
@@ -495,7 +506,7 @@ func _layer(k: String, ox: float, oy: float, w: float, bh: float, al: float) -> 
 	var x := fposmod(ox, tw * 2) - tw * 2
 	var i := 0
 	# no aeroporto as pinturas têm letreiros (DUTY FREE, CLOSED): espelhar deixava o texto ao contrário
-	var mirror: bool = game.L.get("theme", "") != "aeroporto"
+	var mirror: bool = game.L.get("theme", "") != "aeroporto" or bool(game.L.get("bgMirror", false))
 	while x < w:
 		if i % 2 == 0 or not mirror:
 			Spr.img(t, x, oy, tw, bh, Rect2(), al)

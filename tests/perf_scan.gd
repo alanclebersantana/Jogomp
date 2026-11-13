@@ -15,7 +15,7 @@ func _initialize() -> void:
 		await process_frame
 	Spr = root.get_node("Spr")
 	var sv = root.get_node("Save")
-	for cid in ["cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho"]:
+	for cid in ["drone", "seguranca", "vento", "fiscal_a", "fiscal_b", "fiscal", "abertura", "cipo", "mergulho", "neve", "pipoca", "picareta", "cavalo", "mina", "toxico", "javali", "gaviao", "bagre", "urso", "vargas", "bola", "aviao", "jangada", "colmeia", "moinho", "telhados", "carrinho"]:
 		sv.setv("comic", cid, true)
 	var lvl := int(OS.get_environment("LVL")) if OS.get_environment("LVL") != "" else 0
 	var step := float(OS.get_environment("PASSO")) if OS.get_environment("PASSO") != "" else 450.0
@@ -32,6 +32,8 @@ func _initialize() -> void:
 		await process_frame
 	g = main.game
 	g.lives = 99
+	for n in g.L.get("npcs", []):
+		n.seen = true
 	if g.clue_opened.is_connected(main._on_clue):
 		g.clue_opened.disconnect(main._on_clue)
 	# espera o pré-carregamento terminar (como no celular depois da tela de título)

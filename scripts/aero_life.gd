@@ -324,16 +324,25 @@ static func _light_dust(g, T: int) -> void:
 			var edge: float = clamp(min(pcx - l0, l1 - pcx) / 30.0, 0.0, 1.0)
 			Spr.glow(pcx, pcy, 46, Color(warm.r, warm.g, warm.b, .22 * edge))
 		xx += per
-	if g.low_fx:
+
+## poeira suspensa: pontinhos de luz que flutuam e cintilam. Desenhada na camada de brilho (por cima do
+## mundo): na camada do mundo o contorno de tinta dava um anel preto em volta de cada pontinho
+static func motes(g, T: int) -> void:
+	if g.L.get("theme", "") != "aeroporto" or g.low_fx:
 		return
-	# poeira suspensa: pontinhos que flutuam e cintilam quando atravessam a luz
+	var bg: String = str(_section(g).get("bg", ""))
+	if not bg in ["vila", "tarde"]:
+		return
+	var W: float = g.W
+	var H: float = g.H
+	var top: float = g.cam_y
 	for i in 34:
 		var sp: float = .12 + hh(i, 1) * .25
 		var x: float = g.cam + fposmod(hh(i, 2) * W * 1.2 + T * sp, W * 1.2) - W * .1
 		var y: float = top + H * .12 + fposmod(hh(i, 3) * H * .7 + sin(T * .013 + i) * 18.0 - T * .04 * hh(i, 4), H * .7)
 		var tw: float = .5 + .5 * sin(T * (.05 + hh(i, 5) * .05) + i * 2.1)
 		var r: float = .9 + hh(i, 6) * 1.1
-		Spr.circle(x, y, r, Color(1, .98, .9, .3 + .45 * tw))
+		Spr.glow(x, y, r * 2.2, Color(1, .98, .9, .4 + .45 * tw))
 		if tw > .85:
 			Spr.glow(x, y, 6, Color(1, .95, .8, .25))
 

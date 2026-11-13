@@ -1085,6 +1085,7 @@ static func plat(s: Dictionary) -> void:
 	# tábuas separadas (cada uma com veio e prego), pontas arredondadas e um pouco irregulares
 	var bx: float = s.x
 	var bi := 0
+	var nails: Array[Vector2] = []
 	# a pintura da viga tem 20 de 33 linhas vazias em cima: sem subir, a parte visível ficava ~10 px
 	# abaixo do topo de verdade e o Milis parecia flutuar (antes a sombra disfarçava)
 	var oy: float = -11.0 if (Polish.g != null and Polish.g.L.get("theme", "") == "aeroporto") else 0.0
@@ -1097,10 +1098,13 @@ static func plat(s: Dictionary) -> void:
 		var u0: float = hh(s.x + bi * 7, 64) * .6
 		var m: float = .9 + hh(s.x + bi * 3, 63) * .15
 		Spr.PRs("seesaw_plank", bx, s.y - 1 + jy + oy, bw, 18, u0, u0 + min(.4, bw / 180.0), Color(m, m, m))
-		Spr.circle(bx + 5, s.y + 8 + jy + oy * .3, 1.4, Color(.25, .22, .2))
-		Spr.circle(bx + bw - 5, s.y + 8 + jy + oy * .3, 1.4, Color(.25, .22, .2))
+		nails.append(Vector2(bx + 5, s.y + 8 + jy + oy * .3))
+		nails.append(Vector2(bx + bw - 5, s.y + 8 + jy + oy * .3))
 		bx += bw
 		bi += 1
+	# pregos depois de todas as tábuas (tábuas num lote só, pregos em outro)
+	for nv in nails:
+		Spr.rect(nv.x - 1.3, nv.y - 1.3, 2.6, 2.6, Color(.25, .22, .2))
 	if oy != 0.0:
 		# leitura da tela: um friso claro no topo de tudo em que dá para pisar (não se perde no fundo)
 		Spr.rect(s.x + 2, s.y - 2, s.w - 4, 2.5, Color(1, .97, .78, .75))
@@ -2220,9 +2224,9 @@ func _tapume(s: Dictionary) -> void:
 		var off: float = 4.0 if k % 2 == 0 else -3.0
 		Spr.rect(x + off * .3, y - hh, w, hh - 2, c)
 		Spr.rect(x + off * .3, y - hh, w, 2, Color(1, 1, 1, .18))
-		Spr.seg(x + 6, y - hh * .55, x + w * .6, y - hh * .5, Color(0, 0, 0, .12), 1.2)
-		Spr.circle(x + 5, y - hh * .5, 1.6, Color(.25, .25, .28))
-		Spr.circle(x + w - 5, y - hh * .5, 1.6, Color(.25, .25, .28))
+		Spr.rect(x + 6, y - hh * .53, w * .6 - 6, 1.2, Color(0, 0, 0, .12))
+		Spr.rect(x + 3.5, y - hh * .5 - 1.5, 3, 3, Color(.25, .25, .28))
+		Spr.rect(x + w - 6.5, y - hh * .5 - 1.5, 3, 3, Color(.25, .25, .28))
 		y -= hh
 		k += 1
 	# viga de reforço na vertical
@@ -2322,15 +2326,15 @@ func _basement_wall(L: Dictionary) -> void:
 	var bx1 := -1e9
 	var by0 := 1e9
 	var by1 := -1e9
+	var top: float = float(L.get("under", 640))
 	for s in L.solids:
-		if s.t == "dirt":
+		if s.t == "dirt" and float(s.y) >= top:   # só o subsolo de verdade (a placa do chão também é "dirt")
 			bx0 = min(bx0, s.x)
 			bx1 = max(bx1, s.x + s.w)
 			by0 = min(by0, s.y)
 			by1 = max(by1, s.y + s.h)
 	if bx1 < bx0 or bx1 < x0 or bx0 > x1:
 		return
-	var top: float = float(L.get("under", 640))
 	Spr.rect(bx0, top, bx1 - bx0, by1 - top, Color("#23272e"))
 	var xx: float = bx0
 	while xx < bx1:
