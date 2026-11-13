@@ -985,3 +985,176 @@ milhas(4000, 4400, 470, 50)
 fim(4500)
 L["spanX"] = 4600
 salvar(4)
+
+
+# ======================================================================
+#  2-1 · GALEÃO (Rio de Janeiro)
+# ======================================================================
+novo("Galeão · 2-1 Terminal",
+     "As pistas do Barão levam ao Rio de Janeiro! No Galeão, os capangas estão trocando as milhas roubadas num "
+     "ponto secreto do terminal. Atravesse o desembarque, os quiosques e o bondinho sobre a vista da Baía de "
+     "Guanabara, junte os biscoitos de polvilho e descubra o próximo passo da quadrilha.",
+     introSub="Episódio 2 · Brasil — Rio de Janeiro", endTitle="FIM DO GALEÃO", introImg="res://assets/bg/gig_dia.jpg",
+     bgset="gig", snackName="Biscoitos de polvilho", clueIds=[7, 8, 9],
+     rain=[6300, 8200], nightAt=9300,
+     periods=["Desembarque · 10:00", "Quiosques · 13:00", "Bondinho · 17:30", "Píer · 20:00"],
+     rests={"1": ["CHECK-IN DO GALEÃO", "No balcão, alguém deixou um guardanapo com a baía desenhada e um X vermelho.",
+                  "Um ponto de troca de milhas aqui no Galeão? O Barão não brinca em serviço."]},
+     endStory="No píer do terminal 2, o envelope lacrado com o B dourado confirma: as milhas do Rio já seguem "
+              "para o próximo destino. O Barão está sempre um voo à frente... mas o Milis também sabe voar!")
+L["spawn"] = {"x": 190, "y": GY}
+
+# --- A · Desembarque (0 .. 3000)
+L["sections"].append({"x": 0, "song": "manha", "bg": "vila", "gt": "vila", "per": 0})
+chao(-200, 3000)
+dica(0, 520, "Rio de Janeiro! Os capangas do Barão espalharam milhas pelo desembarque do Galeão. E tem biscoito de polvilho pelo caminho!")
+milhas(300, 700, 470)
+caixa(820, n=5)
+for cx in [640, 1900, 2700]:
+    movel(cx, "coluna", 92)
+movel(1150, "carrinhos", 110)
+movel(2300, "bancos", 230)
+painel(260)
+painel(1300, 210, 170)
+obj(460, "papeis", 60)
+obj(1020, "passaportes", 44)
+obj(1480, "lixeiras", 96)
+obj(2120, "cafe", 46)
+obj(2580, "etiqueta", 26)
+pax(320, "turista", r=[200, 900], spd=.8, re=1)
+pax(700, "cel", r=[560, 880], spd=.5)
+pax(1700, "piloto", r=[1600, 2050], spd=.7)
+pax(2290, "dorme", k="sit", y=GY - 14, look=False, z="z")
+pax(2520, "comissaria", r=[2400, 2700], spd=.8)
+atendente(1040, 410, "barros_gig1", [
+    ["SEU BARROS", "Olha só, o robozinho da Milhas Plus no Rio! Bem-vindo ao Galeão!", "barros"],
+    ["MILIS", "Seu Barros?! O senhor também veio para o Rio?", "tome"],
+    ["SEU BARROS", "Folga, folga... vim ver o Pão de Açúcar. Hehe. Dizem que tem gente de capuz no bondinho, viu?", "barros"]], "aponta")
+plat(980, 410, 140)                 # balcão de informações
+milhas(1000, 1100, 380, 40)
+totem(780)
+# pombo (drone espião) nos bancos
+pombo(1600, 250, [1480, 1760])
+# torre de malas até o cartão dourado 1/3 (pulo duplo)
+plat(1950, 400, 110)
+plat(2120, 300, 110)
+plat(1950, 200, 110)
+milhas(1960, 2050, 370, 30)
+milhas(2130, 2220, 270, 30)
+cartao(2005, 200, "Cartão de embarque dourado 1/3 (Galeão): GIG → ??? — carimbo com um B floreado.")
+icone(1850, 2000, 1950, 420, "↑↑")
+robo_falso(2550, [2420, 2760])
+caixa(2860, item="heart", soft=True)
+totem(2900)
+# o vulto de capuz aparece de novo e foge pelo desembarque
+L["chases"] = [{"trig": 120, "x0": 300, "x1": 900, "y": GY, "spd": 4.8, "bonus": 15,
+                "pista": "Na mala, um bilhete: \"Troca no terminal 2, depois do bondinho.\" Assinado: B."}]
+
+# --- B · Quiosques (3000 .. 6200): praça de alimentação, carregadores e o 1º segurança
+L["sections"].append({"x": 3000, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 1})
+chao(3000, 5250)
+chao(5370, 6100)
+inimigo("porter", 3550, [3380, 3720])
+dica(3100, 3350, "Carregador falso! Quando ele erguer a mala, rebata com o bastão na hora certa.")
+painel(3300, 200, 170)
+quebra(3260, "lanche", 64)
+for kx in [3850, 4060]:               # quiosques (balcões baixos para subir)
+    peca(kx, kx + 140, 410, 500, "p_pc_balcao", 75, 40, 4, 58)
+    milhas(kx + 20, kx + 120, 380, 50)
+plat(3920, 260, 130)                   # toldo do quiosque
+pista(3985, 260, 7)
+milhas(3930, 4040, 230, 36)
+icone(3820, 3960, 3900, 360, "↑↑")
+totem(4200, 410)
+# arena do 1º segurança (praça de alimentação)
+inimigo("boar", 4600, [4430, 4780], arena=[4330, 4860])
+quebra(4470, "carrinho", 70)
+caixa(4900, item="heart", soft=True)
+obj(4950, "cafe", 44)
+obj(5180, "folhetos", 40)
+# tapume da obra: passe rolando (corra e abaixe)
+bloco(5000, 5120, -620, GY - 34, t="tapume")
+icone(4870, 4990, 4960, 420, "» ↓")
+L["pits"].append([5250, 5370])         # vãozinho logo depois do tapume (pulo curto)
+arco(5240, 5380, 450, 50, 4)
+faxineiro(5700, [5420, 5960])
+molhado(5800, 130)
+quebra(5785, "placa", 34)
+pax(5450, "mae", r=[5360, 5560], spd=.6)
+pax(6000, "idosa", k="stand")
+painel(5600, 200)
+milhas(5400, 5700, 470, 50)
+totem(6000, GY, 1)
+caixa(5900, n=4, soft=True)
+
+# --- C · Átrio do bondinho (6100 .. 9200): o vão da vidraça com a vista da baía, só atravessa de bondinho
+L["sections"].append({"x": 6100, "song": "tarde", "bg": "tarde", "gt": "vila", "per": 2})
+chao(6100, 6180)
+chao(6260, 6500)
+# elevador panorâmico até o mirante (uma pista lá em cima)
+elevador_vidro(6180, 60)
+bloco(6180, 6260, 511, 640)
+passarela(6270, 6490, 60, 100)
+pista(6440, 60, 8)
+milhas(6290, 6420, 30, 40)
+icone(6100, 6270, 6180, 380, "✋")
+dica(6250, 6500, "O átrio da vidraça! Só dá para atravessar de bondinho. Pule para dentro da cabine quando ela chegar perto.")
+L["pits"].append([6500, 7700])
+L["movers"].append({"k": "path", "x0": 6520, "x1": 6980, "y0": 420, "y1": 330, "w": 130, "per": 320, "skin": "bondinho"})
+L["movers"].append({"k": "path", "x0": 7560, "x1": 7090, "y0": 420, "y1": 330, "w": 130, "per": 320, "skin": "bondinho"})
+arco(6560, 7660, 280, 70, 16)
+drone(7080, 170, [6860, 7300])
+# torre do cabo no meio, com o cartão dourado 2/3 no topo (pule de dentro do bondinho)
+plat(7030, 150, 60)
+cartao(7060, 150, "Cartão de embarque dourado 2/3: \"VOO ESPECIAL — saída do Rio às 21h\". Para onde?")
+chao(7700, 9200)
+caixa(7780, item="heart", soft=True)
+totem(7820)
+# arena do 2º segurança (chama reforço no rádio)
+inimigo("boar", 8250, [8080, 8420], arena=[7980, 8520], radio=1)
+quebra(8120, "malas", 72)
+milhas(8600, 8900, 470, 50)
+inimigo("porter", 8900, [8720, 9100])
+painel(8400, 190)
+obj(8650, "lixeiras", 96)
+pax(9080, "exec", r=[9000, 9180], spd=1.0)
+totem(9150)
+
+# --- D · Píer do terminal 2 (9200 .. 12300): noite, esteira rolante, escada rolante e a saída
+L["sections"].append({"x": 9200, "song": "noite", "bg": "noite", "gt": "vila", "night": .4, "per": 3})
+chao(9200, 12300)
+neon(9500, "#ff4fb4")
+neon(10100, "#4fd8ff")
+neon(10900, "#ffd84a")
+neon(11600, "#9b6bff")
+L.setdefault("walks", []).append({"x0": 9300, "x1": 9700, "y": GY, "dir": 1, "spd": 1.8})
+icone(9220, 9320, 9330, 420, "»")
+milhas(9320, 9680, 470, 45)
+pombo(9950, 250, [9800, 10100])
+# escada rolante até o mezanino: o cartão dourado 3/3
+escada_rolante(10200, GY, 260, dir=1, spd=1.6)
+bloco(10680, 10920, 260, GY)
+S[-1]["esc"] = 2
+plat(10740, 140, 130)
+milhas(10700, 10900, 230, 46)
+cartao(10805, 140, "Cartão de embarque dourado 3/3: o destino aparece em letras douradas... a caçada continua!")
+icone(10100, 10280, 10190, 330, "↑↑")
+caixa(10980, item="heart", soft=True)
+robo_falso(11250, [11080, 11420])
+painel(11300, 190)
+obj(11500, "papeis", 60)
+pax(11620, "teen", k="stand", re=1, bal="oi!")
+pista(11720, GY, 9)
+totem(11500)
+milhas(11760, 11900, 470, 45)
+fim(11980)
+L["spanX"] = 12300
+L["fg"] = [{"x": 760, "k": "coluna"}, {"x": 2150, "k": "bancos", "flip": True}, {"x": 3480, "k": "lixeira"},
+           {"x": 5500, "k": "coluna"}, {"x": 7900, "k": "coluna"}, {"x": 9050, "k": "lixeira", "flip": True},
+           {"x": 10450, "k": "coluna"}, {"x": 11800, "k": "bancos"}]
+# biscoitos de polvilho (o petisco típico): 10 pelo caminho, alguns em lugares mais difíceis
+L["snacks"] = [[560, 440], [1050, 330], [2170, 160], [3985, 200], [4700, 420], [5310, 380],
+               [6360, 0], [7300, 260], [9500, 420], [10805, 90]]
+for h in L["hints"]:
+    h.setdefault("yl", L.get("under", 640))
+salvar(5)

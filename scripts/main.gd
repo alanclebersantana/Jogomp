@@ -1345,7 +1345,7 @@ func show_title() -> void:
 	panel.move_child(img, 0)
 	vb.add_child(_label("CADÊ AS\nMILHAS?!", 50, Color("#f2d28a"), Spr.font_title))
 	var eps: int = int(Save.getv("prog", "eps", 1))
-	vb.add_child(_label("MILHAS PLUS · EPISÓDIO 1 · BRASIL", 18, Color("#e8c98a"), Spr.font_title))
+	vb.add_child(_label("MILHAS PLUS · GUARULHOS · GALEÃO" if eps >= 2 else "MILHAS PLUS · EPISÓDIO 1 · BRASIL", 18, Color("#e8c98a"), Spr.font_title))
 	if OS.has_feature("teste"):
 		vb.add_child(_label("VERSÃO DE TESTE · todos os episódios liberados", 13, Color("#ffb070"), Spr.font_b))
 	vb.add_child(_label("Alguém está roubando as milhas dos clientes. O Milis vai descobrir quem é!", 17, Color("#e8dcc0"), Spr.font_i, 460))
@@ -1356,7 +1356,7 @@ func show_title() -> void:
 	if not run.is_empty():
 		vb.add_child(_button("CONTINUAR", func(): start_level(true)))
 	if eps >= 2:
-		vb.add_child(_button("ESCOLHER EPISÓDIO", _choose_episode))
+		vb.add_child(_button("MAPA DE DESTINOS", _choose_episode))
 	else:
 		vb.add_child(_button("NOVO JOGO" if not run.is_empty() else "COMEÇAR", func(): _confirm_wipe(func(): start_level(false), show_title)))
 	var row := HBoxContainer.new()
@@ -1416,22 +1416,37 @@ func _confirm_wipe(next: Callable, back: Callable) -> void:
 	_confirm("COMEÇAR DE NOVO?", "O progresso salvo no último totem será apagado. Isso não tem volta.", "APAGAR E COMEÇAR", next, back)
 
 ## escolher o episódio (aparece depois de terminar o primeiro)
-const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."]]
+const EPISODES := [["GUARULHOS · 1-1 TERMINAL", "Saguão, check-in, segurança e o mezanino."],
+	["GALEÃO · 2-1 RIO DE JANEIRO", "Saguão com vista para o Pão de Açúcar, o bondinho do átrio e a pista à noite."]]
 func _choose_episode() -> void:
 	var vb := _overlay(.9)
-	vb.add_child(_label("ESCOLHA O EPISÓDIO", 30, GOLD, Spr.font_title))
-	var eps: int = int(Save.getv("prog", "eps", 1))
-	for i in min(eps, EPISODES.size()):
+	vb.add_theme_constant_override("separation", 8)
+	vb.add_child(_label("MAPA DE DESTINOS", 28, GOLD, Spr.font_title))
+	var eps: int = clampi(int(Save.getv("prog", "eps", 1)), 1, EPISODES.size())
+	var go := func(lv: int):
+		_confirm_wipe(func():
+			if panel:
+				panel.queue_free()
+				panel = null
+			start_level(false, lv), _choose_episode)
+	# o mapa (toque no alfinete) e, embaixo, um botão por destino (para o controle e para quem prefere)
+	var mp = preload("res://scripts/ui/mapa.gd").new()
+	mp.eps = eps
+	mp.pick.connect(func(i): go.call(i))
+	var mc := CenterContainer.new()
+	mc.add_child(mp)
+	vb.add_child(mc)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 12)
+	for i in eps:
 		var lv: int = i
 		var b := Save.best(i)
 		var st: String = "  " + "★".repeat(int(b.get("stars", 0))) if not b.is_empty() else ""
-		vb.add_child(_button(EPISODES[i][0] + st, func():
-			_confirm_wipe(func():
-				if panel:
-					panel.queue_free()
-					panel = null
-				start_level(false, lv), _choose_episode)))
-		vb.add_child(_label(EPISODES[i][1], 13, Color(.8, .75, .65), Spr.font_i))
+		var bt := _button(EPISODES[i][0] + st, func(): go.call(lv))
+		bt.tooltip_text = EPISODES[i][1]
+		row.add_child(bt)
+	vb.add_child(row)
 	var back := func():
 		panel.queue_free()
 		panel = null
@@ -2545,7 +2560,7 @@ func show_map(from_pause: bool, from_bag: bool = false) -> void:
 var _ep_per_cache := {}
 func _ep_periods(ep: int) -> Array:
 	if not _ep_per_cache.has(ep):
-		var p := "res://assets/data/level%d.json" % ep
+		var p := "res://assets/data/level%d.json" % Game.level_file(ep - 1)
 		var per: Array = Game.PERIODS1
 		if FileAccess.file_exists(p):
 			var L = JSON.parse_string(FileAccess.get_file_as_string(p))
@@ -2645,7 +2660,7 @@ func show_gallery(ep: int = 1) -> void:
 		tabs.add_theme_constant_override("separation", 8)
 		for e in eps:
 			var en: int = e + 1
-			var tb := _compact_btn(["1-1", "1-2", "1-3", "CHEFE"][e] if e < 4 else "FASE %d" % en)
+			var tb := _compact_btn(["GRU 1-1", "GIG 2-1"][e] if e < 2 else "FASE %d" % en)
 			tb.toggle_mode = true
 			tb.button_pressed = en == ep
 			tb.pressed.connect(func(): show_gallery(en))
@@ -2670,7 +2685,7 @@ func show_gallery(ep: int = 1) -> void:
 	vb.add_child(_label("Melhor tempo %s" % [("%d:%02d" % [bt2 / 60, bt2 % 60]) if bt2 > 0 else "—"], 13, Color(.85, .8, .7), Spr.font_i))
 	# cartões de embarque dourados desta fase (o texto aparece depois de achar)
 	vb.add_child(_label("CARTÕES DE EMBARQUE DOURADOS", 13, Color("#b8a888")))
-	var L2 = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/level%d.json" % ep))
+	var L2 = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/level%d.json" % Game.level_file(ep - 1)))
 	var nd: int = L2.get("drawings", []).size() if L2 else 0
 	for i in nd:
 		var tx = Save.getv("gallery", "cartao_%d_%d" % [ep - 1, i], null)
@@ -2689,8 +2704,9 @@ func show_gallery(ep: int = 1) -> void:
 	cl.alignment = BoxContainer.ALIGNMENT_CENTER
 	cl.add_theme_constant_override("separation", 10)
 	cl.add_child(_label("PISTAS DO LADRÃO", 13, Color("#b8a888")))
-	var c0: int = 1
-	for i in range(c0, c0 + 6):
+	var cids: Array = L2.get("clueIds", [1, 2, 3]) if L2 else [1, 2, 3]
+	for i0 in cids:
+		var i: int = int(i0)
 		if Save.getv("gallery", "c%d" % i, false):
 			var ic := _atlas_icon("clb_%d" % i, 50)
 			ic.tooltip_text = GameData.CLUE_INFO[i][0]
@@ -2782,6 +2798,8 @@ func _on_results() -> void:
 	var rows := ["⏱ Tempo  %d:%02d" % [secs / 60, secs % 60], "✈ Milhas  %d/%d" % [pen, pt], "Cartões dourados  %d/%d" % [dr, game.DRWS.size()], "Pistas  %d/%d" % [nc, ntot]]
 	if game.SPECS.size() > 0:
 		rows.append("Milhas especiais  %d/%d" % [ns, game.SPECS.size()])
+	if game.SNACKS.size() > 0:
+		rows.append("%s  %d/%d" % [game.L.get("snackName", "Petiscos"), game.SNACKS.filter(func(q): return q.got).size(), game.SNACKS.size()])
 	if game.L.has("gold"):
 		rows.append(gold_txt)
 	if game.X.SECRETS.size() > 0:
@@ -2847,11 +2865,11 @@ func _on_results() -> void:
 		# a próxima fase fica liberada e começa logo depois
 		Save.setv("prog", "eps", max(lvl + 2, int(Save.getv("prog", "eps", 1))))
 		cont = func(): start_level(false, lvl + 1)
-		vb.add_child(_button("PRÓXIMA FASE", cont))
+		vb.add_child(_button("VOAR PARA O PRÓXIMO DESTINO  ✈" if lvl + 1 < EPISODES.size() else "PRÓXIMA FASE", cont))
 	else:
 		# última fase liberada: jogar de novo ou ir para o menu (antes o aviso largo empurrava o botão
 		# para fora da tela e não dava para sair do placar)
-		vb.add_child(_label("Próxima fase: Guarulhos 1-2 Bagagens — em breve.", 13, Color(.75, .7, .6), Spr.font_i, 520))
+		vb.add_child(_label("Você chegou ao último destino liberado. Novos aeroportos estão a caminho!", 13, Color(.75, .7, .6), Spr.font_i, 520))
 		var brow := HBoxContainer.new()
 		brow.alignment = BoxContainer.ALIGNMENT_CENTER
 		brow.add_theme_constant_override("separation", 16)

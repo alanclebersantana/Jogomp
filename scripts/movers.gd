@@ -186,7 +186,11 @@ func draw(T: int) -> void:
 					continue
 				_lift(o, T)
 			"path":
-				if g.L.get("theme", "") == "aeroporto":
+				if g.L.get("theme", "") == "aeroporto" and o.get("skin", "") == "bondinho":
+					_bond_cable(o)
+					for s in o.plats:
+						_bondinho(s, T)
+				elif g.L.get("theme", "") == "aeroporto":
 					_cargo_rail(o)
 					for s in o.plats:
 						_cargo_plat(s, T)
@@ -208,6 +212,50 @@ func _cargo_rail(o: Dictionary) -> void:
 	Spr.seg(a.x, a.y, b.x, b.y, Color(0, 0, 0, .35), 12)
 	Spr.seg(a.x, a.y, b.x, b.y, steel, 8)
 	Spr.seg(a.x, a.y - 2, b.x, b.y - 2, Color("#8a96a2"), 2)
+
+## Galeão: bondinho (como o do Pão de Açúcar) correndo num cabo de aço preso no teto, de um lado do
+## átrio ao outro. O piso da cabine é onde o Milis fica; as paredes são de vidro (dá para ver ele dentro)
+func _bond_cable(o: Dictionary) -> void:
+	var w: float = float(o.w)
+	var a := Vector2(float(o.x0) + w / 2, float(o.y0) - 150)
+	var b := Vector2(float(o.x1) + w / 2, float(o.y1) - 150)
+	# torres nas pontas e o cabo levemente caído no meio
+	for q in [a, b]:
+		Spr.rect(q.x - 6, q.y - 40, 12, 46, Color("#4a5560"))
+		Spr.circle(q.x, q.y, 9, Color("#2c333a"))
+		Spr.circle(q.x, q.y, 4, Color("#c2ccd6"))
+	var n := 16
+	var prev := a
+	for i in range(1, n + 1):
+		var u: float = float(i) / n
+		var p: Vector2 = a.lerp(b, u) + Vector2(0, sin(u * PI) * 14.0)
+		Spr.seg(prev.x, prev.y, p.x, p.y, Color(0, 0, 0, .35), 5)
+		Spr.seg(prev.x, prev.y, p.x, p.y, Color("#7f8b97"), 2.5)
+		prev = p
+
+func _bondinho(s: Dictionary, T: int) -> void:
+	var x: float = s.x
+	var y: float = s.y
+	var w: float = s.w
+	var cx: float = x + w / 2
+	var top: float = y - 128
+	# braço e roldana até o cabo
+	Spr.rect(cx - 3, top - 24, 6, 26, Color("#3a434c"))
+	Spr.circle(cx, top - 26, 7, Color("#2c333a"))
+	Spr.circle(cx, top - 26, 3, Color("#c2ccd6"))
+	# cabine: teto vermelho, colunas, vidro azulado translúcido, faixa e piso
+	Spr.rr(x - 6, top - 6, w + 12, 16, 6, Color("#a3261f"))
+	Spr.rect(x - 4, top + 8, w + 8, 4, Color("#6e1712"))
+	Spr.rect(x + 2, top + 10, w - 4, 112, Color(.62, .82, .95, .22))
+	for k in [x, x + w - 6, x + w / 2 - 3]:
+		Spr.rect(k, top + 10, 6, 112, Color("#c83a2c"))
+	Spr.rect(x, top + 62, w, 5, Color("#f2f2f2", .8))
+	Spr.seg(x + 10, top + 18, x + 26, top + 48, Color(1, 1, 1, .35), 3)
+	# piso (onde se pisa)
+	Spr.rr(x - 4, y - 2, w + 8, 18, 4, Color("#1c2228"))
+	Spr.rr(x - 2, y, w + 4, 14, 3, Color("#c83a2c"))
+	Spr.rect(x, y + 1, w, 3, Color("#ff7a6a"))
+	Spr.circle(cx, y + 8, 2.4, Color(1, .9, .4, .6 + .4 * sin(T * .2)))
 
 func _cargo_plat(s: Dictionary, T: int) -> void:
 	var x: float = s.x

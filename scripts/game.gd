@@ -58,6 +58,7 @@ var ITEMS: Array = []
 var LOCKS: Array = []
 var CLUES: Array = []
 var SPECS: Array = []
+var SNACKS: Array = []   # petisco típico do aeroporto (Galeão: biscoito de polvilho)
 var LILY: Array = []
 var MUD: Array = []
 var SWAMP: Array = []
@@ -179,7 +180,8 @@ func load_level(i: int) -> void:
 	level_idx = i
 	max_x = 0.0
 	cur_chk = -1
-	L = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/level%d.json" % (i + 1)))
+	L = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/level%d.json" % Game.level_file(i)))
+	Spr.set_bgset(str(L.get("bgset", "")))
 	PERIODS = L.get("periods", PERIODS1)
 	_support_physics()
 	SOL = []
@@ -397,6 +399,9 @@ func _p1_load() -> void:
 		var o: Dictionary = c.duplicate()
 		o.got = CLUEGOT.has(int(c.id))
 		CLUES.append(o)
+	SNACKS = []
+	for sn in L.get("snacks", []):
+		SNACKS.append({"x": float(sn[0]), "y": float(sn[1]), "got": false})
 	SPECS = []
 	for s in L.get("specials", []):
 		var o: Dictionary = s.duplicate()
@@ -991,6 +996,11 @@ func use_available_base() -> bool:
 	return X.near_use() or X.beam_useful()
 
 ## nome do período do dia em que o Tomé está (a fase é uma só, dividida pelas fogueiras grandes)
+## episódio -> arquivo da fase (1-1 Guarulhos, 2-1 Galeão; as outras de Guarulhos ainda são rascunho)
+const LEVEL_FILES := [1, 5]
+static func level_file(i: int) -> int:
+	return LEVEL_FILES[i] if i >= 0 and i < LEVEL_FILES.size() else i + 1
+
 const PERIODS1 := ["Saguão", "Check-in", "Segurança", "Mezanino", "Portão", "Pista"]
 var PERIODS: Array = PERIODS1
 ## pistas da fase (Episódio 1: 1..6; Episódio 2: 7..12)
@@ -3238,6 +3248,14 @@ func _p1_post(pcx: float, _pcy: float) -> void:
 						[Color("#ffffff"), Color("#f5e3a0"), Color("#9fd0ff"), Color("#ffb3a8")][i % 4], {"gy": c.y + 60, "size": randf_range(3.5, 5.5)})
 			clue_opened.emit(int(c.id))
 			Polish.celebrate(player.x + player.w / 2, player.y + 10, false)
+	for sn in SNACKS:
+		if not sn.got and abs(sn.x - pcx) < 80 and hit(player, R(sn.x - 18, sn.y - 24, 36, 44)):
+			sn.got = true
+			Audio.play("special", -4)
+			Audio.vib(30)
+			burst(sn.x, sn.y, 16, Color("#ffd27a"))
+			var ng: int = SNACKS.filter(func(q): return q.got).size()
+			flash("%s! (%d/%d)" % [L.get("snackName", "Petisco"), ng, SNACKS.size()], 90)
 	for s in SPECS:
 		if not s.got and abs(s.x - pcx) < 80 and hit(player, R(s.x - 20, s.y - 22, 40, 44)):
 			s.got = true

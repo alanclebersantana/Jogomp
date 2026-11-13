@@ -798,6 +798,22 @@ var warmed := false
 ## tira é um passo; o quadro sai da distância andada, então o pé plantado não patina no chão
 var _walks = null
 
+## cenários de outro aeroporto: a fase pede um conjunto ("gig" = Galeão) e as mesmas chaves de trecho
+## (vila = dia, tarde = pôr do sol, noite) passam a usar assets/bg/<conjunto>_<chave>.jpg
+var _bgset := ""
+const BGSET_KEYS := {"vila": "dia", "tarde": "tarde", "noite": "noite"}
+func set_bgset(sname: String) -> void:
+	if sname == _bgset:
+		return
+	_bgset = sname
+	for k in BGSET_KEYS:
+		var pth: String = "res://assets/bg/%s.jpg" % k
+		if sname != "":
+			var alt: String = "res://assets/bg/%s_%s.jpg" % [sname, BGSET_KEYS[k]]
+			if ResourceLoader.exists(alt):
+				pth = alt
+		tex["bg_" + k] = load(pth)
+
 func walk_meta(name: String) -> Dictionary:
 	walk_frame(name, 0.0, 1.0)
 	return _walks.get(name, {})

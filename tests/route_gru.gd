@@ -607,6 +607,81 @@ func fase_chefe() -> void:
 
 ## nenhum capanga patrulha a menos de 300 px de uma passagem de rolar/se arrastar (abaixado o Milis
 ## não ataca nem se defende)
+func bond(n: int) -> int:
+	var k := 0
+	for i in g.MV.MV.size():
+		if str(g.MV.MV[i].get("skin", "")) == "bondinho":
+			if k == n:
+				return i
+			k += 1
+	return -1
+
+func lift_idx() -> int:
+	for i in g.MV.MV.size():
+		if g.MV.MV[i].k == "lift":
+			return i
+	return -1
+
+func fase_2_1() -> void:
+	walk_to(760)
+	S("caixa de milhas", jump_to(900))
+	walk_to(1900)
+	S("torre 1", jump_to(2000))
+	S("torre 2 (pulo duplo)", jump_to(2170, true))
+	S("torre 3 (pulo duplo)", jump_to(2000, true))
+	S("cartão 1", cartoes() == 1)
+	S("desce", jump_to(2300))
+	walk_to(3800)
+	S("quiosque 1", jump_to(3900))
+	S("toldo (pulo duplo)", jump_to(3985, true))
+	S("pista 7", n_clues() == 1)
+	S("quiosque 2", jump_to(4130))
+	S("desce", jump_to(4300))
+	walk_to(4880)
+	S("tapume (rolando)", crawl(5140))
+	walk_to(5150)
+	S("vãozinho", jump_to(5450))
+	S("totem antes do átrio", walk_to(6020))
+	var li := lift_idx()
+	walk_to(6220)
+	S("entra no elevador", g.MV.on_plat(g.MV.MV[li]))
+	use()
+	S("elevador subiu", until({}, func(): return float(g.MV.MV[li].pos) <= 0.001, 700))
+	S("mirante", walk_to(6440))
+	S("pista 8", n_clues() == 2)
+	walk_to(6220)
+	use()
+	S("elevador desceu", until({}, func(): return float(g.MV.MV[li].pos) >= .999, 700))
+	walk_to(6470)
+	var b1 := bond(0)
+	var b2 := bond(1)
+	S("bondinho 1", pula_na_tabua(b1, 6585))
+	S("bondinho 1 até o meio", na_tabua_ate(b1, 7045))
+	S("torre do cabo (pulo duplo)", jump_to(7060, true))
+	S("cartão 2", cartoes() == 2)
+	var s2: Dictionary = g.MV.MV[b2].plats[0]
+	until({}, func(): return s2.x + s2.w / 2 > 7600, 400)
+	S("espera o bondinho 2", until({}, func(): return s2.x + s2.w / 2 < 7175, 400))
+	S("pula no bondinho 2", jump_to(7150))
+	S("está no bondinho 2", g.MV.on_plat(g.MV.MV[b2]))
+	S("bondinho 2 até o fim", na_tabua_ate(b2, 7625))
+	S("desce do bondinho", jump_to(7780))
+	S("totem depois do átrio", walk_to(7830))
+	walk_to(8000)
+	S("malas da arena", jump_to(8220))
+	S("até a escada rolante", walk_to(10150))
+	S("sobe na escada rolante", jump_to(10240))
+	S("escada rolante leva ao mezanino", until({}, func(): return P.onGround and px() > 10670, 900))
+	walk_to(10730)
+	S("prateleira alta (pulo duplo)", jump_to(10805, true))
+	S("cartão 3", cartoes() == 3)
+	walk_to(10880)
+	S("desce", jump_to(11050))
+	S("pista 9", walk_to(11730) and n_clues() == 3)
+	walk_to(11992)
+	var r = until({}, func(): return not g.running, 300)
+	S("saída", r is String and r == "state")
+
 func capangas_longe_dos_vaos():
 	var ruins := []
 	for e in g.EN:
@@ -631,9 +706,9 @@ func _initialize() -> void:
 		if a.is_valid_int():
 			fases.append(int(a))
 	if fases.is_empty():
-		fases = [1, 2, 3, 4]
+		fases = [1, 5]
 	for f in fases:
-		carregar(f - 1, com)
+		carregar(1 if f == 5 else f - 1, com)
 		log_lines.append("== " + nome_fase)
 		S("capangas longe das passagens baixas", capangas_longe_dos_vaos())
 		match f:
@@ -645,6 +720,8 @@ func _initialize() -> void:
 				fase_1_3()
 			4:
 				fase_chefe()
+			5:
+				fase_2_1()
 		S("fim: milhas %d/%d pistas %d cartões %d/%d segredos %d" % [g.STATS.pen, g.STATS.penTotal, n_clues(), cartoes(), g.DRWS.size(), g.X.found.size()], true)
 	for l in log_lines:
 		print(l)

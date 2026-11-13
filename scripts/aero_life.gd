@@ -27,6 +27,7 @@ static func back(g, T: int) -> void:
 	if not aero(g):
 		return
 	_reset(g)
+	_snacks(g, T)
 	_grilles(g, T)
 	_neon_floor(g, T)
 	_floor_shine(g, T)
@@ -247,6 +248,24 @@ static func _icons(g, T: int) -> void:
 		Spr.rr(-w / 2 - 2, -22, w + 4, 44, 22, Color(.1, .16, .28, .9 * al))
 		Spr.rr(-w / 2, -20, w, 40, 20, Color(1, 1, 1, .94 * al))
 		Spr.text(gtxt, 0, 8, 22, Color(.12, .2, .36, al), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 0)
+		Spr.restore()
+
+## petisco típico (Galeão: saquinho de biscoito de polvilho, branco e laranja, com as rodelinhas)
+static func _snacks(g, T: int) -> void:
+	for sn in g.SNACKS:
+		if sn.got or sn.x < g.cam - 60 or sn.x > g.cam + g.W + 60:
+			continue
+		var y: float = sn.y + sin(T * .07 + sn.x) * 3.0
+		Spr.glow(sn.x, y, 26, Color(1, .85, .45, .3 + .1 * sin(T * .15)))
+		Spr.save()
+		Spr.translate(sn.x, y)
+		Spr.rotate(sin(T * .05 + sn.x) * .12)
+		Spr.rr(-13, -18, 26, 34, 4, Color("#2a1d14"))
+		Spr.rr(-11, -16, 22, 30, 3, Color("#fbf6ec"))
+		Spr.rect(-11, -16, 22, 6, Color("#f08a2a"))
+		Spr.rect(-11, 8, 22, 6, Color("#f08a2a"))
+		for k in 3:
+			Spr.ring(-5 + k * 5, -1 + (k % 2) * 4, 3.2, Color("#d9a85a"), 2)
 		Spr.restore()
 
 ## grade de ventilação torta na parede: pista de que tem segredo lá em cima (brilha de vez em quando)

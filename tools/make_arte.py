@@ -311,7 +311,69 @@ def objetos():
     for cid, q in enumerate([i[6], i[7], i[8], i[9], i[10], i[11]], start=1):
         troca("cl_%d" % cid, q, 60, 60, 30, 30)
         troca("clb_%d" % cid, q, 219, 220, 109, 110)
+    # pistas do Galeão (7, 8, 9): desenhadas aqui no mesmo traço (tinta escura, cores chapadas)
+    for cid, big in pistas_gig():
+        NOVO["clb_%d" % cid] = (big, 109.0, 110.0)
+        NOVO["cl_%d" % cid] = (big.resize((60, 60), Image.LANCZOS), 30.0, 30.0)
     return p, i
+
+
+def pistas_gig():
+    from PIL import ImageDraw
+    S = 4
+    ink = (30, 22, 14, 255)
+    out = []
+    def novo():
+        im = Image.new("RGBA", (219 * S, 220 * S), (0, 0, 0, 0))
+        return im, ImageDraw.Draw(im)
+    def fecha(im, ang):
+        im = im.rotate(ang, resample=Image.BICUBIC)
+        return im.resize((219, 220), Image.LANCZOS)
+    # 7 · bilhete do bondinho (vermelho, com o bondinho no cabo e um furo)
+    im, d = novo()
+    d.rounded_rectangle((70, 230, 810, 650), 40, fill=(214, 52, 44, 255), outline=ink, width=22)
+    d.rounded_rectangle((110, 270, 770, 610), 24, outline=(255, 226, 170, 255), width=10)
+    d.line((140, 340, 740, 300), fill=ink, width=12)
+    d.rounded_rectangle((360, 330, 520, 450), 18, fill=(250, 240, 220, 255), outline=ink, width=12)
+    d.line((440, 318, 440, 334), fill=ink, width=12)
+    for k in range(3):
+        d.rectangle((380 + k * 46, 350, 412 + k * 46, 392), fill=(120, 190, 230, 255), outline=ink, width=6)
+    d.polygon([(140, 600), (250, 470), (330, 600)], fill=(80, 70, 60, 255), outline=ink)
+    d.polygon([(560, 600), (680, 430), (770, 600)], fill=(80, 70, 60, 255), outline=ink)
+    d.ellipse((690, 520, 760, 590), fill=(0, 0, 0, 0), outline=ink, width=12)
+    d.ellipse((540, 450, 680, 590), outline=(255, 210, 60, 255), width=14)
+    d.line((590, 480, 590, 560), fill=(255, 210, 60, 255), width=14)
+    d.arc((560, 478, 640, 522), -90, 90, fill=(255, 210, 60, 255), width=14)
+    d.arc((560, 516, 646, 562), -90, 90, fill=(255, 210, 60, 255), width=14)
+    out.append((7, fecha(im, 8)))
+    # 8 · guardanapo do quiosque com um mapa rabiscado (a baía, um X e setas)
+    im, d = novo()
+    d.polygon([(110, 150), (790, 120), (820, 760), (90, 790)], fill=(250, 248, 238, 255), outline=ink)
+    d.line([(110, 150), (790, 120), (820, 760), (90, 790), (110, 150)], fill=ink, width=20)
+    for k in range(0, 700, 70):
+        d.line((130 + k, 160, 120 + k, 180), fill=(200, 196, 180, 255), width=6)
+    pts = [(160, 520), (260, 430), (380, 470), (470, 380), (600, 420), (700, 330), (760, 400)]
+    d.line(pts, fill=(40, 90, 200, 255), width=16, joint="curve")
+    d.polygon([(560, 420), (610, 300), (660, 420)], fill=(150, 130, 100, 255), outline=ink)
+    d.line((300, 640, 400, 560), fill=(214, 40, 40, 255), width=26)
+    d.line((300, 560, 400, 640), fill=(214, 40, 40, 255), width=26)
+    d.line((420, 600, 620, 620), fill=ink, width=10)
+    d.polygon([(620, 600), (660, 622), (618, 645)], fill=ink)
+    d.ellipse((620, 640, 760, 720), fill=(200, 160, 80, 120))
+    out.append((8, fecha(im, -6)))
+    # 9 · envelope lacrado com o selo de cera dourado do B
+    im, d = novo()
+    d.rectangle((90, 230, 790, 680), fill=(236, 222, 190, 255), outline=ink, width=22)
+    d.line((90, 230, 440, 500, 790, 230), fill=ink, width=16)
+    d.line((90, 680, 360, 440), fill=(180, 160, 120, 255), width=10)
+    d.line((790, 680, 520, 440), fill=(180, 160, 120, 255), width=10)
+    d.ellipse((330, 400, 550, 620), fill=(212, 160, 30, 255), outline=ink, width=18)
+    d.ellipse((370, 440, 510, 580), outline=(255, 226, 120, 255), width=10)
+    d.line((420, 460, 420, 560), fill=ink, width=18)
+    d.arc((380, 455, 470, 515), -90, 90, fill=ink, width=18)
+    d.arc((380, 505, 480, 565), -90, 90, fill=ink, width=18)
+    out.append((9, fecha(im, 5)))
+    return out
 
 
 def luvas_icone():

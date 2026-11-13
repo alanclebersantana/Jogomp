@@ -20,6 +20,9 @@ const CLUE_INFO := {
 	4: ["Etiqueta de mala adulterada", "Uma etiqueta de bagagem com o código trocado. As milhas estão sendo despachadas escondidas nas malas!"],
 	5: ["Planilha do Barão", "Uma planilha com milhares de milhas LATAM desviadas, anotadas com uma letra cheia de floreios."],
 	6: ["Plano de voo", "\"Motoboy leva o malote até a pista. Eu sigo para Maringá no voo das 23h59.\" — Barão."],
+	7: ["Bilhete do bondinho", "Um bilhete do bondinho do Pão de Açúcar, com um B dourado carimbado no verso. Alguém da quadrilha passou por aqui."],
+	8: ["Guardanapo rabiscado", "Um guardanapo do quiosque com a Baía de Guanabara desenhada e um X vermelho no terminal 2: \"ponto de troca das milhas\"."],
+	9: ["Envelope lacrado", "Um envelope com selo de cera dourado. Dentro: \"As milhas do Rio seguem para o próximo destino. Não falhem de novo.\" — B."],
 }
 const PEN_LIST := ["vermelho", "laranja", "amarelo", "verde", "azul", "roxo"]
 const PEN_COL := {

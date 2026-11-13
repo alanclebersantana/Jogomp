@@ -140,7 +140,10 @@ func _draw_planes(n: Node2D) -> void:
 ## riscos e gotas escorrem no vidro; de vez em quando um relâmpago clareia o saguão
 func _glass_rain(w: float, H: float, day: float) -> void:
 	var c: float = game.cam + game.W * .5
-	var k: float = clamp(min(c - 4300.0, 6700.0 - c) / 400.0, 0.0, 1.0) * day
+	var rr: Array = game.L.get("rain", [4300, 6700])
+	if rr.size() < 2:
+		return
+	var k: float = clamp(min(c - float(rr[0]), float(rr[1]) - c) / 400.0, 0.0, 1.0) * day
 	if k <= .01:
 		return
 	var T: int = game.T
@@ -354,7 +357,7 @@ func _night_lights(al: float, oy: float, bh: float, w: float) -> void:
 	var sc: float = bh / tx.get_height()
 	var tw: float = tx.get_width() * sc
 	var x: float = fposmod(-game.rcam * PX, tw * 2) - tw * 2
-	var into: float = clamp((game.cam - 10500.0) / 900.0, 0.0, 1.0)
+	var into: float = clamp((game.cam - float(game.L.get("nightAt", 10500))) / 900.0, 0.0, 1.0)
 	var T: int = game.T
 	while x < w:
 		for i in 46:
