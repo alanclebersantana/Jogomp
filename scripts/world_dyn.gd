@@ -958,7 +958,7 @@ func _enemy_fx_over(g: Game, e: Dictionary, eo: Vector2, hop_u: float) -> void:
 	if segk:
 		hy = e.y + eo.y - 172   # o grandalhão: aviso e estrelinhas em cima da cabeça
 	# primeiro encontro com cada tipo de inimigo: dica curta dizendo que ele é perigoso
-	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k):
+	if e.get("seen") and not g.en_seen.has(e.k) and EN_NAME.has(e.k) and g.AC == null:
 		g.en_seen[e.k] = true
 		if segk:
 			pass   # o falso segurança é explicado uma vez só, quando as grades da arena fecham
@@ -1147,6 +1147,8 @@ func _enemy(e: Dictionary) -> void:
 					Spr.frame(Spr.tex.en_frog2, ff, 130, 70, 65, 68, 0, 3, .82)
 			else:
 				Spr.A("en_frog_jump" if e.leap else "en_frog", 0, 3, .9 if e.leap else .82 + sin(T * .12) * .02)
+		"grunt":
+			Acao.grunt_draw(e, T)
 		"porter":
 			# falso carregador (arte olhando para a direita): anda; no arremesso pega, ergue e joga a mala
 			var pt: Texture2D = Spr.opt("porter_walk")

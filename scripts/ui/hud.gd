@@ -375,6 +375,8 @@ func _draw_stats(ci: Control) -> void:
 	var W := size.x
 	var p: Dictionary = game.player
 	Spr.begin(ci)
+	if game.AC:
+		game.AC.draw_hud(W)
 	var o := 40.0   # 5 corações: o resto do painel anda para a direita
 	_plaque(8, 8, 290 + o, 42)
 	# corações: batem de leve; com pouca vida o último pulsa forte.

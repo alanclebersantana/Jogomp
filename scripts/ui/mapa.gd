@@ -7,7 +7,7 @@ signal pick(i: int)
 
 ## [código, nome, longitude, latitude, episódio (-1 = em breve)]
 const DEST := [["GRU", "GUARULHOS", -46.47, -23.43, 0], ["GIG", "GALEÃO", -43.25, -22.81, 1],
-	["???", "PRÓXIMO DESTINO", -51.9, -23.4, -1]]
+	["???", "PRÓXIMO DESTINO", -51.9, -23.4, -1], ["⚡ AÇÃO", "GALEÃO · TESTE", -41.2, -24.3, 2]]
 const LON0 := -54.0
 const LON1 := -38.5
 const LAT0 := -18.5
@@ -40,7 +40,7 @@ func _gui_input(ev: InputEvent) -> void:
 		return
 	for i in DEST.size():
 		var e: int = int(DEST[i][4])
-		if e < 0 or e >= eps:
+		if e < 0 or (e >= eps and e != 2):
 			continue
 		if ev.position.distance_to(_p(DEST[i][2], DEST[i][3])) < 46:
 			sel = i
@@ -118,7 +118,7 @@ func _draw() -> void:
 		var d: Array = DEST[i]
 		var p: Vector2 = _p(d[2], d[3])
 		var e: int = int(d[4])
-		var aberto: bool = e >= 0 and e < eps
+		var aberto: bool = e >= 0 and (e < eps or e == 2)
 		var pul: float = 1.0 + (.08 * sin(t * .12) if aberto else 0.0)
 		var col: Color = Color("#e0463a") if aberto else (Color("#7d7468") if e >= 0 else Color("#4d4a52"))
 		draw_circle(p + Vector2(2, 3), 5, Color(0, 0, 0, .3))
@@ -142,6 +142,8 @@ func _draw() -> void:
 			var b2 := Save.best(e)
 			var st: int = int(b2.get("stars", 0)) if not b2.is_empty() else 0
 			var s2: String = "★".repeat(st) + "☆".repeat(3 - st)
+			if e == 2:
+				s2 = ("nota " + str(b2.get("rank", "—"))) if b2.has("rank") else "novo!"
 			var sw: float = f.get_string_size(s2, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 			draw_rect(Rect2(p + Vector2(-sw / 2 - 5, 21), Vector2(sw + 10, 18)), Color("#2a1d14", .8))
 			draw_string(f, p + Vector2(-sw / 2, 35), s2, HORIZONTAL_ALIGNMENT_LEFT, -1, 15, Color("#ffd76a"))

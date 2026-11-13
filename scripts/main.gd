@@ -387,13 +387,13 @@ func _process(_d: float) -> void:
 			# a Isis não tem picareta (e o botão some junto com os outros na pausa e nas cenas)
 			tb.visible = top_buttons.visible and not (game.player and game.player.get("isis"))
 		elif tb.get_meta("k") in ["K", "F"]:
-			tb.visible = top_buttons.visible and _fight_btns()
+			tb.visible = top_buttons.visible and _fight_btns() and not (_acao() and tb.get_meta("k") == "K")
 	_touch_squash(_d)
 	if hint_btn:
 		hint_btn.visible = top_buttons.visible and hud.can_replay()
 		hint_btn.position = Vector2(352, 8)
 	if bag_btn:
-		bag_btn.visible = top_buttons.visible
+		bag_btn.visible = top_buttons.visible and not _acao()
 	if dog_btn and game.X:
 		dog_btn.visible = top_buttons.visible and game.X.dog_free()
 		dog_btn.texture_normal = tex_tome if game.M.ctrl else tex_dog
@@ -484,7 +484,7 @@ func _process(_d: float) -> void:
 			top_buttons.visible = not in_cine
 			stick.visible = not in_cine
 			for b in touch:
-				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis")) and (_fight_btns() or not b.get_meta("k") in ["K", "F"])
+				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis")) and (_fight_btns() or not b.get_meta("k") in ["K", "F"]) and not (_acao() and b.get_meta("k") == "K")
 			if in_cine:
 				stick._release()
 	# desenho liso entre passos: chefes, Pipoca, plataformas... (volta ao normal no frame_pre_draw)
@@ -1046,6 +1046,11 @@ func apply_controls() -> void:
 	_layout()
 
 ## botões de chute e defesa: só nas fases do aeroporto
+## fase de teste do modo ação: três botões (pular, golpear, dash), sem chute nem mochila
+const ACAO_LVL := 2
+func _acao() -> bool:
+	return game != null and game.L != null and bool(game.L.get("action", false))
+
 func _fight_btns() -> bool:
 	return game != null and game.L != null and game.L.get("theme", "") == "aeroporto"
 
@@ -1355,10 +1360,9 @@ func show_title() -> void:
 	var run := Save.load_run()
 	if not run.is_empty():
 		vb.add_child(_button("CONTINUAR", func(): start_level(true)))
-	if eps >= 2:
-		vb.add_child(_button("MAPA DE DESTINOS", _choose_episode))
-	else:
+	if eps < 2:
 		vb.add_child(_button("NOVO JOGO" if not run.is_empty() else "COMEÇAR", func(): _confirm_wipe(func(): start_level(false), show_title)))
+	vb.add_child(_button("MAPA DE DESTINOS", _choose_episode))
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 10)
@@ -1447,6 +1451,10 @@ func _choose_episode() -> void:
 		bt.tooltip_text = EPISODES[i][1]
 		row.add_child(bt)
 	vb.add_child(row)
+	# fase de teste do modo ação: sempre liberada
+	var ba := Save.best(ACAO_LVL)
+	var bta := _button("⚡ GALEÃO · MODO AÇÃO (TESTE)" + ("   nota " + str(ba.get("rank", "")) if ba.has("rank") else ""), func(): go.call(ACAO_LVL))
+	vb.add_child(bta)
 	var back := func():
 		panel.queue_free()
 		panel = null
@@ -1766,6 +1774,8 @@ func start_level(cont: bool, lvl: int = 0) -> void:
 		game.load_level(lvl)
 		Save.run_secs = 0.0
 	_layout()   # botões de luta (chute e defesa) aparecem no aeroporto
+	# modo ação: sempre no ritmo mais rápido (60 passos por segundo); as outras fases, o das opções
+	Engine.physics_ticks_per_second = 60 if _acao() else int(Save.getv("opt", "tps", 44))
 	# gráficos sempre no máximo (a opção "Leves" e a redução automática saíram)
 	game.low_fx = false
 	hud.reset_run()
@@ -2734,10 +2744,66 @@ func show_gallery(ep: int = 1) -> void:
 	panel.set_meta("back", back)
 
 # ---------- placar ----------
+## placar do modo ação: a nota (S, A, B, C) e os três critérios
+func _on_results_acao() -> void:
+	var ac: Acao = game.AC
+	var rk: Array = ac.rank()
+	var lim: Dictionary = game.L.get("rank", {})
+	var oks: Array = rk[1]
+	var n := 0
+	for o in oks:
+		if o:
+			n += 1
+	var pen: int = game.STATS.pen
+	var old: Dictionary = Save.best(game.level_idx)
+	if old.is_empty() or n >= int(old.get("stars", 0)):
+		Save.set_best(game.level_idx, {"stars": n, "pen": pen, "clues": 0, "specs": 0, "rank": rk[0]})
+	Save.setv("shop", "wallet", int(Save.getv("shop", "wallet", 0)) + pen)
+	Save.clear_run()
+	var vb := _overlay(.88)
+	vb.add_theme_constant_override("separation", 6)
+	vb.add_child(_label(game.L.get("endTitle", "FIM DA FASE"), 16, Color("#cdbfa6"), Spr.font_title))
+	var cols: Dictionary = {"S": Color("#ffd76a"), "A": Color("#7dffa0"), "B": Color("#8ecbff"), "C": Color("#cdbfa6")}
+	var big := _label("NOTA  " + str(rk[0]), 84, cols[rk[0]], Spr.font_title)
+	vb.add_child(big)
+	var hb := HBoxContainer.new()
+	hb.alignment = BoxContainer.ALIGNMENT_CENTER
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 4)
+	col.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var tm: int = int(rk[2][2])
+	var tl: int = int(lim.get("tempo", 240))
+	var rows: Array = [
+		[oks[0], "Dano levado  %d   (meta: até %d)" % [rk[2][0], int(lim.get("dano", 2))]],
+		[oks[1], "Maior combo  %d   (meta: %d)" % [rk[2][1], int(lim.get("combo", 20))]],
+		[oks[2], "Tempo  %d:%02d   (meta: %d:%02d)" % [tm / 60, tm % 60, tl / 60, tl % 60]]]
+	for r in rows:
+		col.add_child(_label(("✓  " if r[0] else "✗  ") + str(r[1]), 17, Color("#7dffa0") if r[0] else Color("#ff9a8a"), Spr.font_b))
+	col.add_child(_label("Capangas derrubados  %d   ·   Esquivas perfeitas  %d   ·   ✈ Milhas  %d" % [ac.kos, ac.perfect_n, pen], 14, Color("#e8dcc0"), Spr.font_i))
+	hb.add_child(col)
+	vb.add_child(hb)
+	vb.add_child(_label("Nota S: os três critérios. Fase de teste do modo ação — conte o que achou!", 13, Color(.75, .7, .6), Spr.font_i, 560))
+	var lvl: int = game.level_idx
+	var again := func(): start_level(false, lvl)
+	var brow := HBoxContainer.new()
+	brow.alignment = BoxContainer.ALIGNMENT_CENTER
+	brow.add_theme_constant_override("separation", 16)
+	var b1 := _button("JOGAR DE NOVO", again)
+	b1.custom_minimum_size = Vector2(210, 44)
+	brow.add_child(b1)
+	var b2 := _button("MENU", show_title)
+	b2.custom_minimum_size = Vector2(150, 44)
+	brow.add_child(b2)
+	vb.add_child(brow)
+	panel.set_meta("ok", again)
+
 func _on_results() -> void:
 	state = S.RESULTS
 	_show_hud(false)
 	Audio.play("door")
+	if game.AC:
+		_on_results_acao()
+		return
 	var nc := game.CLUEGOT.size()
 	var ns := game.SPECGOT.size()
 	var pen: int = game.STATS.pen

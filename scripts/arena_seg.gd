@@ -48,7 +48,8 @@ func step() -> void:
 			a.wait = int(a.get("wait", 0)) - 1
 			if a.wait == 0:
 				Audio.play("door", -4, .8)
-				g.flash("Caminho livre!", 90)
+				if not a.get("acao"):
+					g.flash("Caminho livre!", 90)
 			if a.wait <= 0:
 				a.on = false
 				a.h = max(0.0, a.h - .04)
@@ -73,9 +74,9 @@ func step() -> void:
 			continue
 		a.t += 1
 		a.h = min(1.0, a.h + .06)
-		if a.t == 2:
+		if a.t == 2 and not a.get("acao"):
 			g.en_seen["boar"] = true   # (a explicação vem só daqui, uma vez)
-		if a.t == 30:
+		if a.t == 30 and not a.get("acao"):
 			if not Save.getv("dica", "seg_arena", false):
 				Save.setv("dica", "seg_arena", true)
 				g.flash("O falso segurança fechou a passagem! De frente ele defende com o escudo: bata por trás ou logo depois da investida.", 230)

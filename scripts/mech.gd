@@ -215,8 +215,19 @@ func _fight(p: Dictionary) -> void:
 		if g.T % 3 == 0:
 			g.PARTS.append({"x": p.x + p.w / 2 + p.face * 14, "y": p.y + p.h * .35, "vx": randf_range(-.4, .4), "vy": -.8, "life": 14, "col": Color(.6, .95, 1)})
 	var busy: bool = p.ladder or p.vine or p.get("bar") or p.swim or p.dyingT > 0
+	var ac = g.AC
+	if ac:
+		# modo ação, três botões: o botão de defesa é o DASH; o golpe no ar é a voadora e,
+		# segurando para baixo no chão, a rasteira
+		if g.pressed("F") and not busy:
+			ac.dash(p, self)
+		ac.dash_step(p)
+		if g.keys.get("Gp", false) and swing_t == 0 and kick_t == 0 and (not p.onGround or p.crouch or g.kd("S")):
+			g.keys["Gp"] = false
+			g.keys["Kp"] = true
+			p.crouch = false
 	# --- defesa / esquiva
-	if g.pressed("F") and not busy:
+	if not ac and g.pressed("F") and not busy:
 		var dir: int = 1 if g.kd("R") else (-1 if g.kd("L") else 0)
 		if dir != 0 and p.onGround and dodge_t == 0:
 			dodge_t = 14
@@ -236,7 +247,7 @@ func _fight(p: Dictionary) -> void:
 		# a física limita a velocidade de andar: a esquiva empurra o corpo direto (rápida e curta)
 		g.move_x(p.face * (6.5 if dodge_t > 4 else 2.0))
 		p.vx = p.face * 3.0
-	p.guard = g.kd("F") and dodge_t == 0 and swing_t == 0 and kick_t == 0 and not busy
+	p.guard = not ac and g.kd("F") and dodge_t == 0 and swing_t == 0 and kick_t == 0 and not busy
 	# --- golpe: combo de 3 (o 3º gira e arremessa)
 	if g.pressed("G"):
 		combo_q = true
@@ -333,6 +344,8 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 			book[i] = 1
 			var dir: float = 1.0 if e.x > p.x + p.w / 2 else -1.0
 			g.kill_enemy(e, "hit")
+			if g.AC and int(e.get("blockT", 0)) != 16:
+				g.AC.on_hit(e)
 			if int(e.get("blockT", 0)) == 16:
 				book.erase(i)   # defendeu com o escudo: o próximo golpe do combo ainda pode acertar
 			# empurrão com peso: o capanga é jogado para trás (no giro e no chute, bem mais longe)

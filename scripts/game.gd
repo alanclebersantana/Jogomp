@@ -90,6 +90,7 @@ var TC: ThiefChase
 var QB: Quebra
 var GD: Gadgets
 var ARN: ArenaSeg
+var AC: Acao   # modo ação (fase de teste): ondas, dash, combo e nota
 var VL: Village
 var RESTED := {}        # fogueiras grandes já descansadas
 var player: Dictionary = {}
@@ -344,6 +345,9 @@ func load_level(i: int) -> void:
 	GD.load_level()
 	ARN = ArenaSeg.new(self)
 	ARN.load_level()
+	AC = Acao.new(self) if L.get("action") else null
+	if AC:
+		AC.load_level()
 	VL = Village.new(self)
 	VL.load_level()
 	RESTED = {}
@@ -997,7 +1001,7 @@ func use_available_base() -> bool:
 
 ## nome do período do dia em que o Tomé está (a fase é uma só, dividida pelas fogueiras grandes)
 ## episódio -> arquivo da fase (1-1 Guarulhos, 2-1 Galeão; as outras de Guarulhos ainda são rascunho)
-const LEVEL_FILES := [1, 5]
+const LEVEL_FILES := [1, 5, 6]
 static func level_file(i: int) -> int:
 	return LEVEL_FILES[i] if i >= 0 and i < LEVEL_FILES.size() else i + 1
 
@@ -1900,7 +1904,7 @@ func step() -> void:
 				player.squash = .6
 				player.cutOk = false
 				player.airJumps = 1
-			elif not e.stun and not Capangas.down(e):
+			elif not e.stun and not Capangas.down(e) and not e.get("nocontact"):
 				hurt(1, e.x)
 	if ZN.zone != null:
 		player.x = clamp(player.x, ZN.zone.x0, ZN.zone.x1 - player.w)
@@ -1909,6 +1913,8 @@ func step() -> void:
 	# arena do falso segurança: grades dos dois lados até ele cair
 	if ARN:
 		ARN.step()
+	if AC:
+		AC.step()
 	# saída (porta da mina)
 	if not player.dog and hit(player, R(DOOR.x + 10, DOOR.y, DOOR.w - 20, DOOR.h)) and not DOOR.locked and (VIL == null or VIL.gone):
 		player.exitT = 40
@@ -2146,6 +2152,8 @@ func _npc_check() -> bool:
 	return false
 
 func _comic_check() -> void:
+	if AC:
+		return   # modo ação: nada para o jogo no meio da fase
 	var px: float = player.x + player.w / 2
 	for t in COMIC_TRIG:
 		if not t.done and px > t.x and px < t.x + 600:
@@ -3595,6 +3603,8 @@ func _fuel_step() -> void:
 #  INIMIGOS, DANO E MORTE
 # ======================================================================
 func ebox(e: Dictionary) -> Dictionary:
+	if e.k == "grunt":
+		return Acao.grunt_box(self, e)
 	if e.k == "plant":
 		if e.dead or e.stun > 0:
 			return R(-9999, -9999, 0, 0)
@@ -3773,6 +3783,10 @@ func _update_enemy_core(e: Dictionary) -> void:
 		return
 	if e.k == "boar" and SegGuard.is_seg(self, e):
 		SegGuard.update(self, e)
+		return
+	if e.k == "grunt":
+		if AC:
+			AC.grunt(e)
 		return
 	if Capangas.update(self, e):
 		return
@@ -4212,7 +4226,18 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 	if seg:
 		if how in ["stomp", "hit", "cart"] and SegGuard.on_hit(self, e, how if how != "cart" else "hit"):
 			return
+	# capanga que aguenta mais de uma pancada (modo ação): perde um ponto, pisca e é empurrado
+	if not seg and int(e.get("hp", 1)) > 1:
+		e.hp = int(e.hp) - 1
+		e.hitFx = 8
+		e.kb = (1.0 if e.x > player.x + player.w / 2 else -1.0) * 7.0
+		Polish.impact(e.x, e.y - 50)
+		Audio.play("stomp", -6, 1.2)
+		hit_stop = max(int(hit_stop), 3)
+		return
 	e.dead = 1
+	if AC:
+		AC.on_ko(e, how)
 	e.dk = "flat" if (how == "stomp" and not FLY.has(e.k)) else "flip"
 	e.ddy = 0.0
 	e.dvy = -6.0
@@ -4349,6 +4374,8 @@ func break_crate(c: Dictionary) -> void:
 			flash("Mala ★: +%d milhas." % n)
 
 func hurt(d: int, from_x: float) -> void:
+	if AC and player.dyingT == 0 and AC.try_perfect():
+		return
 	if player.iframe > 0 or player.dyingT > 0:
 		return
 	if TR and TR.trapped != null and not player.get("dog"):
@@ -4360,6 +4387,8 @@ func hurt(d: int, from_x: float) -> void:
 		M.on_block(from_x)
 		player.iframe = 20
 		return
+	if AC:
+		AC.on_hurt()
 	var kb = func():
 		player.iframe = 70
 		player.hitT = 30

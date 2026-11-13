@@ -1158,3 +1158,86 @@ L["snacks"] = [[560, 440], [1050, 330], [2170, 160], [3985, 200], [4700, 420], [
 for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))
 salvar(5)
+
+
+# ======================================================================
+#  GALEÃO · MODO AÇÃO (fase de teste): luta em grupo, dash, combo com nota e o passeio de bondinho
+# ======================================================================
+novo("Galeão · Modo Ação",
+     "FASE DE TESTE. Os capangas de capuz do Barão tomaram o Galeão! Três botões: PULAR, GOLPEAR e DASH. "
+     "Emende as pancadas para o combo multiplicar as milhas, atravesse os ataques com o dash e não leve dano: "
+     "no fim você ganha uma nota (S, A, B ou C).",
+     introSub="Modo Ação · teste", endTitle="GALEÃO · MODO AÇÃO", introImg="res://assets/bg/gig_tarde.jpg",
+     bgset="gig", bgMirror=1, nightAt=99999, rain=[], action=1, clueIds=[],
+     rank={"dano": 2, "combo": 20, "tempo": 210},
+     periods=["Desembarque", "Praça", "Bondinho", "Píer"])
+L["spawn"] = {"x": 160, "y": GY}
+G1 = {"k": "grunt"}
+GB = {"k": "grunt", "sc": 1.28, "hp": 3, "spd": 1.5}     # o grandão: aguenta 3 pancadas, bote mais longo
+def voa(cy=300):
+    return {"k": "fly", "cy": cy}
+
+# --- A · Desembarque: aquecimento e a primeira zona
+L["sections"].append({"x": 0, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 0})
+chao(-200, 3900)
+dica(0, 560, "GOLPE: toque várias vezes para o combo (o 3º gira). No ar vira voadora. DASH: atravessa qualquer ataque!")
+milhas(300, 620, 470, 40)
+inimigo("grunt", 760, [560, 1150])
+inimigo("grunt", 980, [560, 1150])
+for cx in [520, 2300, 3700]:
+    movel(cx, "coluna", 92)
+movel(1100, "carrinhos", 110)
+painel(300)
+painel(2200, 210, 170)
+obj(420, "papeis", 60)
+obj(2480, "lixeiras", 96)
+totem(1180)
+L["acZones"] = [
+    {"x0": 1300, "x1": 2060, "waves": [[G1, G1, G1], [G1, G1, G1, G1]]},
+    {"x0": 2880, "x1": 3680, "waves": [[G1, G1, {"k": "frog"}], [G1, G1, G1, GB], [voa(310), voa(280), G1, G1, G1]]},
+    {"x0": 5640, "x1": 6500, "waves": [[G1, G1, G1, G1], [GB, GB, voa(300), voa(270)],
+                                           [{"k": "boar", "x": 6070, "radio": 1}, G1, G1]]},
+]
+milhas(1400, 1960, 470, 56)
+# corredor: carregador arremessando, esteira a favor e dois capangas soltos
+L["sections"].append({"x": 2060, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 1})
+caixa(2140, item="heart", soft=True)
+L.setdefault("walks", []).append({"x0": 2200, "x1": 2640, "y": GY, "dir": 1, "spd": 2.0})
+milhas(2220, 2620, 470, 44)
+inimigo("porter", 2700, [2600, 2800])
+inimigo("grunt", 2500, [2150, 2820])
+arco(2300, 2560, 400, 60, 6)
+totem(2830)
+milhas(2960, 3600, 470, 64)
+totem(3740)
+caixa(3800, item="heart", soft=True)
+
+# --- B · O passeio de bondinho: a cabine grande atravessa o vão enquanto as malas voadoras atacam
+L["sections"].append({"x": 3800, "song": "tarde", "bg": "tarde", "gt": "vila", "per": 2})
+L["pits"].append([3900, 5420])
+L["movers"].append({"k": "path", "x0": 3920, "x1": 5060, "y0": 440, "y1": 440, "w": 340, "per": 1900, "skin": "bondinho"})
+L["acRide"] = {"mover": 0, "x0": 3900, "x1": 5420, "spawns": [
+    [.08, [{"k": "fly", "dx": 260, "cy": 300}, {"k": "fly", "dx": -220, "cy": 270}]],
+    [.30, [{"k": "crow", "dx": 300, "cy": 190}, {"k": "fly", "dx": 240, "cy": 310}, {"k": "fly", "dx": -260, "cy": 290}]],
+    [.52, [{"k": "fly", "dx": 280, "cy": 280}, {"k": "fly", "dx": 200, "cy": 320}, {"k": "crow", "dx": -280, "cy": 200}]],
+    [.74, [{"k": "crow", "dx": 300, "cy": 180}, {"k": "fly", "dx": 260, "cy": 300}, {"k": "fly", "dx": -240, "cy": 300}, {"k": "fly", "dx": 0, "cy": 250}]]]}
+icone(3760, 3900, 3990, 380, "↑")
+arco(3960, 5380, 330, 50, 22)
+
+# --- C · Píer à noite: a zona final com o segurança
+L["sections"].append({"x": 5420, "song": "noite", "bg": "noite", "gt": "vila", "night": .35, "per": 3})
+chao(5420, 7100)
+totem(5500)
+caixa(5560, item="heart", soft=True)
+neon(5700, "#ff4fb4")
+neon(6200, "#4fd8ff")
+neon(6700, "#ffd84a")
+painel(6000, 190)
+milhas(5720, 6440, 470, 60)
+milhas(6560, 6740, 470, 45)
+fim(6800)
+L["spanX"] = 7100
+L["fg"] = [{"x": 900, "k": "coluna"}, {"x": 2700, "k": "lixeira"}, {"x": 5560, "k": "coluna"}, {"x": 6650, "k": "bancos"}]
+for h in L["hints"]:
+    h.setdefault("yl", L.get("under", 640))
+salvar(6)

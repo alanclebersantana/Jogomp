@@ -87,7 +87,8 @@ func pre() -> void:
 	var p: Dictionary = g.player
 	var gs = p.get("_g")
 	for o in MV:
-		o.t = float(o.t) + 1.0
+		if not o.get("hold", false):
+			o.t = float(o.t) + 1.0
 		match o.k:
 			"wheel":
 				if not o.on and o.has("lock") and _lock_done(str(o.lock)):
@@ -245,7 +246,8 @@ func _bondinho(s: Dictionary, T: int) -> void:
 	if int(s.get("_st", -1)) != T:
 		var ax: float = vx - float(s.get("_pvx", vx))
 		sv += (-ax * .22 - sw * .05) - sv * .06
-		sw = clamp(sw + sv, -.09, .09)
+		var lim: float = .09 * min(1.0, 130.0 / w)     # cabine larga balança menos (o piso não sai do lugar)
+		sw = clamp(sw + sv, -lim, lim)
 		s["_sw"] = sw
 		s["_sv"] = sv
 		s["_pvx"] = vx
