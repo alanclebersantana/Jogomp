@@ -20,3 +20,7 @@ Aprovado pelo Alan; aplicar só depois que ele liberar (pediu mais sugestões an
 6. Efeitos de impacto desenhados (faíscas, poeira, rastro do bastão, estilhaços).
 
 Ficaram de fora: 2,5D com cenário em 3D e 3D completo.
+
+## Vida do cenário (aprovado em seguida)
+9. Passageiros que reagem à luta: correm, se escondem atrás dos bancos, filmam com o celular, aplaudem no fim da zona.
+10. Cenário que quebra: vidraça que estilhaça, painel de voos que cai, bancos que viram.
