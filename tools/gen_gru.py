@@ -1181,7 +1181,7 @@ def voa(cy=300):
     return {"k": "fly", "cy": cy}
 
 # --- A · Desembarque: aquecimento e a zona 1 (chão reto, com carrinho e extintor para usar)
-L["sections"].append({"x": 0, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 0})
+L["sections"].append({"x": 0, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 0, "tint": "rgba(90,170,255,.10)"})
 chao(-200, 3900)
 dica(0, 560, "GOLPE: toque várias vezes (o 3º gira e quebra escudos). No ar vira voadora. DASH: atravessa qualquer ataque!")
 milhas(300, 620, 470, 40)
@@ -1218,7 +1218,7 @@ L["acZones"] = [
         [{"k": "boar", "x": 6320, "r": [6160, 6470], "radio": 1}, cap("", x=5760, **ZL), cap("salta", x=5860, **ZL)]]},
 ]
 milhas(1400, 1960, 470, 56)
-L["sections"].append({"x": 2060, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 1})
+L["sections"].append({"x": 2060, "song": "aero_tema", "bg": "vila", "gt": "vila", "per": 1, "tint": "rgba(255,225,130,.12)"})
 caixa(2140, item="heart", soft=True)
 L.setdefault("walks", []).append({"x0": 2200, "x1": 2640, "y": GY, "dir": 1, "spd": 2.0})
 milhas(2220, 2620, 470, 44)
@@ -1235,7 +1235,7 @@ totem(3740)
 caixa(3800, item="heart", soft=True)
 
 # --- B · O passeio de bondinho
-L["sections"].append({"x": 3800, "song": "tarde", "bg": "tarde", "gt": "vila", "per": 2})
+L["sections"].append({"x": 3800, "song": "tarde", "bg": "tarde", "gt": "vila", "per": 2, "tint": "rgba(255,130,60,.14)"})
 L["pits"].append([3900, 5420])
 L["movers"].append({"k": "path", "x0": 3920, "x1": 5060, "y0": 440, "y1": 440, "w": 340, "per": 1900, "skin": "bondinho"})
 L["acRide"] = {"mover": 0, "x0": 3900, "x1": 5420, "spawns": [
@@ -1247,7 +1247,7 @@ icone(3760, 3900, 3990, 380, "↑")
 arco(3960, 5380, 330, 50, 22)
 
 # --- C · Píer à noite: esteira que puxa para o vão, dos dois lados
-L["sections"].append({"x": 5420, "song": "noite", "bg": "noite", "gt": "vila", "night": .35, "per": 3})
+L["sections"].append({"x": 5420, "song": "noite", "bg": "noite", "gt": "vila", "night": .3, "per": 3, "tint": "rgba(150,90,255,.16)"})
 chao(5420, 6030)
 chao(6120, 7100)
 L["pits"].append([6030, 6120])
