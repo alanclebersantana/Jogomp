@@ -133,12 +133,18 @@ func _initialize() -> void:
 	print("passeio: st=", ac.RIDE.st, " quadros=", t2, " x=", int(px()), " y=", int(P.y), " vidas=", g.lives, " kos=", ac.kos)
 	if int(ac.RIDE.st) != 2:
 		f += 1
-	print("desce: ", jump_to(5480), " ", walk_to(5540, 800))
+	print("desce: ", jump_to(5480), " ", walk_to(5680, 800), " ilhas: ", jump_to(5915, true), jump_to(6120, true), jump_to(6300, true))
 	var z3 = ac.Z[2]
 	walk_to(float(z3.a.x0) + 120, 2500)
 	var t3 := 0
-	while not z3.a.done and t3 < 9000:
+	while not z3.a.done and t3 < 1500:
+		g.lives = 99
 		if not z3.a.on:
+			if px() < 5700:
+				walk_to(5680, 800)
+				jump_to(5915, true)
+				jump_to(6120, true)
+				jump_to(6300, true)
 			walk_to(float(z3.a.x0) + 120, 600)
 		luta(40)
 		frame({})
@@ -156,7 +162,26 @@ func _initialize() -> void:
 		f += 1
 	for i in 140:
 		frame({})
-	walk_to(6812, 2500)
+	var z4 = ac.Z[3]
+	var t4 := 0
+	while not z4.a.done and t4 < 1500:
+		g.lives = 99
+		if not z4.a.on:
+			walk_to(float(z4.a.x0) + 120, 900)
+		luta(40)
+		frame({})
+		t4 += 1
+		P = g.player
+		P.hp = max(P.hp, 3)
+		if t4 % 150 == 0 and OS.get_environment("DBG") != "":
+			var b = ac.boss
+			print("   t4=", t4, " on=", z4.a.on, " P=", int(px()), ",", int(P.y), " chefe=", ("hp %d %s x=%d" % [b.hp, b.gs, b.x]) if b != null else "-", " vivos=", ac._alive("z3"))
+	print("chefão: caiu=", z4.a.done, " kos=", ac.kos, " dano=", ac.hits, " combo max=", ac.best)
+	if not z4.a.done:
+		f += 1
+	for i in 160:
+		frame({})
+	walk_to(8712, 2500)
 	var r2 = until({}, func(): return not g.running, 400)
 	print("saída: ", r2, " nota=", ac.rank())
 	if not (r2 is String and r2 == "state"):

@@ -21,6 +21,8 @@ var dog_btn: TextureButton
 var tex_dog: Texture2D = preload("res://assets/ui/btn_dog.png")
 var bag_btn: TextureButton
 var tex_golpe: Texture2D = preload("res://assets/ui/btn_golpe.png")
+var tex_dash: Texture2D = preload("res://assets/ui/btn_dash.png")
+var tex_esp: Texture2D = preload("res://assets/ui/btn_especial.png")
 var tex_use: Texture2D = preload("res://assets/ui/btn_use.png")
 var tex_bagb: Texture2D = preload("res://assets/ui/btn_bag.png")
 var tex_check: Texture2D = load("res://assets/ui/btn_check.png") if ResourceLoader.exists("res://assets/ui/btn_check.png") else tex_use
@@ -388,6 +390,17 @@ func _process(_d: float) -> void:
 			tb.visible = top_buttons.visible and not (game.player and game.player.get("isis"))
 		elif tb.get_meta("k") in ["K", "F"]:
 			tb.visible = top_buttons.visible and _fight_btns() and not (_acao() and tb.get_meta("k") == "K" and not game.AC.sp_full())
+			# modo ação: a defesa vira DASH e o chute vira o GOLPE ESPECIAL (ícones próprios; o especial pulsa)
+			if not tb.has_meta("tex0"):
+				tb.set_meta("tex0", tb.texture_normal)
+			var wt: Texture2D = tb.get_meta("tex0")
+			if _acao():
+				wt = tex_dash if tb.get_meta("k") == "F" else tex_esp
+				if tb.get_meta("k") == "K":
+					var pl: float = 1.15 + .25 * sin(Time.get_ticks_msec() * .012)
+					tb.modulate = Color(pl, pl, pl * .8, tb.modulate.a)
+			if tb.texture_normal != wt:
+				tb.texture_normal = wt
 	_touch_squash(_d)
 	if hint_btn:
 		hint_btn.visible = top_buttons.visible and hud.can_replay()

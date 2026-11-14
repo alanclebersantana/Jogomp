@@ -1169,8 +1169,8 @@ novo("Galeão · Modo Ação",
      "rebata a mala de volta; use carrinhos, extintores e painéis contra eles. Barra cheia = golpe especial.",
      introSub="Modo Ação · teste 2", endTitle="GALEÃO · MODO AÇÃO", introImg="res://assets/bg/gig_tarde.jpg",
      bgset="gig", bgMirror=1, nightAt=99999, rain=[], action=1, clueIds=[],
-     rank={"dano": 3, "combo": 20, "tempo": 240},
-     periods=["Desembarque", "Praça", "Bondinho", "Píer"])
+     rank={"dano": 4, "combo": 25, "tempo": 330},
+     periods=["Desembarque", "Praça", "Bondinho", "Píer e Chefão"])
 L["spawn"] = {"x": 160, "y": GY}
 G1 = {"k": "grunt"}
 def cap(tp, **kw):
@@ -1246,24 +1246,64 @@ L["acRide"] = {"mover": 0, "x0": 3900, "x1": 5420, "spawns": [
 icone(3760, 3900, 3990, 380, "↑")
 arco(3960, 5380, 330, 50, 22)
 
-# --- C · Píer à noite: esteira que puxa para o vão, dos dois lados
+# --- C · Travessia sem luta: ilhas sobre o vão (pulo + dash no ar) e o poço para subir pulando na parede
 L["sections"].append({"x": 5420, "song": "noite", "bg": "noite", "gt": "vila", "night": .3, "per": 3, "tint": "rgba(150,90,255,.16)"})
-chao(5420, 6030)
-chao(6120, 7100)
-L["pits"].append([6030, 6120])
-L["walks"].append({"x0": 5700, "x1": 6020, "y": GY, "dir": 1, "spd": 1.3})
-L["walks"].append({"x0": 6130, "x1": 6450, "y": GY, "dir": -1, "spd": 1.3})
-totem(5500)
-caixa(5560, item="heart", soft=True)
-neon(5700, "#ff4fb4")
-neon(6200, "#4fd8ff")
-neon(6700, "#ffd84a")
-painel(6000, 190)
-arco(6010, 6140, 410, 50, 4)
-milhas(6560, 6740, 470, 45)
-fim(6800)
-L["spanX"] = 7100
-L["fg"] = [{"x": 900, "k": "coluna"}, {"x": 2700, "k": "lixeira"}, {"x": 5560, "k": "coluna"}, {"x": 6650, "k": "bancos"}]
+chao(5420, 5700)
+totem(5470)
+# poço: duas paredes altas; pule de uma para a outra (pulo na parede) até o mezanino com o coração
+bloco(5540, 5566, 150, 350)
+bloco(5650, 5676, 150, 350)
+plat(5566, 150, 84)
+caixa(5596, 150, item="heart", soft=True)
+milhas(5580, 5640, 300, 30)
+milhas(5580, 5640, 220, 30)
+icone(5480, 5560, 5608, 440, "↑↑")
+L["pits"].append([5700, 6260])
+bloco(5880, 5950, GY, 640)
+bloco(6090, 6150, GY, 640)
+arco(5710, 5870, 400, 60, 5)
+arco(5960, 6080, 400, 60, 4)
+arco(6160, 6250, 420, 40, 3)
+drone(5990, 250, [5820, 6180])
+chao(6260, 6710)
+chao(6800, 9000)
+L["pits"].append([6710, 6800])
+totem(6290)
+# --- D · Píer: esteira que puxa para o vão, dos dois lados
+L["walks"].append({"x0": 6380, "x1": 6700, "y": GY, "dir": 1, "spd": 1.3})
+L["walks"].append({"x0": 6810, "x1": 7130, "y": GY, "dir": -1, "spd": 1.3})
+neon(6400, "#ff4fb4")
+neon(6900, "#4fd8ff")
+neon(7700, "#ffd84a")
+neon(8100, "#ff4fb4")
+painel(6680, 190)
+arco(6690, 6820, 410, 50, 4)
+totem(7260)
+caixa(7300, item="heart", soft=True)
+caixa(7340, item="heart", soft=True)
+milhas(8500, 8640, 470, 45)
+fim(8700)
+L["spanX"] = 9000
+L["fg"] = [{"x": 900, "k": "coluna"}, {"x": 2700, "k": "lixeira"}, {"x": 6300, "k": "coluna"}, {"x": 8560, "k": "bancos"}]
+# plateia: passageiros do lado de fora das zonas (assustam, vibram a cada nocaute e comemoram no fim)
+for px_, nm in [(1240, "turista"), (2110, "cel"), (2840, "teen"), (3720, "exec"), (7240, "turista"), (8390, "comissaria")]:
+    pax(px_, nm, k="stand", re=1, bal="!")
+ZL = {"r": [6350, 6690]}
+ZR = {"r": [6820, 7140]}
+L["acZones"][2] = {"x0": 6320, "x1": 7180, "waves": [
+    [cap("", x=6460, **ZL), cap("salta", x=6580, **ZL), cap("atira", x=7080, **ZR), cap("", x=6980, **ZR)],
+    [cap("escudo", x=6440, **ZL), cap("agarra", x=7060, **ZR), cap("atira", x=7120, **ZR), voa(280)],
+    [cap("escudo", x=6990, **ZR), cap("", x=6440, **ZL), cap("salta", x=6540, **ZL), cap("atira", x=7110, **ZR)]]}
+# --- E · O Chefão dos Capuzes (três fases), com extintor, vidros e um painel para derrubar em cima dele
+L["acZones"].append({"x0": 7420, "x1": 8360, "waves": [[cap("chefe", x=8100)]]})
+L["acProps"] = [q for q in L["acProps"] if q["x"] < 5000] + [
+    {"k": "vidro", "x": 1680, "y": GY}, {"k": "banco", "x": 1760, "y": GY},
+    {"k": "vidro", "x": 3330, "y": GY}, {"k": "banco", "x": 3560, "y": GY},
+    {"k": "extintor", "x": 6420, "y": GY}, {"k": "carrinho", "x": 6900, "y": GY},
+    {"k": "extintor", "x": 7560, "y": GY}, {"k": "placa", "x": 7890, "y": 240}, {"k": "vidro", "x": 7700, "y": GY},
+    {"k": "vidro", "x": 8120, "y": GY}, {"k": "carrinho", "x": 8240, "y": GY}, {"k": "banco", "x": 7620, "y": GY}]
+L["chases"] = [{"trig": 2080, "x0": 2200, "x1": 2800, "y": GY, "spd": 5.2, "bonus": 20,
+                "pista": "O vulto de capuz largou a mala e sumiu para o píer!"}]
 for h in L["hints"]:
     h.setdefault("yl", L.get("under", 640))
 salvar(6)

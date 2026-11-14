@@ -78,6 +78,15 @@ func step() -> void:
 	_shots(p)
 	_props(p)
 	_bodies()
+	_wall(p)
+	var kl: Array = []
+	for l in LT:
+		l.t += 1
+		if l.t < int(l.n):
+			kl.append(l)
+	LT = kl
+	if boss != null and (boss.dead or not g.EN.has(boss)):
+		boss = null
 	sp_fx = max(0, sp_fx - 1)
 	word_t = max(0, word_t - 1)
 	var kf: Array = []
@@ -122,6 +131,7 @@ func _zone(z: Dictionary, p: Dictionary) -> void:
 		z.was_on = true
 		z.wi = -1
 		z.wt = 34
+		_crowd(float(a.x0), float(a.x1), "!", 60)
 	if z.wt > 0:
 		z.wt -= 1
 		if z.wt == 0:
@@ -130,6 +140,7 @@ func _zone(z: Dictionary, p: Dictionary) -> void:
 				z.boss.dead = 1      # acabou: as grades sobem
 				bonus += 1
 				_txt(p.x + p.w / 2, p.y - 40, "ZONA LIMPA!", Color(.5, 1, .7), 26.0)
+				_crowd(float(a.x0), float(a.x1), "★", 110)
 				Audio.play("special", -6)
 			else:
 				_spawn_wave(z, z.waves[z.wi])
@@ -297,6 +308,7 @@ func on_hit(e: Dictionary) -> void:
 	var forte: bool = how in ["spin", "kick", "sweep", "special"]
 	FX.append({"k": "star", "x": e.x, "y": e.y - 58.0 * float(e.get("sc", 1.0)), "t": 0, "n": 12 if forte else 9, "r": randf() * TAU, "s": 1.5 if forte else 1.0})
 	g.shake = max(g.shake, 5 if forte else 2)
+	LT.append({"x": e.x, "y": e.y - 60.0, "c": Color(1, .9, .6), "t": 0, "n": 12 if forte else 7, "r": 260.0 if forte else 170.0})
 	if combo in [5, 10, 20, 30, 50]:
 		var w: String = {5: "BOA!", 10: "ÓTIMO!", 20: "INCRÍVEL!", 30: "IMPARÁVEL!", 50: "LENDÁRIO!"}[combo]
 		word = w
@@ -309,6 +321,8 @@ func on_ko(e: Dictionary, how: String) -> void:
 	if how == "stomp":
 		add_combo(1)
 	FX.append({"k": "ring", "x": e.x, "y": e.y - 50.0, "t": 0, "n": 14, "r": 0.0})
+	if kos % 3 == 0:
+		_crowd(e.x - 200, e.x + 200, "!", 50)
 	g.shake = max(g.shake, 4)
 	# o combo multiplica as milhas de cada nocaute
 	var n: int = mult()
@@ -351,7 +365,13 @@ const TP := {
 	"atira": {"hp": 1, "sc": .95, "spd": 1.9, "mod": Color(1.5, 1.15, .7)},       # fica longe e arremessa malas em arco
 	"salta": {"hp": 1, "sc": .86, "spd": 3.1, "mod": Color(.8, 1.5, 1.3)},        # rápido: pula por cima e ataca pelas costas
 	"agarra": {"hp": 4, "sc": 1.34, "spd": 1.3, "mod": Color(1.5, .7, .6)},       # grandão: não sente os golpes fracos e arremessa o Milis
+	"chefe": {"hp": 18, "sc": 1.8, "spd": 1.5, "mod": Color(1.7, 1.25, .5)},       # Chefão dos Capuzes: três fases
 }
+const BOSS_HP := 18
+var LT: Array = []      # clarões de luz (iluminam os personagens por um instante)
+var wall_dir := 0
+var wall_t := 0
+var boss = null
 var how := "hit"        # o golpe que está acertando agora (a luta avisa antes de cada pancada)
 var blocked := false
 var SH: Array = []      # malas arremessadas
@@ -390,6 +410,15 @@ func pre_hit(e: Dictionary) -> bool:
 		return false
 	var p: Dictionary = g.player
 	var front: bool = sign(p.x + p.w / 2 - e.x) == sign(float(e.dir))
+	if str(e.tp) == "chefe":
+		if str(e.gs) == "roar":
+			blocked = true
+			Audio.play("clanc", -6, .9)
+			return true
+		# golpes fortes tiram mais vida (o normal tira 1)
+		var extra: int = {"spin": 1, "special": 3, "prop": 3}.get(how, 0) + (1 if str(e.gs) == "rest" else 0)
+		e.hp = max(2, int(e.hp) - extra) if int(e.hp) > 1 else 1
+		return false
 	if str(e.tp) == "escudo" and int(e.open) <= 0 and front and str(e.gs) in ["in", "walk", "wind"] and not how in ["special", "prop", "stomp"]:
 		blocked = true
 		e.blockFx = 10
@@ -426,10 +455,13 @@ func grunt(e: Dictionary) -> bool:
 	e.open = max(0, int(e.open) - 1)
 	e.blockFx = max(0, int(e.get("blockFx", 0)) - 1)
 	# levou pancada: o grandão não sente (só o giro, o especial ou um objeto o param)
-	if int(e.get("hitFx", 0)) > 0 and e.gs != "hurt" and (tp != "agarra" or how in ["spin", "special", "prop"]):
+	if int(e.get("hitFx", 0)) > 0 and e.gs != "hurt" and tp != "chefe" and (tp != "agarra" or how in ["spin", "special", "prop"]):
 		e.gs = "hurt"
 		e.t = 16
 	var lvl: bool = abs((p.y + p.h) - e.base) < 70.0
+	if tp == "chefe":
+		_chefe(e, p, pc, dx)
+		return true
 	match str(e.gs):
 		"in":
 			e.dir = 1 if dx > 0 else -1
@@ -527,6 +559,189 @@ func _attackers() -> int:
 			n += 1
 	return n
 
+
+# ------------------------------------------------------------------ Chefão dos Capuzes (três fases)
+func _fase(e: Dictionary) -> int:
+	return 1 if int(e.hp) > 12 else (2 if int(e.hp) > 6 else 3)
+
+func _chefe(e: Dictionary, p: Dictionary, pc: float, dx: float) -> void:
+	boss = e
+	var sc: float = float(e.sc)
+	var f: int = _fase(e)
+	if int(e.get("fase", 1)) != f and str(e.gs) != "leap":
+		# mudou de fase: urra (não apanha), empurra o Milis e chama reforço
+		e.fase = f
+		e.gs = "roar"
+		e.t = 70
+		e.y = e.base
+		g.shake = max(g.shake, 14)
+		Polish.flash_white = max(Polish.flash_white, 6)
+		Audio.play("stomp", 0, .5)
+		_txt(e.x, e.y - 200, "FASE %d" % f, Color(1, .8, .3), 30.0)
+		LT.append({"x": e.x, "y": e.y - 90, "c": Color(1, .5, .2), "t": 0, "n": 50, "r": 520.0})
+		if abs(dx) < 260.0:
+			p.vx = -sign(dx) * -9.0
+			p.vy = -6.0
+		var zid: String = str(e.get("zid", ""))
+		for q in ([{"tp": "salta"}, {"tp": "escudo"}] if f == 2 else [{"tp": "atira"}, {"tp": "atira"}, {"tp": "salta"}]):
+			var side: float = 1.0 if randf() < .5 else -1.0
+			var m := mk("grunt", clamp(e.x + side * randf_range(260, 380), e.r[0], e.r[1]), e.base, e.r, q)
+			m.zid = zid
+			g.EN.append(m)
+			g.burst(m.x, m.y - 40, 10, Color(.55, .45, .7))
+	match str(e.gs):
+		"in":
+			e.dir = 1 if dx > 0 else -1
+			if e.t <= 0:
+				e.gs = "walk"
+		"roar":
+			if e.t <= 0:
+				e.gs = "walk"
+				e.acd = 30
+		"walk":
+			e.dir = 1 if dx > 0 else -1
+			e.acd = int(e.acd) - 1
+			var tx: float = clamp(pc - sign(dx) * 110.0, e.r[0], e.r[1])
+			var step: float = clamp(tx - e.x, -float(e.spd) * (1.0 + .25 * (f - 1)), float(e.spd) * (1.0 + .25 * (f - 1)))
+			if abs(tx - e.x) > 3.0:
+				e.x += step
+				e.wd = float(e.wd) + abs(step)
+			if int(e.acd) <= 0 and p.dyingT == 0:
+				# escolhe o ataque: fase 1 bote; fase 2 também chuva de malas e salto; fase 3 também a investida
+				var ops: Array = ["bote"]
+				if f >= 2:
+					ops += ["chuva", "salto"]
+				if f >= 3:
+					ops += ["investida", "salto"]
+				if abs(dx) > 260.0 and "bote" in ops and ops.size() > 1:
+					ops.erase("bote")
+				e.atk = ops[randi() % ops.size()]
+				e.gs = "wind"
+				e.t = {"bote": 36, "chuva": 44, "salto": 26, "investida": 40}[e.atk] - (f - 1) * 4
+				Audio.play("robo_bip", -8, .6)
+		"wind":
+			e.dir = 1 if dx > 0 else -1
+			if e.t <= 0:
+				match str(e.atk):
+					"bote":
+						e.gs = "strike"
+						e.t = 14
+					"chuva":
+						for i in 3 + (2 if f == 3 else 0):
+							_throw(e, p)
+							SH[-1].vx = float(SH[-1].vx) + (i - 1.5) * 1.3
+							SH[-1].vy = float(SH[-1].vy) - i * .5
+						e.gs = "rest"
+						e.t = 50
+						e.acd = 30
+					"salto":
+						e.gs = "leap"
+						e.t = 44
+						e.lx0 = e.x
+						e.lx1 = clamp(pc, e.r[0], e.r[1])
+					"investida":
+						e.gs = "run"
+						e.t = 200
+				Audio.play("slide", -4, .6)
+		"strike":
+			if e.t > 3:
+				e.x = clamp(e.x + e.dir * 8.0, e.r[0], e.r[1])
+				if Game.hit(g.R(e.x + (0.0 if e.dir > 0 else -80.0), e.y - 130, 80, 130), p):
+					g.hurt(1, e.x - e.dir * 10.0)
+			if e.t <= 0:
+				e.gs = "rest"
+				e.t = 54 - f * 6
+		"leap":
+			var u: float = 1.0 - float(e.t) / 44.0
+			e.x = lerp(float(e.lx0), float(e.lx1), u)
+			e.y = e.base - sin(u * PI) * 210.0
+			if e.t <= 0:
+				# aterrissa com onda de choque no chão: pule ou saia com o dash
+				e.y = e.base
+				g.shake = max(g.shake, 16)
+				Audio.play("stomp", 0, .5)
+				FX.append({"k": "wave", "x": e.x, "y": e.base, "t": 0, "n": 22, "r": 0.0})
+				g.fx("fx_dust", e.x - 50, e.base - 6, 24, .3)
+				g.fx("fx_dust", e.x + 50, e.base - 6, 24, .3)
+				if p.onGround and abs(dx) < 190.0:
+					g.hurt(1, e.x)
+				e.gs = "rest"
+				e.t = 60 - f * 6
+		"run":
+			# investida de ponta a ponta: se bater na grade, fica tonto (a melhor hora de bater)
+			e.x += e.dir * 10.0
+			e.wd = float(e.wd) + 10.0
+			if Game.hit(g.R(e.x - 34, e.y - 130, 68, 130), p):
+				g.hurt(1, e.x - e.dir * 10.0)
+			if e.x <= float(e.r[0]) or e.x >= float(e.r[1]) or e.t <= 0:
+				e.x = clamp(e.x, e.r[0], e.r[1])
+				e.gs = "rest"
+				e.t = 110
+				e.dizzy = 110
+				g.shake = max(g.shake, 12)
+				Audio.play("clanc", 0, .5)
+				_txt(e.x, e.y - 200, "TONTO!", Color(.7, .95, 1), 24.0)
+		"rest":
+			e.dizzy = max(0, int(e.get("dizzy", 0)) - 1)
+			if e.t <= 0:
+				e.gs = "walk"
+				e.acd = 50 - f * 10
+
+# ------------------------------------------------------------------ luz dinâmica (só luz, sem sombra no chão)
+## a luz mais forte perto do ponto: [cor, força 0..1, lado (-1 esquerda, 1 direita)]
+func light_at(x: float, y: float) -> Array:
+	var best := 0.0
+	var col := Color(1, 1, 1)
+	var side := 0.0
+	for nz in g.L.get("neon", []):
+		var d: float = abs(float(nz.x) - x)
+		if d < 300.0:
+			var k: float = (1.0 - d / 300.0) * .75
+			if k > best:
+				best = k
+				col = Color(str(nz.get("c", "#ff4fb4")))
+				side = sign(float(nz.x) - x)
+	for l in LT:
+		var d2: float = Vector2(float(l.x) - x, float(l.y) - y).length()
+		var k2: float = (1.0 - d2 / float(l.r)) * (1.0 - float(l.t) / float(l.n))
+		if k2 > best:
+			best = k2
+			col = l.c
+			side = sign(float(l.x) - x)
+	return [col, clamp(best, 0.0, 1.0), side]
+
+# ------------------------------------------------------------------ pulo na parede
+func _wall(p: Dictionary) -> void:
+	wall_t = max(0, wall_t - 1)
+	if p.onGround or p.dyingT > 0 or dash_t > 0:
+		wall_t = 0
+		return
+	var dir: int = 1 if g.kd("R") else (-1 if g.kd("L") else 0)
+	if dir != 0 and float(p.vy) > 0.0 and g.wall_at(p.x + (p.w + 4.0 if dir > 0 else -4.0), p.y + p.h * .5):
+		# encostado na parede: escorrega devagar
+		p.vy = min(float(p.vy), 1.6)
+		wall_dir = dir
+		wall_t = 8
+		if ticks % 6 == 0:
+			g.fx("fx_dust", p.x + (p.w if dir > 0 else 0.0), p.y + p.h * .8, 10, .08)
+	if wall_t > 0 and g.keys.get("Jp", false):
+		g.keys["Jp"] = false
+		p.vy = Game.JUMP * .95
+		p.vx = -wall_dir * 6.5
+		p.face = -wall_dir
+		p.wlock = 9
+		air_used = false
+		wall_t = 0
+		Audio.play("slide", -8, 1.5)
+		g.fx("fx_dust", p.x + (p.w if wall_dir > 0 else 0.0), p.y + p.h * .6, 16, .16)
+
+# ------------------------------------------------------------------ passageiros que reagem
+func _crowd(x0: float, x1: float, bal: String, rt: int) -> void:
+	for q in g.L.get("pax", []):
+		if q.has("re") and float(q.get("px", q.x)) > x0 - 420.0 and float(q.get("px", q.x)) < x1 + 420.0 and int(q.get("rt", 0)) <= 0:
+			q.bal = bal
+			q.rt = rt + randi() % 20
+
 # ------------------------------------------------------------------ malas arremessadas
 func _throw(e: Dictionary, p: Dictionary) -> void:
 	var T := 50.0
@@ -603,6 +818,10 @@ func _prop_box(o: Dictionary) -> Dictionary:
 	match str(o.k):
 		"carrinho":
 			return g.R(float(o.x) - 38, float(o.y) - 52, 76, 52)
+		"banco":
+			return g.R(float(o.x) - 60, float(o.y) - 46, 120, 46)
+		"vidro":
+			return g.R(float(o.x) - 8, float(o.y) - 150, 16, 150)
 		"extintor":
 			return g.R(float(o.x) - 12, float(o.y) - 46, 24, 46)
 	return g.R(float(o.x) - 60, float(o.y) - 34, 120, 44)
@@ -619,9 +838,28 @@ func _props(p: Dictionary) -> void:
 		var b: Dictionary = _prop_box(o)
 		var hit: bool = not atk.is_empty() and int(o.cd) == 0 and Game.hit(atk, b)
 		match str(o.k):
-			"carrinho":
+			"vidro":
+				# divisória de vidro: estilhaça com pancada, carrinho, capanga voando ou o golpe especial
+				if int(o.st) == 0:
+					var quebra: bool = hit or (sp_fx == 29 and abs(float(o.x) - (p.x + p.w / 2)) < 340.0)
+					for o2 in PR:
+						if str(o2.k) in ["carrinho", "banco"] and abs(float(o2.get("vx", 0.0))) > 2.0 and abs(float(o2.x) - float(o.x)) < 50.0:
+							quebra = true
+					for e in g.EN:
+						if e.dead and int(e.dead) < 30 and abs(float(e.get("dvx", 0.0))) > 4.0 and abs(e.x + float(e.get("ddx", 0.0)) - float(o.x)) < 30.0:
+							quebra = true
+					if quebra:
+						o.st = 1
+						Audio.play("clanc", -2, 1.9)
+						Audio.play("stomp", -8, 1.6)
+						g.shake = max(g.shake, 6)
+						for i in 18:
+							FX.append({"k": "shard", "x": float(o.x) + randf_range(-6, 6), "y": float(o.y) - randf_range(10, 150), "t": 0, "n": 40 + randi() % 20, "r": randf() * TAU, "vx": randf_range(-4.5, 4.5), "vy": randf_range(-6.0, -1.0)})
+						LT.append({"x": float(o.x), "y": float(o.y) - 80, "c": Color(.7, .9, 1), "t": 0, "n": 10, "r": 240.0})
+			"carrinho", "banco":
 				if hit:
-					o.vx = p.face * 11.0
+					o.vx = p.face * (11.0 if str(o.k) == "carrinho" else 8.0)
+					o.st = 1
 					o.cd = 24
 					g.hit_stop = max(int(g.hit_stop), 3)
 					Audio.play("stomp", -5, .8)
@@ -637,7 +875,7 @@ func _props(p: Dictionary) -> void:
 					for e in g.EN:
 						if not e.dead and abs(e.x - float(o.x)) < 46.0 and abs(e.y - float(o.y)) < 60.0:
 							how = "prop"
-							e.hp = 1 if e.k == "grunt" else int(e.get("hp", 1))
+							e.hp = 1 if (e.k == "grunt" and str(e.get("tp", "")) != "chefe") else int(e.get("hp", 1))
 							g.kill_enemy(e, "hit")
 							if e.dead:
 								e.dvx = sign(float(o.vx)) * 7.0
@@ -677,7 +915,7 @@ func _props(p: Dictionary) -> void:
 						for e in g.EN:
 							if not e.dead and abs(e.x - float(o.x)) < 96.0 and abs(e.y - fl) < 80.0:
 								how = "prop"
-								e.hp = 1 if e.k == "grunt" else int(e.get("hp", 1))
+								e.hp = 1 if (e.k == "grunt" and str(e.get("tp", "")) != "chefe") else int(e.get("hp", 1))
 								g.kill_enemy(e, "hit")
 								add_combo(1)
 				elif int(o.st) == 2:
@@ -740,12 +978,13 @@ func try_special() -> bool:
 	for r in 3:
 		Polish.part("ringw", cx, p.y + p.h / 2, 0, 0, 24 + r * 8, Color(1, .85, .4))
 	_txt(cx, p.y - 60, "GIRO TURBO!", Color(1, .85, .4), 28.0)
+	LT.append({"x": cx, "y": p.y, "c": Color(1, .8, .3), "t": 0, "n": 34, "r": 620.0})
 	SH = []
 	for e in g.EN:
 		if e.dead or abs(e.x - cx) > 330.0 or abs(e.y - (p.y + p.h)) > 190.0:
 			continue
 		how = "special"
-		if e.k == "grunt":
+		if e.k == "grunt" and str(e.get("tp", "")) != "chefe":
 			e.hp = max(1, int(e.get("hp", 1)) - 2)
 		for i in (2 if e.k == "boar" else 1):
 			if not e.dead:
@@ -783,6 +1022,12 @@ static func grunt_draw(e: Dictionary, T: int) -> void:
 	elif st == "leap":
 		fr = 11
 		lean = .5
+	elif st == "run":
+		fr = [10, 11, 12, 11][int(float(e.get("wd", 0.0)) / 22.0) % 4]
+		lean = .34
+	elif st == "roar":
+		fr = 8
+		lean = -.18
 	elif st == "rest":
 		fr = 12
 		lean = .16 + (.06 * sin(T * .5) if int(e.get("open", 0)) > 0 else 0.0)
@@ -822,6 +1067,17 @@ static func grunt_draw(e: Dictionary, T: int) -> void:
 		Spr.restore()
 	elif tp == "agarra":
 		Spr.glow(6, -84 * sc0, 9, Color(1, .25, .2, .8))
+	elif tp == "chefe":
+		# medalhão dourado com o B e, tonto, estrelinhas rodando
+		Spr.circle(4, -58 * sc0, 11, Color("#1c1418"))
+		Spr.circle(4, -58 * sc0, 8.5, Color("#f2c94c"))
+		Spr.text("B", 4, -58 * sc0 + 6, 14, Color("#1c1418"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b)
+		if int(e.get("dizzy", 0)) > 0:
+			for i in 3:
+				var a: float = T * .2 + i * TAU / 3.0
+				Spr.text("★", cos(a) * 30.0, -104 * sc0 + sin(a) * 8.0, 18, Color(1, .9, .4), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
+		if st == "roar":
+			Spr.ring(0, -70 * sc0, 60.0 + 80.0 * (1.0 - float(e.get("t", 0)) / 70.0), Color(1, .6, .2, .6), 5.0)
 	if st == "wind":
 		Spr.text("!", 0, -118 * sc0 - 4, 26, Color(1, .3, .25), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
 
@@ -857,15 +1113,68 @@ func draw_fx(T: int) -> void:
 					Spr.seg(x + cos(a3) * d0, y + sin(a3) * d0, x + cos(a3) * (d0 + 12.0), y + sin(a3) * (d0 + 12.0), Color(.75, .95, 1, 1.0 - u), 3.0)
 			"ring":
 				Spr.ring(x, y, 14.0 + 60.0 * u, Color(1, 1, 1, .8 * (1.0 - u)), 5.0 * (1.0 - u) + 1.0)
+			"shard":
+				var tt: float = float(f.t)
+				var sx: float = x + float(f.vx) * tt
+				var sy: float = min(y + float(f.vy) * tt + .22 * tt * tt, 498.0)
+				var a4: float = float(f.r) + tt * .3 * sign(float(f.vx))
+				var q := PackedVector2Array([Vector2(sx + cos(a4) * 9.0, sy + sin(a4) * 9.0), Vector2(sx + cos(a4 + 2.2) * 6.0, sy + sin(a4 + 2.2) * 6.0), Vector2(sx + cos(a4 + 4.1) * 7.0, sy + sin(a4 + 4.1) * 7.0)])
+				Spr.poly(q, Color(.8, .95, 1, .9 * (1.0 - u * u)))
+			"wave":
+				for sd in [-1.0, 1.0]:
+					var wx: float = x + sd * (30.0 + 170.0 * u)
+					Spr.rr(wx - 9, y - 30.0 * (1.0 - u) - 4, 18, 30.0 * (1.0 - u) + 6, 6, Color(.11, .08, .1, 1.0 - u))
+					Spr.rr(wx - 6, y - 30.0 * (1.0 - u) - 1, 12, 30.0 * (1.0 - u), 4, Color(1, .85, .5, 1.0 - u))
+	# halo dos clarões e do bastão: a luz vaza para o que está em volta
+	for l in LT:
+		var lu: float = 1.0 - float(l.t) / float(l.n)
+		Spr.glow(float(l.x), float(l.y), float(l.r) * .55, Color(l.c.r, l.c.g, l.c.b, .22 * lu))
+	if g.M.swing_t > 0:
+		var pp: Dictionary = g.player
+		Spr.glow(pp.x + pp.w / 2 + pp.face * 34.0, pp.y + pp.h * .35, 46, Color(1, .6, .2, .28))
+	# névoa rasteira (atmosfera): bancos de bruma que passam devagar rente ao piso
+	var nite: float = float(g.AMB.get("night", 0.0))
+	var mc: Color = Color(.75, .7, 1.0) if nite > .1 else Color(1, 1, 1)
+	for i in 7:
+		var mx: float = g.cam + fposmod(i * 263.0 + T * (.25 + .08 * (i % 3)) - g.cam * .15, g.W + 400.0) - 200.0
+		Spr.glow(mx, 492.0 + 6.0 * sin(T * .01 + i), 150.0, Color(mc.r, mc.g, mc.b, .07))
 
 ## malas no ar, objetos do cenário e fumaça (na camada do mundo, em coordenadas do mundo)
 func draw_world(T: int) -> void:
+	# camada do meio (profundidade): pilares e luminárias ao longe, andando mais devagar que o chão
+	var nite: float = float(g.AMB.get("night", 0.0))
+	var b0: float = floor((g.cam * .7 - 200.0) / 520.0) * 520.0
+	for i in 5:
+		var wx: float = b0 + i * 520.0 + g.cam * .3
+		var cc: Color = Color(.16, .2, .36, .16) if nite < .1 else Color(.05, .04, .14, .3)
+		Spr.rect(wx - 26, 60, 52, 440, cc)
+		Spr.rect(wx - 26, 60, 6, 440, Color(1, 1, 1, .05))
+		Spr.rect(wx - 40, 60, 80, 14, cc)
+		Spr.rect(wx + 236, 60, 3, 70, cc)
+		Spr.rr(wx + 216, 128, 44, 12, 5, cc)
+		Spr.glow(wx + 238, 150, 70, Color(1, .92, .7, .1 + .1 * nite))
 	for o in PR:
 		var x: float = float(o.x)
 		var y: float = float(o.y)
 		if x < g.cam - 200 or x > g.cam + g.W + 200:
 			continue
 		match str(o.k):
+			"vidro":
+				if int(o.st) == 0:
+					Spr.rr(x - 9, y - 152, 18, 152, 4, Color("#1c1418"))
+					Spr.rect(x - 6, y - 149, 12, 143, Color(.62, .86, 1, .5))
+					Spr.rect(x - 4, y - 140, 3, 90, Color(1, 1, 1, .5))
+				else:
+					Spr.rr(x - 9, y - 16, 18, 16, 4, Color("#1c1418"))
+					Spr.poly(PackedVector2Array([Vector2(x - 6, y - 14), Vector2(x - 2, y - 34), Vector2(x + 1, y - 18), Vector2(x + 5, y - 28), Vector2(x + 6, y - 14)]), Color(.62, .86, 1, .6))
+			"banco":
+				Spr.save()
+				Spr.translate(x, y)
+				if int(o.st) > 0:
+					Spr.rotate(PI if abs(float(o.vx)) < .6 else float(o.x) * .05)
+					Spr.translate(0, 40 if abs(float(o.vx)) < .6 else 0)
+				Spr.P("pc_bancos", 0, 2, 150.0)
+				Spr.restore()
 			"carrinho":
 				Spr.P("pc_carrinhos", x, y + 2, 92.0)
 				if abs(float(o.vx)) > 1.0:
@@ -920,6 +1229,18 @@ func draw_hud(W: float) -> void:
 	Spr.rr(bx, by, max(8.0, bw * fu), 8, 4, fc)
 	if sp_full():
 		Spr.text("ESPECIAL PRONTO!", W * .5, by + 12, 13, fc, HORIZONTAL_ALIGNMENT_CENTER, Spr.font_b, 4)
+	if boss != null and not boss.dead:
+		# vida do chefão: três trechos (um por fase)
+		var hw := 360.0
+		var hx: float = W * .5 - hw / 2
+		var hy := 58.0
+		Spr.text("CHEFÃO DOS CAPUZES", W * .5, hy - 4, 14, Color("#ffd76a"), HORIZONTAL_ALIGNMENT_CENTER, Spr.font_title, 5)
+		Spr.rr(hx - 4, hy, hw + 8, 16, 7, Color(.08, .05, .07, .85))
+		for i in 3:
+			var seg0: float = float(BOSS_HP) / 3.0
+			var fill: float = clamp((float(boss.hp) - seg0 * (2 - i)) / seg0, 0.0, 1.0) if i < 3 else 0.0
+			var sx: float = hx + (hw / 3.0) * (2 - i) + 2
+			Spr.rr(sx, hy + 3, (hw / 3.0 - 4) * fill + .01, 10, 4, [Color("#ff4a4a"), Color("#ff9a3a"), Color("#ffd84a")][i])
 	if word_t > 0:
 		var wk: float = 1.0 + .5 * clamp((float(word_t) - 60.0) / 10.0, 0.0, 1.0)
 		var wa: float = clamp(float(word_t) / 14.0, 0.0, 1.0)

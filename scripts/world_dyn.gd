@@ -234,6 +234,13 @@ func _draw_enemy_node_raw(n: CanvasItem) -> void:
 	mat.set_shader_parameter("rim_col", Color(1, .9, .72) if dark < .3 else Color(1, .78, .45))
 	mat.set_shader_parameter("rim_amt", .26 if dark < .3 else .3 * clamp((dark - .3) * 3.0, 0, 1))
 	mat.set_shader_parameter("shade_amt", .26)
+	if g.AC:
+		# luz dinâmica (neon por perto, clarão de golpe): a borda dos capangas acende na cor da luz
+		var li: Array = g.AC.light_at(g.cam + g.W * .5, 440.0)
+		if float(li[1]) > .05:
+			mat.set_shader_parameter("light_uv", Vector2(.3, -.8).normalized())
+			mat.set_shader_parameter("rim_col", li[0])
+			mat.set_shader_parameter("rim_amt", .3 + .6 * float(li[1]))
 	n.self_modulate = _env(g)
 	for e in g.EN:
 		var segk: bool = e.k == "boar" and SegGuard.is_seg(g, e)
@@ -352,6 +359,14 @@ func _draw_player_node(n: CanvasItem) -> void:
 		mat.set_shader_parameter("light_uv", Vector2(-.7 * lk, -.75).normalized())
 		mat.set_shader_parameter("rim_col", Color(1, .95, .8).lerp(Color(1, .74, .42), tw))
 		mat.set_shader_parameter("rim_amt", .34)
+	if g.AC:
+		var li2: Array = g.AC.light_at(p.x + p.w / 2, p.y + p.h / 2)
+		if float(li2[1]) > .05:
+			# a luz vem do lado em que está a lâmpada (ou o clarão), na cor dela
+			var sdx: float = float(li2[2]) * face
+			mat.set_shader_parameter("light_uv", Vector2(.75 * (sdx if sdx != 0.0 else -1.0), -.6).normalized())
+			mat.set_shader_parameter("rim_col", li2[0])
+			mat.set_shader_parameter("rim_amt", .34 + .6 * float(li2[1]))
 	# na meia-volta o corpo fica de lado para a luz: sombra um pouco mais forte (volume)
 	mat.set_shader_parameter("shade_amt", (.55 if p.swim else .32) + .14 * (1.0 - abs(lk)))
 	var env := _env(g)
