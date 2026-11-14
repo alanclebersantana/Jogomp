@@ -222,6 +222,10 @@ func _fight(p: Dictionary) -> void:
 		if g.pressed("F") and not busy:
 			ac.dash(p, self)
 		ac.dash_step(p)
+		# o botão de chute só existe com a barra cheia: solta o golpe especial
+		if g.keys.get("Kp", false):
+			g.keys["Kp"] = false
+			ac.try_special()
 		if g.keys.get("Gp", false) and swing_t == 0 and kick_t == 0 and (not p.onGround or p.crouch or g.kd("S")):
 			g.keys["Gp"] = false
 			g.keys["Kp"] = true
@@ -343,6 +347,8 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 				continue
 			book[i] = 1
 			var dir: float = 1.0 if e.x > p.x + p.w / 2 else -1.0
+			if g.AC:
+				g.AC.how = "sweep" if (how == "kick" and kick_kind == "sweep") else how
 			g.kill_enemy(e, "hit")
 			if g.AC and int(e.get("blockT", 0)) != 16:
 				g.AC.on_hit(e)
@@ -356,6 +362,19 @@ func _attack_hits(hb: Dictionary, how: String) -> void:
 				# derrubado no aeroporto: o golpe forte joga mais longe, mas ele tomba e quica (não voa girando)
 				e.dvx = dir * (6.5 if how in ["spin", "kick"] else 4.2)
 				e.dvy = -6.0 if how in ["spin", "kick"] else -4.5
+				if g.AC:
+					# cada golpe derruba de um jeito: a rasteira tira os pés (cai de cara, quase no lugar),
+					# a voadora joga longe e baixo, o giro levanta do chão
+					if how == "kick" and kick_kind == "sweep":
+						e.dvx = dir * 1.6
+						e.dvy = -5.0
+						e.rmax = -PI * .5
+					elif how == "kick":
+						e.dvx = dir * 11.0
+						e.dvy = -3.5
+					elif how == "spin":
+						e.dvx = dir * 7.5
+						e.dvy = -9.0
 			elif e.get("dk", "") != "seg":
 				# derrubado: voa girando para longe (no giro e no chute, bem mais longe)
 				e.dk = "flip"

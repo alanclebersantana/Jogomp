@@ -48,6 +48,8 @@ func __draw_raw() -> void:
 	# Ep. 2: chama das lamparinas e olhos vermelhos do Morcego-Rei (acima da escuridão)
 	WorldEp2.glow(g, T)
 	AeroLife.motes(g, T)
+	if g.AC:
+		g.AC.draw_fx(T)
 	# beiradas dos buracos aparecem mesmo no escuro: borda clara e pedrinhas soltas
 	for pit in g.L.get("pits", []):
 		if pit[1] < x0 or pit[0] > x1:

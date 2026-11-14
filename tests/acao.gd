@@ -19,6 +19,12 @@ func alvo():
 			best = e
 	return best
 
+func vao(x: float) -> bool:
+	for q in g.L.get("pits", []):
+		if x > float(q[0]) and x < float(q[1]):
+			return true
+	return false
+
 func luta(lim: int) -> String:
 	var n := 0
 	while n < lim:
@@ -44,11 +50,26 @@ func luta(lim: int) -> String:
 				if abs(dx) < 80 and n % 6 == 0:
 					press("G")
 			else:
+				var alto: bool = float(e.base) < P.y + P.h - 60
 				if abs(dx) > 44:
 					d = {"R": true} if dx > 0 else {"L": true}
-				elif n % 5 == 0:
+				elif n % 5 == 0 and not alto:
 					P.face = 1 if dx > 0 else -1
 					press("G")
+				# capanga no andar de cima: sobe na passarela (pulo e pulo duplo) e luta lá
+				if alto:
+					d = {"R": true} if dx > 0 else {"L": true}
+					if abs(dx) < 16:
+						d = {}
+					if P.onGround and abs(dx) < 150:
+						jump_to(clamp(e.x, float(e.r[0]) + 10, float(e.r[1]) - 10), true)
+						P = g.player
+				# vão no caminho (zona 3): pula
+				if P.onGround and vao(px() + (40 if dx > 0 else -40)) and abs(dx) > 44:
+					jump_to(px() + (190 if dx > 0 else -190))
+					P = g.player
+			if g.AC.sp_full() and abs(dx) < 200:
+				press("K")
 		else:
 			return "ok"
 		frame(d)
@@ -108,6 +129,7 @@ func _initialize() -> void:
 			P.face = 1 if e.x > px() else -1
 			press("G")
 		frame(d)
+	print("vidas antes do passeio=", g.lives) if false else null
 	print("passeio: st=", ac.RIDE.st, " quadros=", t2, " x=", int(px()), " y=", int(P.y), " vidas=", g.lives, " kos=", ac.kos)
 	if int(ac.RIDE.st) != 2:
 		f += 1
@@ -116,11 +138,19 @@ func _initialize() -> void:
 	walk_to(float(z3.a.x0) + 120, 2500)
 	var t3 := 0
 	while not z3.a.done and t3 < 9000:
+		if not z3.a.on:
+			walk_to(float(z3.a.x0) + 120, 600)
 		luta(40)
 		frame({})
 		t3 += 1
 		P = g.player
 		P.hp = max(P.hp, 3)
+		if t3 % 400 == 0 and OS.get_environment("DBG") != "":
+			var al := []
+			for e in g.EN:
+				if not e.dead and str(e.get("zid", "")) == "z2":
+					al.append("%s/%s@%d,%d %s" % [e.k, e.get("tp", ""), e.x, e.y, e.get("gs", "")])
+			print("   t3=", t3, " on=", z3.a.on, " wi=", z3.wi, " P=", int(px()), ",", int(P.y), " vidas=", g.lives, " ", al)
 	print("zona final: limpa=", z3.a.done, " ondas=", z3.wi, " kos=", ac.kos, " dano=", ac.hits, " combo max=", ac.best)
 	if not z3.a.done:
 		f += 1

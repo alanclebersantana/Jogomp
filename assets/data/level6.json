@@ -1,6 +1,6 @@
 {
  "name": "Galeão · Modo Ação",
- "intro": "FASE DE TESTE. Os capangas de capuz do Barão tomaram o Galeão! Três botões: PULAR, GOLPEAR e DASH. Emende as pancadas para o combo multiplicar as milhas, atravesse os ataques com o dash e não leve dano: no fim você ganha uma nota (S, A, B ou C).",
+ "intro": "FASE DE TESTE. Os capangas de capuz do Barão tomaram o Galeão! PULAR, GOLPEAR e DASH. Cada capanga pede um jeito: o de escudo só apanha pelas costas ou depois do giro; o que arremessa, rebata a mala de volta; use carrinhos, extintores e painéis contra eles. Barra cheia = golpe especial.",
  "theme": "aeroporto",
  "seed": 5,
  "weather": "limpo",
@@ -60,10 +60,29 @@
    "h": 140
   },
   {
+   "t": "plat",
+   "x": 3000,
+   "y": 380,
+   "w": 180
+  },
+  {
+   "t": "plat",
+   "x": 3380,
+   "y": 380,
+   "w": 180
+  },
+  {
    "t": "ground",
    "x": 5420,
    "y": 500,
-   "w": 1680,
+   "w": 610,
+   "h": 140
+  },
+  {
+   "t": "ground",
+   "x": 6120,
+   "y": 500,
+   "w": 980,
    "h": 140
   }
  ],
@@ -287,6 +306,38 @@
    400
   ],
   [
+   3020,
+   350
+  ],
+  [
+   3066,
+   350
+  ],
+  [
+   3112,
+   350
+  ],
+  [
+   3158,
+   350
+  ],
+  [
+   3400,
+   350
+  ],
+  [
+   3446,
+   350
+  ],
+  [
+   3492,
+   350
+  ],
+  [
+   3538,
+   350
+  ],
+  [
    2960,
    470
   ],
@@ -419,56 +470,20 @@
    330
   ],
   [
-   5720,
-   470
+   6010,
+   410
   ],
   [
-   5780,
-   470
+   6053,
+   366
   ],
   [
-   5840,
-   470
-  ],
-  [
-   5900,
-   470
-  ],
-  [
-   5960,
-   470
-  ],
-  [
-   6020,
-   470
-  ],
-  [
-   6080,
-   470
+   6096,
+   366
   ],
   [
    6140,
-   470
-  ],
-  [
-   6200,
-   470
-  ],
-  [
-   6260,
-   470
-  ],
-  [
-   6320,
-   470
-  ],
-  [
-   6380,
-   470
-  ],
-  [
-   6440,
-   470
+   410
   ],
   [
    6560,
@@ -514,7 +529,7 @@
   {
    "a": 0,
    "b": 560,
-   "t": "GOLPE: toque várias vezes para o combo (o 3º gira). No ar vira voadora. DASH: atravessa qualquer ataque!",
+   "t": "GOLPE: toque várias vezes (o 3º gira e quebra escudos). No ar vira voadora. DASH: atravessa qualquer ataque!",
    "yl": 640
   }
  ],
@@ -522,6 +537,10 @@
   [
    3900,
    5420
+  ],
+  [
+   6030,
+   6120
   ]
  ],
  "water": [],
@@ -549,17 +568,10 @@
   },
   {
    "k": "pc",
-   "x": 3700,
+   "x": 3760,
    "y": 500,
    "n": "p_pc_coluna",
    "w": 92
-  },
-  {
-   "k": "pc",
-   "x": 1100,
-   "y": 500,
-   "n": "p_pc_carrinhos",
-   "w": 110
   },
   {
    "k": "pc",
@@ -594,7 +606,7 @@
  "comics": [],
  "relics": [],
  "fireflies": [],
- "introSub": "Modo Ação · teste",
+ "introSub": "Modo Ação · teste 2",
  "endTitle": "GALEÃO · MODO AÇÃO",
  "introImg": "res://assets/bg/gig_tarde.jpg",
  "bgset": "gig",
@@ -604,9 +616,9 @@
  "action": 1,
  "clueIds": [],
  "rank": {
-  "dano": 2,
+  "dano": 3,
   "combo": 20,
-  "tempo": 210
+  "tempo": 240
  },
  "periods": [
   "Desembarque",
@@ -634,6 +646,38 @@
    "h": 64
   }
  ],
+ "acProps": [
+  {
+   "k": "carrinho",
+   "x": 1480,
+   "y": 500
+  },
+  {
+   "k": "extintor",
+   "x": 1900,
+   "y": 500
+  },
+  {
+   "k": "placa",
+   "x": 3270,
+   "y": 250
+  },
+  {
+   "k": "carrinho",
+   "x": 3000,
+   "y": 500
+  },
+  {
+   "k": "extintor",
+   "x": 5700,
+   "y": 500
+  },
+  {
+   "k": "carrinho",
+   "x": 6240,
+   "y": 500
+  }
+ ],
  "acZones": [
   {
    "x0": 1300,
@@ -647,21 +691,28 @@
       "k": "grunt"
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "escudo"
      }
     ],
     [
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "atira",
+      "side": 1
      },
      {
       "k": "grunt"
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "salta",
+      "side": -1
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "escudo",
+      "side": -1
      }
     ]
    ]
@@ -672,49 +723,73 @@
    "waves": [
     [
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "atira",
+      "x": 3090,
+      "y": 380,
+      "r": [
+       3010,
+       3170
+      ]
+     },
+     {
+      "k": "grunt",
+      "tp": "atira",
+      "x": 3470,
+      "y": 380,
+      "r": [
+       3390,
+       3550
+      ]
      },
      {
       "k": "grunt"
      },
      {
-      "k": "frog"
+      "k": "grunt"
      }
     ],
     [
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "escudo"
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "escudo"
+     },
+     {
+      "k": "grunt",
+      "tp": "salta"
+     },
+     {
+      "k": "grunt",
+      "tp": "atira",
+      "x": 3470,
+      "y": 380,
+      "r": [
+       3390,
+       3550
+      ]
+     }
+    ],
+    [
+     {
+      "k": "grunt",
+      "tp": "agarra",
+      "side": 1
      },
      {
       "k": "grunt"
      },
      {
       "k": "grunt",
-      "sc": 1.28,
-      "hp": 3,
-      "spd": 1.5
-     }
-    ],
-    [
-     {
-      "k": "fly",
-      "cy": 310
+      "tp": "salta",
+      "side": -1
      },
      {
       "k": "fly",
-      "cy": 280
-     },
-     {
-      "k": "grunt"
-     },
-     {
-      "k": "grunt"
-     },
-     {
-      "k": "grunt"
+      "cy": 290
      }
     ]
    ]
@@ -725,51 +800,102 @@
    "waves": [
     [
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "",
+      "x": 5780,
+      "r": [
+       5670,
+       6000
+      ]
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "salta",
+      "x": 5900,
+      "r": [
+       5670,
+       6000
+      ]
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "atira",
+      "x": 6400,
+      "r": [
+       6150,
+       6470
+      ]
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "",
+      "x": 6300,
+      "r": [
+       6150,
+       6470
+      ]
      }
     ],
     [
      {
       "k": "grunt",
-      "sc": 1.28,
-      "hp": 3,
-      "spd": 1.5
+      "tp": "escudo",
+      "x": 5760,
+      "r": [
+       5670,
+       6000
+      ]
      },
      {
       "k": "grunt",
-      "sc": 1.28,
-      "hp": 3,
-      "spd": 1.5
+      "tp": "agarra",
+      "x": 6380,
+      "r": [
+       6150,
+       6470
+      ]
+     },
+     {
+      "k": "grunt",
+      "tp": "atira",
+      "x": 6440,
+      "r": [
+       6150,
+       6470
+      ]
      },
      {
       "k": "fly",
-      "cy": 300
-     },
-     {
-      "k": "fly",
-      "cy": 270
+      "cy": 280
      }
     ],
     [
      {
       "k": "boar",
-      "x": 6070,
+      "x": 6320,
+      "r": [
+       6160,
+       6470
+      ],
       "radio": 1
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "",
+      "x": 5760,
+      "r": [
+       5670,
+       6000
+      ]
      },
      {
-      "k": "grunt"
+      "k": "grunt",
+      "tp": "salta",
+      "x": 5860,
+      "r": [
+       5670,
+       6000
+      ]
      }
     ]
    ]
@@ -782,6 +908,20 @@
    "y": 500,
    "dir": 1,
    "spd": 2.0
+  },
+  {
+   "x0": 5700,
+   "x1": 6020,
+   "y": 500,
+   "dir": 1,
+   "spd": 1.3
+  },
+  {
+   "x0": 6130,
+   "x1": 6450,
+   "y": 500,
+   "dir": -1,
+   "spd": 1.3
   }
  ],
  "acRide": {

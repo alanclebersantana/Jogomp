@@ -4226,6 +4226,8 @@ func kill_enemy(e: Dictionary, how: String = "") -> void:
 	if seg:
 		if how in ["stomp", "hit", "cart"] and SegGuard.on_hit(self, e, how if how != "cart" else "hit"):
 			return
+	if AC and AC.pre_hit(e):
+		return
 	# capanga que aguenta mais de uma pancada (modo ação): perde um ponto, pisca e é empurrado
 	if not seg and int(e.get("hp", 1)) > 1:
 		e.hp = int(e.hp) - 1

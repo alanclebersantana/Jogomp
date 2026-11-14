@@ -387,7 +387,7 @@ func _process(_d: float) -> void:
 			# a Isis não tem picareta (e o botão some junto com os outros na pausa e nas cenas)
 			tb.visible = top_buttons.visible and not (game.player and game.player.get("isis"))
 		elif tb.get_meta("k") in ["K", "F"]:
-			tb.visible = top_buttons.visible and _fight_btns() and not (_acao() and tb.get_meta("k") == "K")
+			tb.visible = top_buttons.visible and _fight_btns() and not (_acao() and tb.get_meta("k") == "K" and not game.AC.sp_full())
 	_touch_squash(_d)
 	if hint_btn:
 		hint_btn.visible = top_buttons.visible and hud.can_replay()
@@ -484,7 +484,7 @@ func _process(_d: float) -> void:
 			top_buttons.visible = not in_cine
 			stick.visible = not in_cine
 			for b in touch:
-				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis")) and (_fight_btns() or not b.get_meta("k") in ["K", "F"]) and not (_acao() and b.get_meta("k") == "K")
+				b.visible = not in_cine and not (b.get_meta("k") == "G" and game.player.get("isis")) and (_fight_btns() or not b.get_meta("k") in ["K", "F"]) and not (_acao() and b.get_meta("k") == "K" and not game.AC.sp_full())
 			if in_cine:
 				stick._release()
 	# desenho liso entre passos: chefes, Pipoca, plataformas... (volta ao normal no frame_pre_draw)

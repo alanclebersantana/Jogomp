@@ -146,6 +146,8 @@ func __draw_raw() -> void:
 	AeroLife.back(g, T)
 	if g.ARN:
 		g.ARN.draw(T)   # grades das arenas: na frente de tudo que passa no fundo
+	if g.AC:
+		g.AC.draw_world(T)
 	WorldLake.back(g, T)
 	var __d_Traps_draw := Time.get_ticks_usec()
 	WorldTraps.draw(g, T)
