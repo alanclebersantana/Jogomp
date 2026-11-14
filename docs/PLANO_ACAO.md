@@ -24,3 +24,22 @@ Ficaram de fora: 2,5D com cenário em 3D e 3D completo.
 ## Vida do cenário (aprovado em seguida)
 9. Passageiros que reagem à luta: correm, se escondem atrás dos bancos, filmam com o celular, aplaudem no fim da zona.
 10. Cenário que quebra: vidraça que estilhaça, painel de voos que cai, bancos que viram.
+
+## Visual, fluidez e gráficos (aprovados todos, 14/11/2026)
+1. Quadros intermediários nas animações (correr 12, parado 6).
+2. Transição entre movimentos (frear, virar, cair e levantar, começar a correr).
+3. Antecipação e peso (preparação antes do golpe e do pulo, recuperação depois).
+4. Roupa e acessórios com atraso (mochila, antena, fones).
+5. Capangas reagem onde apanham (para trás, rasteira tira os pés, voadora joga longe).
+6. Câmera que antecipa e enquadra o grupo.
+7. Tremor e zoom por golpe.
+8. Paleta por momento (cor dominante por trecho).
+9. Contorno e sombra coerentes (redesenhar o que é forma chapada por código).
+10. Atmosfera (neblina, raios de sol, vapor, chuva escorrendo, calor na pista).
+11. Brilho nas luzes (halo de neons, faróis, bastão).
+12. Piso e vidro com reflexo de verdade.
+13. Painel e botões redesenhados (ícone próprio do dash, animação ao tocar).
+14. Números e textos de impacto desenhados (combo, "+3", nota).
+15. Telas de transição com ilustração.
+16. Travar em 60 quadros com folga (imagens em poucas folhas, menos desenho fora da tela).
+17. Opção de 90 ou 120 quadros.
